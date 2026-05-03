@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
+from fx_monitor.adapters import build_monitor_case_from_royal_road_payload
 from fx_monitor.ai.prompt_builder import build_prompt
 from fx_monitor.knowledge.loader import load_knowledge_pack
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_prompt_includes_pack_schema_and_payload(passing_payload):
@@ -66,3 +72,29 @@ def test_prompt_system_warns_against_general_knowledge(passing_payload):
     sys = prompt.system.lower()
     assert "general market knowledge" in sys
     assert "unknown" in sys
+
+
+def test_prompt_for_monitor_case_includes_rich_royal_road_payload():
+    raw = json.loads(
+        (FIXTURES / "royal_road_ready_sell_payload.json").read_text(encoding="utf-8")
+    )
+    case = build_monitor_case_from_royal_road_payload(raw)
+    prompt = build_prompt(case)
+    text = prompt.user
+
+    for token in [
+        "entry_plan",
+        "selected_entry_candidate",
+        "royal_road_procedure_checklist",
+        "structural_lines",
+        "pattern_levels",
+        "wave_derived_lines",
+        "trendline_context",
+        "support_resistance_v2",
+        "fundamental_sidebar",
+        "WNL1",
+        "SNL1",
+        "STL1",
+        "confirmation_candle",
+    ]:
+        assert token in text, f"prompt must surface {token!r}"

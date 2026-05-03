@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -137,3 +137,24 @@ class NotificationDecision(BaseModel):
     reason: str
     title: str = ""
     body: str = ""
+
+
+class MonitorCase(BaseModel):
+    """One complete monitoring case.
+
+    chart_payload:
+      Minimal deterministic payload used by the legacy/simple rule engine.
+
+    ai_payload:
+      Rich royal-road payload sent to OpenAI / Claude.
+      This must include entry_plan, structural_lines, checklist, etc.
+
+    source_payload:
+      Raw input from existing royal-road system, kept for debugging.
+    """
+
+    chart_payload: ChartPayload
+    ai_payload: dict[str, Any] = Field(default_factory=dict)
+    source_payload: dict[str, Any] = Field(default_factory=dict)
+    source: str = "unknown"
+    chart_image_path: str | None = None

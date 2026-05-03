@@ -3,14 +3,20 @@
 Per AI_REVIEW_POLICY.md, every call must include the *full* knowledge pack,
 the JSON schema, and the structured payload. We do not trim. Optimization
 (prompt caching) is the API's job, not ours.
+
+The builder accepts either a legacy ChartPayload, a rich MonitorCase, or a
+plain dict. MonitorCase is preferred because it carries the full royal-road
+evidence (entry_plan, structural_lines, checklist, ...).
 """
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from typing import Any
 
-from ..core.models import ChartPayload
-from ..knowledge.loader import KnowledgePack
+from ..core.models import ChartPayload, MonitorCase
+from ..knowledge.loader import KnowledgePack, load_knowledge_pack
 from .schema import schema_as_json
 
 SYSTEM_INSTRUCTION = (
@@ -37,8 +43,36 @@ class BuiltPrompt:
         return len(self.system) + len(self.user)
 
 
-def build_prompt(payload: ChartPayload, pack: KnowledgePack) -> BuiltPrompt:
-    payload_json = payload.model_dump_json(indent=2)
+def _payload_to_jsonable(
+    payload: ChartPayload | MonitorCase | dict[str, Any],
+) -> dict[str, Any]:
+    if isinstance(payload, MonitorCase):
+        return {
+            "chart_payload": payload.chart_payload.model_dump(mode="json"),
+            "ai_payload": payload.ai_payload,
+            "chart_image_path": payload.chart_image_path,
+            "source": payload.source,
+        }
+    if isinstance(payload, ChartPayload):
+        return payload.model_dump(mode="json")
+    if isinstance(payload, dict):
+        return payload
+    raise TypeError(f"Unsupported payload type: {type(payload).__name__}")
+
+
+def build_prompt(
+    payload: ChartPayload | MonitorCase | dict[str, Any],
+    pack: KnowledgePack | None = None,
+) -> BuiltPrompt:
+    if pack is None:
+        pack = load_knowledge_pack()
+
+    payload_json = json.dumps(
+        _payload_to_jsonable(payload),
+        indent=2,
+        ensure_ascii=False,
+        default=str,
+    )
     user = (
         "## Royal Road Knowledge Pack (verbatim)\n"
         f"{pack.text}\n\n"

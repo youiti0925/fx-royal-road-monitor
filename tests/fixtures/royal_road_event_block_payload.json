@@ -1,0 +1,83 @@
+{
+  "symbol": "EURUSD=X",
+  "timeframe": "M5",
+  "timestamp_utc": "2026-05-03T12:00:00+00:00",
+  "entry_plan": {
+    "entry_status": "WAIT_EVENT_CLEAR",
+    "side": "SELL",
+    "entry_price": 1.1000,
+    "stop_price": 1.1030,
+    "target_price": 1.0940,
+    "rr": 2.0,
+    "breakout_confirmed": true,
+    "retest_confirmed": true,
+    "confirmation_candle": "bearish_rejection"
+  },
+  "selected_entry_candidate": {
+    "entry_type": "neckline_retest",
+    "status": "WAIT_EVENT_CLEAR",
+    "side": "SELL"
+  },
+  "royal_road_procedure_checklist": {
+    "schema_version": "royal_road_procedure_checklist_v1",
+    "p0_pass": false,
+    "p0_missing_or_blocked": ["event_clear"],
+    "steps": [
+      {"key": "wave_pattern", "status": "PASS"},
+      {"key": "wave_lines", "status": "PASS"},
+      {"key": "breakout_confirmed", "status": "PASS"},
+      {"key": "retest_confirmed", "status": "PASS"},
+      {"key": "confirmation_candle", "status": "PASS"},
+      {"key": "entry_price", "status": "PASS"},
+      {"key": "stop_price", "status": "PASS"},
+      {"key": "target_price", "status": "PASS"},
+      {"key": "rr_ok", "status": "PASS"},
+      {"key": "event_clear", "status": "BLOCK"}
+    ]
+  },
+  "structural_lines": {
+    "schema_version": "structural_lines_v1",
+    "counts": {
+      "total": 4,
+      "structural_neckline": 1,
+      "structural_invalidation": 1,
+      "structural_target": 1,
+      "structural_trendline": 1
+    },
+    "lines": [
+      {"id": "SNL1", "kind": "structural_neckline", "role": "entry_trigger", "price": 1.1000, "anchor_parts": ["NL"]},
+      {"id": "SIL1", "kind": "structural_invalidation", "role": "stop_candidate", "price": 1.1030, "anchor_parts": ["P2"]},
+      {"id": "STP1", "kind": "structural_target", "role": "target_candidate", "price": 1.0940, "anchor_parts": ["BR"]},
+      {"id": "STL1", "kind": "structural_trendline", "role": "top_structure_line", "anchor_parts": ["P1", "P2"], "numeric_alignment": "NEAR"}
+    ]
+  },
+  "pattern_levels": {
+    "available": true,
+    "side": "SELL",
+    "pattern_kind": "double_top",
+    "parts": {
+      "P1": {"index": 10, "price": 1.1050},
+      "NL": {"index": 15, "price": 1.1000},
+      "P2": {"index": 20, "price": 1.1040},
+      "BR": {"index": 25, "price": 1.0985}
+    }
+  },
+  "wave_derived_lines": [
+    {"id": "WNL1", "role": "entry_confirmation_line", "price": 1.1000},
+    {"id": "WSL1", "role": "stop_candidate", "price": 1.1030},
+    {"id": "WTP1", "role": "target_candidate", "price": 1.0940}
+  ],
+  "trendline_context": {
+    "selected_trendlines_top3": [
+      {"id": "T1", "slope": -0.0001}
+    ]
+  },
+  "support_resistance_v2": {
+    "selected_level_zones_top5": [
+      {"id": "R1", "price": 1.1000}
+    ]
+  },
+  "fundamental_sidebar": {
+    "event_risk_status": "BLOCK"
+  }
+}
