@@ -115,6 +115,26 @@ def evaluate_monitor_case(case: MonitorCase) -> RuleResult:
     checklist = payload.get("royal_road_procedure_checklist") or {}
     fs = payload.get("fundamental_sidebar") or {}
 
+    # Draft / observation-only safety guard. A draft payload built from raw
+    # OHLC must never PASS — even if some upstream code accidentally fills
+    # entry_status="READY" into it, we refuse and surface a WARN.
+    if payload.get("observation_only") is True:
+        ep_status = str(ep.get("entry_status") or "").upper()
+        if ep_status == "READY":
+            return RuleResult(
+                verdict="WARN",
+                bias="none",
+                reasons=[
+                    "Invalid draft payload: READY is forbidden in "
+                    "observation-only draft."
+                ],
+            )
+        return RuleResult(
+            verdict="UNKNOWN",
+            bias="none",
+            reasons=["Draft observation-only payload; READY disabled."],
+        )
+
     status = str(selected.get("status") or ep.get("entry_status") or "HOLD").upper()
     side = str(selected.get("side") or ep.get("side") or "NEUTRAL").upper()
 

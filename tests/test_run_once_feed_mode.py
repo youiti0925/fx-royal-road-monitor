@@ -8,7 +8,7 @@ from pathlib import Path
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def test_run_once_csv_feed_mode_does_not_ready():
+def test_run_once_csv_feed_mode_builds_draft_but_not_ready():
     env = os.environ.copy()
     env.pop("FX_MONITOR_FIXTURE_PATH", None)
     env["FX_MONITOR_FEED"] = "csv"
@@ -29,7 +29,11 @@ def test_run_once_csv_feed_mode_does_not_ready():
     assert "Market snapshot:" in result.stdout
     assert "candles=5" in result.stdout
     assert "last_close=1.099" in result.stdout
+    assert "Draft payload:" in result.stdout
+    assert "observation_only=True" in result.stdout
+    assert "Rule: UNKNOWN" in result.stdout
     assert "Decision: SUPPRESSED" in result.stdout
+    assert "READY disabled" in result.stdout
     assert "[READY]" not in result.stdout
 
 
@@ -53,4 +57,7 @@ def test_run_once_csv_feed_missing_file_does_not_crash():
 
     assert "Market warnings:" in result.stdout
     assert "csv_not_found" in result.stdout
+    # Draft mode still builds a (degenerate) draft and stays SUPPRESSED.
+    assert "Draft payload:" in result.stdout
+    assert "Decision: SUPPRESSED" in result.stdout
     assert "[READY]" not in result.stdout

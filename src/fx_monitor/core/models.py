@@ -182,6 +182,43 @@ class MarketSnapshot(BaseModel):
         return self.candles[-1].close
 
 
+PivotKind = Literal["HIGH", "LOW"]
+
+
+class PivotPoint(BaseModel):
+    index: int
+    timestamp_utc: datetime
+    price: float
+    kind: PivotKind
+    strength: int = 1
+
+
+class RoyalRoadDraftPayload(BaseModel):
+    """Observation-only draft payload synthesized from raw OHLC.
+
+    This is **not** a trading signal. By construction it must never lead
+    to a READY notification — the rule engine's draft guard refuses to
+    return PASS for any payload with ``observation_only=True``.
+    """
+
+    symbol: str
+    timeframe: str
+    source: str
+    timestamp_utc: datetime | None = None
+
+    pivots: list[PivotPoint] = Field(default_factory=list)
+    rough_support_resistance: dict[str, Any] = Field(default_factory=dict)
+    rough_wave_context: dict[str, Any] = Field(default_factory=dict)
+
+    entry_plan: dict[str, Any] = Field(default_factory=dict)
+    selected_entry_candidate: dict[str, Any] = Field(default_factory=dict)
+    royal_road_procedure_checklist: dict[str, Any] = Field(default_factory=dict)
+
+    warnings: list[str] = Field(default_factory=list)
+    observation_only: bool = True
+    used_in_final_action: bool = False
+
+
 class MonitorCase(BaseModel):
     """One complete monitoring case.
 

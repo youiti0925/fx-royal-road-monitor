@@ -21,7 +21,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from ..adapters import build_monitor_case_from_royal_road_payload
+from ..adapters import (
+    build_monitor_case_from_draft_payload,
+    build_monitor_case_from_royal_road_payload,
+)
+from ..analysis import build_royal_road_draft_payload_from_snapshot
 from ..ai.claude_reviewer import ClaudeReviewer
 from ..ai.mock_reviewer import MockReviewer
 from ..ai.openai_reviewer import OpenAIReviewer
@@ -64,12 +68,18 @@ def load_fixture_case(path: str | Path) -> MonitorCase:
     return build_monitor_case_from_royal_road_payload(raw)
 
 
-def _run_market_snapshot_only_mode() -> int:
-    """Feed-only mode: fetch and print a MarketSnapshot. Never READY.
+def _run_market_draft_mode() -> int:
+    """Feed mode: snapshot -> observation-only draft payload. Never READY.
 
-    No MonitorCase is built here — the rich royal-road payload is what
-    triggers a READY notification, and we don't synthesize it from raw
-    OHLC. This mode is for verifying that data ingest works.
+    Pipeline:
+      1. fetch MarketSnapshot from FX_MONITOR_FEED
+      2. build a RoyalRoadDraftPayload (pivots + rough S/R + rough wave)
+      3. wrap in MonitorCase and run evaluate_monitor_case()
+      4. report Rule + (no AI) + INSUFFICIENT + SUPPRESSED
+
+    AI reviewers are intentionally NOT called here: the draft is
+    observation-only and must never feed a notification, so spending
+    real API tokens on it would be wasteful.
     """
     snapshot = load_market_snapshot_from_env()
     print(
@@ -81,13 +91,27 @@ def _run_market_snapshot_only_mode() -> int:
     )
     if snapshot.warnings:
         print("Market warnings: " + ", ".join(snapshot.warnings))
-    print("Rule: UNKNOWN none")
+
+    draft = build_royal_road_draft_payload_from_snapshot(snapshot)
+    zones = draft.rough_support_resistance.get("selected_level_zones_top5") or []
+    rough_pattern = draft.rough_wave_context.get("rough_pattern_kind", "unknown")
+    print(
+        "Draft payload: "
+        f"pivots={len(draft.pivots)} "
+        f"rough_pattern={rough_pattern} "
+        f"zones={len(zones)} "
+        f"observation_only={draft.observation_only}"
+    )
+
+    case = build_monitor_case_from_draft_payload(draft)
+    rule = evaluate_monitor_case(case)
+    print(f"Rule: {rule.verdict} {rule.bias}")
     print("OpenAI: (not run)")
     print("Claude: (not run)")
     print("Compare: INSUFFICIENT")
     print(
         "Decision: SUPPRESSED "
-        "(market snapshot only; royal-road rich payload required for READY)"
+        "(draft payload only; READY disabled)"
     )
     return 0
 
@@ -103,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
         payload = case.chart_payload
         rule = evaluate_monitor_case(case)
     elif feed_env in ("csv", "yahoo"):
-        return _run_market_snapshot_only_mode()
+        return _run_market_draft_mode()
     else:
         payload = _demo_payload()
         case = None

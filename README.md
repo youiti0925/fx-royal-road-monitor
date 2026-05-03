@@ -113,10 +113,29 @@ FX_MONITOR_SYMBOL=EURUSD=X
 FX_MONITOR_TIMEFRAME=M5
 ```
 
-This only loads OHLC and prints a `MarketSnapshot`. It does not produce
-READY by itself — the royal-road rich payload (entry_plan / checklist /
-structural_lines / ...) is still required for a READY notification, and
-that payload is fed in via `FX_MONITOR_FIXTURE_PATH` for now.
+## Draft payload from OHLC
+
+CSV/Yahoo feed mode now builds an observation-only **draft payload**:
+
+```
+OHLC -> pivots -> rough support/resistance -> rough wave context
+                                            -> RoyalRoadDraftPayload
+                                            -> MonitorCase (draft)
+```
+
+Safety contract (enforced by tests + the rule engine):
+
+- `observation_only = true`
+- `used_in_final_action = false`
+- `entry_plan.entry_status = HOLD`
+- `royal_road_procedure_checklist.p0_pass = false`
+- `evaluate_monitor_case()` returns `UNKNOWN` for any draft (and `WARN`
+  if the draft is hand-edited to claim `READY`).
+- Feed-mode `run_once` does **not** call OpenAI / Claude reviewers.
+- Feed-mode `run_once` always ends in `Decision: SUPPRESSED`.
+
+Use rich royal-road payload fixtures (`FX_MONITOR_FIXTURE_PATH=...`) for
+READY notification tests.
 
 ## ステータス
 
