@@ -27,15 +27,37 @@ def compare(openai: ReviewResult | None, claude: ReviewResult | None) -> Compare
         )
 
     if openai.verdict == "PASS" and claude.verdict == "PASS":
-        if openai.bias == claude.bias and openai.bias != "none":
+        if openai.bias != claude.bias or openai.bias == "none":
             return CompareOutcome(
-                result="AGREE_PASS",
-                bias=openai.bias,
-                notes=["Both reviewers PASS with matching bias."],
+                result="DISAGREE",
+                notes=[f"Both PASS but bias differs: openai={openai.bias}, claude={claude.bias}."],
             )
+        # Even when both are PASS with matching bias, any explicit disagreement
+        # raised by either reviewer downgrades the comparison to DISAGREE so
+        # that READY is never emitted on a flagged setup.
+        if openai.disagreements or claude.disagreements:
+            return CompareOutcome(
+                result="DISAGREE",
+                notes=[
+                    "Both PASS but at least one reviewer raised disagreements; "
+                    "refusing AGREE_PASS for safety."
+                ],
+            )
+        # Same goes for an explicit disagreement_with_system block.
+        for r in (openai, claude):
+            d = r.disagreement_with_system
+            if d is not None and d.has_disagreement:
+                return CompareOutcome(
+                    result="DISAGREE",
+                    notes=[
+                        f"{r.provider} flagged disagreement_with_system "
+                        f"(severity={d.severity}); refusing AGREE_PASS."
+                    ],
+                )
         return CompareOutcome(
-            result="DISAGREE",
-            notes=[f"Both PASS but bias differs: openai={openai.bias}, claude={claude.bias}."],
+            result="AGREE_PASS",
+            bias=openai.bias,
+            notes=["Both reviewers PASS with matching bias and no disagreements."],
         )
 
     if openai.verdict == claude.verdict:

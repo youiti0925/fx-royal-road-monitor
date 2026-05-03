@@ -56,6 +56,56 @@ class RuleResult(BaseModel):
     reasons: list[str] = Field(default_factory=list)
 
 
+StepStatusValue = Literal["PASS", "WAIT", "WARN", "BLOCK", "UNKNOWN"]
+AlignmentValue = Literal["MATCH", "NEAR", "CONFLICT", "NONE", "UNKNOWN"]
+EntryTimingValue = Literal["GOOD", "EARLY", "LATE", "UNKNOWN"]
+SeverityValue = Literal["NONE", "LOW", "MEDIUM", "HIGH"]
+
+
+class StepStatus(BaseModel):
+    key: str
+    status: StepStatusValue
+    reason_ja: str = ""
+    evidence: dict = Field(default_factory=dict)
+    missing: list[str] = Field(default_factory=list)
+    cautions: list[str] = Field(default_factory=list)
+
+
+class LineReview(BaseModel):
+    neckline_valid: bool = False
+    numeric_trendline_valid: bool = False
+    structural_line_valid: bool = False
+    numeric_structural_alignment: AlignmentValue = "UNKNOWN"
+    problems: list[str] = Field(default_factory=list)
+
+
+class WaveReview(BaseModel):
+    pattern_valid: bool = False
+    pattern_type: str = ""
+    wave_points_valid: bool = False
+    problems: list[str] = Field(default_factory=list)
+
+
+class EntryReview(BaseModel):
+    entry_natural: bool = False
+    entry_timing: EntryTimingValue = "UNKNOWN"
+    reason_ja: str = ""
+    problems: list[str] = Field(default_factory=list)
+
+
+class RiskReview(BaseModel):
+    stop_structural: bool = False
+    target_realistic: bool = False
+    rr_ok: bool = False
+    problems: list[str] = Field(default_factory=list)
+
+
+class DisagreementWithSystem(BaseModel):
+    has_disagreement: bool = False
+    severity: SeverityValue = "NONE"
+    reason_ja: str = ""
+
+
 class ReviewResult(BaseModel):
     """One AI reviewer's output. Schema is enforced; see ai/schema.py."""
 
@@ -68,6 +118,12 @@ class ReviewResult(BaseModel):
     missing: list[str] = Field(default_factory=list)
     suggested_invalidation: float | None = None
     suggested_target: float | None = None
+    steps: list[StepStatus] = Field(default_factory=list)
+    line_review: LineReview | None = None
+    wave_review: WaveReview | None = None
+    entry_review: EntryReview | None = None
+    risk_review: RiskReview | None = None
+    disagreement_with_system: DisagreementWithSystem | None = None
 
 
 class CompareOutcome(BaseModel):

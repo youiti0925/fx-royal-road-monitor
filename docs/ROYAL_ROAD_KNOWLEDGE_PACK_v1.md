@@ -1,144 +1,392 @@
 # Royal Road Knowledge Pack v1
 
-> このドキュメントは AI レビューに **毎回そのまま渡す** 知識パック。
-> AI は一般知識ではなく、ここに書いてあることだけを判断材料にしてよい。
+## 0. Purpose
 
----
+AI is not a signal generator.
+AI is a royal-road procedure auditor.
+AI must not rely on general market knowledge.
+AI must judge only from provided payload and chart image.
+If evidence is missing, use UNKNOWN or WAIT.
 
-## 1. 王道手順 (royal road) とは
+observation_only = true
+used_in_final_action = false
 
-短期スキャルや裁量の偶発性に依存せず、**環境認識 → セットアップ確認 → 引き金 → 管理** の
-順番で必ずチェックを通す手続き。途中の段が満たされない場合、後段に進んではならない。
+## 1. Royal-road procedure order
 
-### 1.1 順序 (固定)
+The auditor must check these stages in order. Later stages may not be
+considered PASS unless every prior required stage is PASS.
 
-1. **環境認識 (HTF context)**
-   - 上位足 (H4 / D1) のトレンド方向。
-   - 直近の意味のあるスイング高安。
-   - 重要 S/R / ラウンドナンバー。
-2. **セットアップ (LTF structure)**
-   - 上位足方向と整合する押し目 / 戻りの構造。
-   - HH/HL (上昇) または LH/LL (下降) の連続性。
-   - キーレベルでの反応 (反発の足、ピンバー、包み足など)。
-3. **引き金 (trigger)**
-   - 直近スイングのブレイク / リテスト。
-   - 出来高 / モメンタム指標の追認 (ある場合)。
-4. **管理 (management)**
-   - 損切り位置: 直近スイングの外側、ATR 1.0–1.5x が目安。
-   - リワード: 直近反対側スイングまで、最低 1R 以上の余地。
+1. Environment
+2. Higher timeframe direction
+3. Dow structure
+4. Support / resistance
+5. Numeric trendline
+6. Structural line
+7. Wave pattern
+8. Neckline
+9. Breakout
+10. Retest
+11. Confirmation candle
+12. Entry
+13. Stop
+14. Target
+15. RR
+16. Event
+17. Final status
 
-### 1.2 王道から外れる典型パターン (避ける)
+## 2. Status definitions
 
-- 上位足と逆方向の "綺麗に見える" 押し戻し。
-- レンジ中央でのブレイク追随 (ノイズ域)。
-- 重要指標発表の直前 / 直後 (定義: ±15 分)。
-- 流動性が薄い時間帯のブレイク (アジア早朝など、対象通貨ペアによる)。
+PASS:
+  Clear evidence exists.
 
----
+WAIT:
+  Setup is valid but the next required stage has not happened.
 
-## 2. 判定基準: PASS / WAIT / WARN / BLOCK / UNKNOWN
+WARN:
+  Evidence exists but is weak, approximate, conflicting, or visually unclear.
 
-各レビュー出力は必ず以下のいずれか **1 つだけ** を `verdict` として返す。
+BLOCK:
+  Entry is forbidden.
 
-| verdict   | 意味                                                                                                |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| `PASS`    | 王道手順をすべて満たす。READY を出してよい候補。                                                     |
-| `WAIT`    | 大筋は王道だが、引き金 (trigger) がまだ発生していない。観察継続。                                    |
-| `WARN`    | 王道のどれかに弱点 / 不整合あり。READY にしてはいけないが、注視はしてよい。                          |
-| `BLOCK`   | 王道に明確に反する (上位足逆行、指標直前、レンジ中央など)。READY にしてはいけない。                  |
-| `UNKNOWN` | 与えられた payload / 画像から判断するのに情報が不足。READY にしてはいけない。                        |
+UNKNOWN:
+  Input is insufficient.
 
-### 2.1 READY を出してよい条件
+## 3. READY requirements for normal neckline_retest
 
-すべて成立しなければならない:
+READY is allowed only when all P0 conditions pass:
 
-- ルールエンジンの判定が `PASS` である。
-- OpenAI レビューと Claude レビューの **両方** が `PASS`。
-- いずれの reviewer も `disagreements` (重大な不整合) を上げていない。
-- 直近 `NOTIFY_COOLDOWN_SECONDS` 以内に同一 symbol/timeframe で `READY` を出していない。
+- wave pattern exists
+- WNL exists
+- WSL exists
+- WTP exists
+- structural neckline SNL exists or WNL clearly aligns with NL
+- breakout confirmed
+- retest confirmed
+- confirmation_candle present
+- entry_price exists
+- stop_price exists
+- target_price exists
+- RR >= 2.0
+- event risk is not BLOCK
 
-### 2.2 READY を出してはいけない条件 (どれか 1 つでも該当したら不可)
+confirmation_candle is P0.
+Do not output READY without confirmation_candle.
 
-- ルールエンジンが `WAIT` / `WARN` / `BLOCK` / `UNKNOWN`。
-- 二人の reviewer のどちらか一方でも `PASS` 以外。
-- 二人の reviewer の verdict が一致しない。
-- 二人の reviewer の方向 (`bias`: long/short/none) が一致しない。
-- 重要指標 ±15 分。
-- payload に欠損 (例: HTF データなし、ATR 不明)。
+READY is forbidden when any of the following is true:
 
----
+- wave pattern missing
+- WNL missing
+- WSL missing or stop is not structural
+- WTP missing or target is not structural
+- breakout not confirmed (WAIT_BREAKOUT)
+- retest not confirmed (WAIT_RETEST)
+- confirmation_candle missing (WAIT_TRIGGER)
+- RR < 2.0
+- event is BLOCK (WAIT_EVENT_CLEAR)
+- numeric trendline and structural trendline conflict on the main reason
+- system says READY but chart evidence is weak (return WARN/WAIT instead)
 
-## 3. payload (AI に渡す構造化情報) の最小要件
+## 4. WAIT status rules
 
-```
-{
-  "symbol": "USDJPY",
-  "timeframe": "M5",
-  "timestamp_utc": "2026-05-03T13:55:00Z",
-  "htf": {
-    "h4_trend": "up|down|range",
-    "d1_trend": "up|down|range",
-    "key_levels": [155.20, 154.80]
-  },
-  "ltf": {
-    "structure": "HH-HL|LH-LL|range|broken",
-    "last_swing_high": 155.10,
-    "last_swing_low":  154.90,
-    "atr_14":          0.12
-  },
-  "trigger": {
-    "type":     "breakout|retest|pinbar|engulf|none",
-    "occurred": false
-  },
-  "calendar": {
-    "high_impact_within_15min": false
-  }
-}
-```
+WAIT_BREAKOUT:
+  Pattern and WNL exist, but WNL has not broken.
 
-これが揃っていない場合、AI は `UNKNOWN` を返さねばならない。
-推測で埋めない。
+WAIT_RETEST:
+  WNL has broken, but retest is not confirmed.
 
----
+WAIT_TRIGGER:
+  Retest happened, but confirmation candle is missing.
 
-## 4. 出力 JSON schema (要点)
+WAIT_EVENT_CLEAR:
+  Technical setup is READY-like, but event risk is BLOCK.
 
-詳細フィールド定義は `src/fx_monitor/ai/schema.py` を **真の参照元** とする。
+HOLD:
+  Required evidence is missing, invalid, or contradictory.
 
-```
-{
-  "verdict":  "PASS|WAIT|WARN|BLOCK|UNKNOWN",
-  "bias":     "long|short|none",
-  "confidence": 0.0,                       // 0.0–1.0
-  "reasons": ["..."],                      // 王道のどの段に基づくか
-  "disagreements": ["..."],                // payload と矛盾する点があれば
-  "missing":  ["..."],                     // payload で欠けていたフィールド
-  "suggested_invalidation": 154.85,        // 任意。bias と整合する損切り候補。
-  "suggested_target":       155.40         // 任意。
-}
-```
+## 5. Wave pattern rules
 
-reviewer は **この schema を破ってはならない**。
+DT (double top, sell setup) requires:
+- P1
+- NL
+- P2
+- BR
 
----
+DB (double bottom, buy setup) requires:
+- B1
+- NL
+- B2
+- BR
 
-## 5. 二重レビュー比較 (compare)
+PASS:
+  Parts exist and wave skeleton follows actual pivots.
 
-OpenAI と Claude の出力を比較し、以下のうち 1 つを返す:
+WARN:
+  Fallback pattern only.
+  Wave points look weak or unclear.
+  Skeleton does not visually follow pivots.
 
-- `AGREE_PASS`   : 両者 PASS かつ bias 一致 → READY 候補
-- `AGREE_HOLD`   : 両者 PASS 以外で一致 (例: 両者 WAIT)
-- `DISAGREE`     : 一致しない
-- `INSUFFICIENT` : どちらかが UNKNOWN
+BLOCK:
+  Pattern missing.
+  Required parts missing.
 
-`AGREE_PASS` 以外では READY を発行しない。
+The BREAK / RETEST / CONFIRM anchors are derived from these wave parts:
 
----
+- BREAK anchor   = the candle that closes through NL / WNL.
+- RETEST anchor  = the touch back near NL / WNL after BREAK.
+- CONFIRM anchor = the confirmation_candle near WNL after RETEST.
 
-## 6. 通知の落とし所
+These three anchors must reference real pivots / candles, not approximated
+positions. If any anchor is approx, mark WARN.
 
-- `READY`        : ルール PASS + AGREE_PASS のとき。Discord/LINE に push、コンソールにも。
-- `WATCH`        : ルール PASS + AGREE_HOLD など、注視レベル。コンソールのみ (or 静かなチャネル)。
-- `SUPPRESSED`   : DISAGREE / BLOCK / 指標直前 / cooldown 中 → 通知しない (ログのみ)。
+## 6. W-line / structural line rules
 
-詳細は `docs/NOTIFICATION_POLICY.md`。
+WNL:
+  wave neckline / entry trigger
+
+WSL:
+  wave structural invalidation / stop candidate
+
+WTP:
+  wave target candidate
+
+SNL:
+  structural neckline derived from NL / WNL
+
+SIL:
+  structural invalidation derived from WSL / P2 / B2
+
+STP:
+  structural target derived from WTP / BR / measured move
+
+STL:
+  structural trendline derived from P1-P2, B1-B2, HL-HL, or LH-LH
+
+PASS:
+  WNL/WSL/WTP exist and structural lines align.
+
+WARN:
+  W-lines exist but structural line is missing.
+  Structural line anchor_quality is approx.
+  Numeric and structural lines conflict.
+
+BLOCK:
+  WNL missing.
+  Stop/target structural lines missing when required.
+
+## 7. Numeric vs structural trendline
+
+Numeric trendline:
+  T1/T2/T3 detected from price statistics.
+
+Structural trendline:
+  STL from wave structure.
+
+Do not treat them as the same.
+
+PASS:
+  Structural trendline is anchored to valid parts.
+  Numeric line agrees or trendline is only supplemental.
+
+WARN:
+  Numeric line exists but structural line is weak.
+  Structural and numeric line conflict.
+  Anchor is approximate.
+  Too many lines make the setup unclear.
+
+BLOCK:
+  Trendline is used as main reason but has no valid anchor.
+  Trendline contradicts side.
+
+## 8. Neckline
+
+DT:
+  Neckline relates to P1 -> NL -> P2 -> BR.
+
+DB:
+  Neckline relates to B1 -> NL -> B2 -> BR.
+
+PASS:
+  WNL and SNL exist and align with NL.
+
+WARN:
+  WNL exists but SNL missing.
+  Neckline is unclear or repeatedly broken.
+
+BLOCK:
+  WNL missing.
+  NL missing.
+
+## 9. Breakout
+
+SELL:
+  close breaks below WNL.
+
+BUY:
+  close breaks above WNL.
+
+PASS:
+  breakout_confirmed true and marker anchored.
+
+WAIT:
+  WNL not broken.
+
+WARN:
+  breakout marker approx.
+  wick-only or weak breakout.
+
+BLOCK:
+  breakout_quality BLOCK.
+  WAIT_BREAKOUT shows confirmed BREAK/BR as if already happened.
+
+## 10. Retest
+
+PASS:
+  retest_confirmed true and near WNL.
+
+WAIT:
+  breakout happened but retest not confirmed.
+
+WARN:
+  retest marker approx.
+  retest too far from WNL.
+
+BLOCK:
+  neckline_retest READY without retest.
+
+## 11. Confirmation candle
+
+confirmation_candle is P0.
+
+SELL:
+  bearish rejection / bearish confirmation near WNL.
+
+BUY:
+  bullish rejection / bullish confirmation near WNL.
+
+PASS:
+  confirmation_candle exists and agrees with side.
+
+WAIT:
+  retest happened but confirmation missing.
+
+WARN:
+  candle weak or marker approx.
+
+BLOCK:
+  READY without confirmation candle.
+
+## 12. Entry
+
+PASS:
+  READY has entry_price.
+  entry is consistent with WNL / retest / confirmation.
+
+WAIT:
+  WAIT_BREAKOUT / WAIT_RETEST / WAIT_TRIGGER with no entry.
+
+WARN:
+  entry too early or too late.
+
+BLOCK:
+  READY without entry.
+  WNL not broken but READY.
+  retest missing but neckline_retest READY.
+
+## 13. Stop
+
+SELL:
+  stop > entry.
+  Prefer P2 high / WSL / SIL.
+
+BUY:
+  stop < entry.
+  Prefer B2 low / WSL / SIL.
+
+PASS:
+  stop exists and is structural.
+
+WARN:
+  stop too far.
+  stop too close.
+  ATR-only without structure.
+
+BLOCK:
+  stop missing.
+  invalid price order.
+  stop inside structure.
+
+## 14. Target
+
+SELL:
+  target < entry.
+
+BUY:
+  target > entry.
+
+PASS:
+  target exists and is WTP / STP / next SR / measured move.
+
+WARN:
+  target too far.
+  obstacle before target.
+
+BLOCK:
+  target missing.
+  invalid price order.
+
+## 15. RR
+
+Normal royal road:
+  RR >= 2.0
+
+PASS:
+  rr >= 2.0 and stop/target are structurally valid.
+
+WARN:
+  rr passes but target/stop looks unrealistic.
+
+BLOCK:
+  rr < 2.0 or missing.
+
+## 16. Event
+
+PASS:
+  event CLEAR.
+
+WARN:
+  event WARNING.
+
+BLOCK:
+  event BLOCK.
+
+WAIT_EVENT_CLEAR:
+  technical setup can remain visible, but no entry.
+
+## 17. Final status rules
+
+Do not output PASS unless all required P0 steps pass.
+
+If system says READY but chart evidence is weak:
+  return WARN or WAIT and add disagreement.
+
+If evidence is missing:
+  return UNKNOWN.
+
+If event BLOCK:
+  return BLOCK or WAIT_EVENT_CLEAR equivalent, never PASS.
+
+## 18. Output contract
+
+The reviewer must reply with a single JSON object that strictly matches the
+JSON schema embedded in the prompt. The schema requires, among other fields:
+
+- verdict in PASS/WAIT/WARN/BLOCK/UNKNOWN
+- bias in long/short/none
+- confidence in 0.0..1.0
+- reasons (array)
+- steps (array of per-stage status objects keyed by REQUIRED_STEP_KEYS)
+- line_review, wave_review, entry_review, risk_review
+- disagreement_with_system
+
+If the reviewer cannot fill a required field honestly, the reviewer must
+return verdict UNKNOWN. Hallucinated values are worse than UNKNOWN.
