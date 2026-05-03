@@ -94,8 +94,33 @@ FX_MONITOR_CJK_FONT_PATH=/path/to/NotoSansCJKjp-Regular.otf
 フォントが見つからなくても renderer は落ちません — 日本語ラベルだけ
 豆腐 (□) になります。フォントファイルは絶対に commit しないでください。
 
+## Market data feed
+
+Initial feed support is **read-only**. There is no broker connection,
+no OANDA, no live order, no paper trading.
+
+Supported sources:
+
+- `csv` — local OHLC file
+- `yahoo` — optional `yfinance` (`pip install -e .[market]`)
+
+CSV example:
+
+```env
+FX_MONITOR_FEED=csv
+FX_MONITOR_CSV_PATH=tests/fixtures/ohlc_sample.csv
+FX_MONITOR_SYMBOL=EURUSD=X
+FX_MONITOR_TIMEFRAME=M5
+```
+
+This only loads OHLC and prints a `MarketSnapshot`. It does not produce
+READY by itself — the royal-road rich payload (entry_plan / checklist /
+structural_lines / ...) is still required for a READY notification, and
+that payload is fed in via `FX_MONITOR_FIXTURE_PATH` for now.
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
 通知カード PNG の生成と Discord/LINE への画像添付パスは実装済 (DRY_RUN
-で安全側)。
+で安全側)。マーケットデータ feed は CSV / Yahoo (optional) の入口のみ
+実装済 — feed だけでは READY を出さない。

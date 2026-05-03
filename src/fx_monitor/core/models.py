@@ -145,6 +145,43 @@ class NotificationDecision(BaseModel):
         return self.level not in ("SUPPRESSED", "INFO")
 
 
+class MarketCandle(BaseModel):
+    """One OHLC candle. Validation is lenient on purpose: an invalid OHLC
+    order is recorded as a snapshot warning rather than raised, so a single
+    bad row never crashes the monitor."""
+
+    timestamp_utc: datetime
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float | None = None
+
+    def validate_ohlc_order(self) -> bool:
+        return self.high >= max(self.open, self.close) and self.low <= min(
+            self.open, self.close
+        )
+
+
+class MarketSnapshot(BaseModel):
+    symbol: str
+    timeframe: str
+    source: str
+    candles: list[MarketCandle] = Field(default_factory=list)
+    fetched_at_utc: datetime | None = None
+    warnings: list[str] = Field(default_factory=list)
+
+    @property
+    def is_empty(self) -> bool:
+        return len(self.candles) == 0
+
+    @property
+    def last_close(self) -> float | None:
+        if not self.candles:
+            return None
+        return self.candles[-1].close
+
+
 class MonitorCase(BaseModel):
     """One complete monitoring case.
 

@@ -1,12 +1,16 @@
 """Run the monitor pipeline a single time (used by CI dry-run and CLI smoke).
 
-Two input modes:
+Three input modes (checked in this order):
 
-- Demo mode (default): synthetic ChartPayload built in-process. Useful for
-  smoke-testing without any data feed.
-- Fixture mode: load a saved royal-road payload JSON from
-  ``FX_MONITOR_FIXTURE_PATH`` and adapt it to a MonitorCase. Used by tests
-  and by anyone replaying a captured case.
+1. Fixture mode: ``FX_MONITOR_FIXTURE_PATH`` points at a saved royal-road
+   payload JSON. The adapter builds a full :class:`MonitorCase` and the
+   pipeline can produce READY.
+2. Feed mode: ``FX_MONITOR_FEED`` selects ``csv`` / ``yahoo`` and we fetch
+   a :class:`MarketSnapshot`. The royal-road rich payload is **not** built
+   from raw OHLC yet, so this mode never produces READY — it only prints
+   the snapshot for observation.
+3. Demo mode (default): synthetic :class:`ChartPayload`. Useful for
+   smoke-testing without any data source.
 """
 
 from __future__ import annotations
@@ -31,6 +35,7 @@ from ..core.models import (
     TriggerInfo,
 )
 from ..core.rule_engine import evaluate, evaluate_monitor_case
+from ..data.feed_selector import load_market_snapshot_from_env
 from ..knowledge.loader import load_knowledge_pack
 from ..notify.console_notifier import ConsoleNotifier
 from ..notify.notifier import CooldownTracker, decide, dispatch
@@ -59,14 +64,46 @@ def load_fixture_case(path: str | Path) -> MonitorCase:
     return build_monitor_case_from_royal_road_payload(raw)
 
 
+def _run_market_snapshot_only_mode() -> int:
+    """Feed-only mode: fetch and print a MarketSnapshot. Never READY.
+
+    No MonitorCase is built here — the rich royal-road payload is what
+    triggers a READY notification, and we don't synthesize it from raw
+    OHLC. This mode is for verifying that data ingest works.
+    """
+    snapshot = load_market_snapshot_from_env()
+    print(
+        "Market snapshot: "
+        f"{snapshot.symbol} {snapshot.timeframe} "
+        f"source={snapshot.source} "
+        f"candles={len(snapshot.candles)} "
+        f"last_close={snapshot.last_close}"
+    )
+    if snapshot.warnings:
+        print("Market warnings: " + ", ".join(snapshot.warnings))
+    print("Rule: UNKNOWN none")
+    print("OpenAI: (not run)")
+    print("Claude: (not run)")
+    print("Compare: INSUFFICIENT")
+    print(
+        "Decision: SUPPRESSED "
+        "(market snapshot only; royal-road rich payload required for READY)"
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     pack = load_knowledge_pack()
 
     fixture_path = os.environ.get("FX_MONITOR_FIXTURE_PATH")
+    feed_env = os.environ.get("FX_MONITOR_FEED", "").lower()
+
     if fixture_path:
         case = load_fixture_case(fixture_path)
         payload = case.chart_payload
         rule = evaluate_monitor_case(case)
+    elif feed_env in ("csv", "yahoo"):
+        return _run_market_snapshot_only_mode()
     else:
         payload = _demo_payload()
         case = None
