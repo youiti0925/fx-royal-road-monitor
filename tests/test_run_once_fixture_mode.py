@@ -8,11 +8,12 @@ from pathlib import Path
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def _run(fixture_name: str) -> subprocess.CompletedProcess[str]:
+def _run(fixture_name: str, **overrides: str) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env["FX_MONITOR_FIXTURE_PATH"] = str(FIXTURES / fixture_name)
     env["AI_USE_MOCK"] = "true"
     env["DRY_RUN"] = "true"
+    env.update(overrides)
     return subprocess.run(
         [sys.executable, "-m", "fx_monitor.app.run_once"],
         env=env,
@@ -36,4 +37,44 @@ def test_run_once_with_wait_retest_fixture_not_ready():
 
 def test_run_once_with_event_block_fixture_not_ready():
     result = _run("royal_road_event_block_payload.json")
+    assert "[READY]" not in result.stdout
+
+
+def test_run_once_real_reviewers_disabled_suppresses_ready_fixture():
+    result = _run(
+        "royal_road_ready_sell_payload.json",
+        AI_USE_MOCK="false",
+        OPENAI_ENABLED="false",
+        ANTHROPIC_ENABLED="false",
+    )
+    # With both real reviewers disabled, both come back UNKNOWN -> compare
+    # is INSUFFICIENT and the notifier suppresses READY.
+    assert "INSUFFICIENT" in result.stdout
+    assert "[READY]" not in result.stdout
+
+
+def test_run_once_real_reviewers_missing_keys_suppresses_ready_fixture():
+    env_overrides = dict(
+        AI_USE_MOCK="false",
+        OPENAI_ENABLED="true",
+        ANTHROPIC_ENABLED="true",
+    )
+    # Make sure no key leaks in from the test environment.
+    env = os.environ.copy()
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("ANTHROPIC_API_KEY", None)
+    env["FX_MONITOR_FIXTURE_PATH"] = str(FIXTURES / "royal_road_ready_sell_payload.json")
+    env["DRY_RUN"] = "true"
+    env.update(env_overrides)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "openai_api_key_missing" in result.stdout
+    assert "anthropic_api_key_missing" in result.stdout
     assert "[READY]" not in result.stdout

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pytest
 
@@ -11,6 +13,8 @@ from fx_monitor.core.models import (
     LtfContext,
     TriggerInfo,
 )
+
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
@@ -28,4 +32,11 @@ def passing_payload() -> ChartPayload:
         ),
         trigger=TriggerInfo(type="breakout", occurred=True),
         calendar=CalendarInfo(high_impact_within_15min=False),
+    )
+
+
+@pytest.fixture
+def ready_payload() -> dict:
+    return json.loads(
+        (FIXTURES / "royal_road_ready_sell_payload.json").read_text(encoding="utf-8")
     )

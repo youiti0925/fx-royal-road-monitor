@@ -17,6 +17,7 @@ dependencies = [
 [project.optional-dependencies]
 openai = ["openai>=1.40"]
 anthropic = ["anthropic>=0.40"]
+api = ["openai>=1.40", "anthropic>=0.40"]
 chart = ["matplotlib>=3.8", "pandas>=2.2", "numpy>=1.26"]
 notify = ["discord-webhook>=1.3"]
 dev = [

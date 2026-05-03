@@ -76,16 +76,39 @@ def main(argv: list[str] | None = None) -> int:
         openai_r = MockReviewer(provider="openai").review(payload)
         claude_r = MockReviewer(provider="claude").review(payload)
     else:
-        openai_enabled = os.environ.get("OPENAI_ENABLED", "true").lower() != "false"
-        anthropic_enabled = os.environ.get("ANTHROPIC_ENABLED", "true").lower() != "false"
-        openai_r = OpenAIReviewer(pack).review(payload) if openai_enabled else None
-        claude_r = ClaudeReviewer(pack).review(payload) if anthropic_enabled else None
+        # Reviewers self-gate on OPENAI_ENABLED / ANTHROPIC_ENABLED and on the
+        # presence of API keys, returning UNKNOWN when not usable. We always
+        # call review() so the reason surfaces in the summary line.
+        review_target = case if case is not None else payload
+        openai_r = OpenAIReviewer(pack).review(review_target)
+        claude_r = ClaudeReviewer(pack).review(review_target)
 
     cmp_outcome = compare(openai_r, claude_r)
     cooldown = CooldownTracker()
     decision = decide(payload, rule, cmp_outcome, openai_r, claude_r, cooldown)
+
+    _print_summary(rule, openai_r, claude_r, cmp_outcome, decision)
     dispatch(decision, [ConsoleNotifier()])
     return 0
+
+
+def _summarize_reviewer(label: str, r) -> str:
+    if r is None:
+        return f"{label}: (not run)"
+    reason = ""
+    if r.missing:
+        reason = f" reason={r.missing[0]}"
+    elif r.reasons:
+        reason = f" reason={r.reasons[0]}"
+    return f"{label}: {r.verdict} {r.bias}{reason}"
+
+
+def _print_summary(rule, openai_r, claude_r, cmp_outcome, decision) -> None:
+    print(f"Rule: {rule.verdict} {rule.bias}")
+    print(_summarize_reviewer("OpenAI", openai_r))
+    print(_summarize_reviewer("Claude", claude_r))
+    print(f"Compare: {cmp_outcome.result}")
+    print(f"Decision: {decision.level} ({decision.reason})")
 
 
 if __name__ == "__main__":

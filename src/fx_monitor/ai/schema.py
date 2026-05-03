@@ -170,6 +170,11 @@ def schema_as_json(indent: int = 2) -> str:
     return json.dumps(REVIEW_OUTPUT_SCHEMA, indent=indent, ensure_ascii=False)
 
 
+def schema_as_dict() -> dict[str, Any]:
+    """Return a fresh deep copy of the schema for SDK structured-output APIs."""
+    return json.loads(schema_as_json())
+
+
 def _safe_unknown(provider: str, why: str) -> ReviewResult:
     return ReviewResult(
         provider=provider,
@@ -259,5 +264,6 @@ __all__ = [
     "REQUIRED_STEP_KEYS",
     "P0_STEP_KEYS",
     "schema_as_json",
+    "schema_as_dict",
     "parse_review",
 ]
