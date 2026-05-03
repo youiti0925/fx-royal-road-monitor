@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fx_monitor.core.compare import compare
-from fx_monitor.core.models import ReviewResult, RuleResult
+from fx_monitor.core.models import NotificationDecision, ReviewResult, RuleResult
 from fx_monitor.core.rule_engine import evaluate
 from fx_monitor.notify.notifier import CooldownTracker, decide
 
@@ -95,6 +95,23 @@ def test_agree_pass_still_ready_after_insufficient_change(passing_payload):
     decision = decide(passing_payload, rule, cmp_outcome, None, None, CooldownTracker(), now=1000.0)
     assert decision.level == "READY"
     assert decision.should_dispatch is True
+
+
+def test_notification_decision_can_hold_image_path():
+    d = NotificationDecision(
+        level="READY",
+        reason="test",
+        title="title",
+        body="body",
+        image_path="out/card.png",
+    )
+    assert d.image_path == "out/card.png"
+    assert d.should_dispatch is True
+
+
+def test_notification_decision_image_path_defaults_to_none():
+    d = NotificationDecision(level="READY", reason="r")
+    assert d.image_path is None
 
 
 def test_block_when_calendar_event_in_rule_engine():

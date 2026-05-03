@@ -58,6 +58,44 @@ python -m fx_monitor.app.run_once   # 1 回だけ実行 (dry-run)
 - AI を **final action** に使う (AI は助言層、最終判断はルール + 通知判定)
 - API キーをコミットする
 
+## Notification cards
+
+`run_once` は (fixture mode の場合) 王道通知カード PNG を生成できます。
+
+```env
+FX_MONITOR_RENDER_CARD=true
+FX_MONITOR_ATTACH_CARD=true
+FX_MONITOR_CARD_PATH=out/notification_card.png
+```
+
+`FX_MONITOR_ATTACH_CARD=true` のとき、Discord は multipart `file=`、
+LINE Notify は `imageFile=` で PNG を添付して送信します。
+`DRY_RUN=true` のときは送信せず、生成画像のパスのみ stdout に出力します。
+
+### Japanese fonts
+
+通知カードは matplotlib で描画しますが、フォントファイルはこの repo に
+**同梱しません**。CJK フォントはホスト側でインストールしてください。
+
+Ubuntu:
+
+```bash
+sudo apt-get install fonts-noto-cjk
+```
+
+または、明示的に指定:
+
+```env
+FX_MONITOR_FONT_FAMILY=Noto Sans CJK JP
+# あるいは絶対パス指定 (.ttf / .otf):
+FX_MONITOR_CJK_FONT_PATH=/path/to/NotoSansCJKjp-Regular.otf
+```
+
+フォントが見つからなくても renderer は落ちません — 日本語ラベルだけ
+豆腐 (□) になります。フォントファイルは絶対に commit しないでください。
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
+通知カード PNG の生成と Discord/LINE への画像添付パスは実装済 (DRY_RUN
+で安全側)。

@@ -137,6 +137,7 @@ class NotificationDecision(BaseModel):
     reason: str
     title: str = ""
     body: str = ""
+    image_path: str | None = None
 
     @property
     def should_dispatch(self) -> bool:

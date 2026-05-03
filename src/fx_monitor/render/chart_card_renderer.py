@@ -274,6 +274,13 @@ def render_royal_road_notification_card(
     except Exception:
         return _placeholder_png(out, "matplotlib unavailable")
 
+    # Best-effort: switch matplotlib to a CJK-capable font if one is installed
+    # on the host. Never bundles font files. If nothing is found we still
+    # render — Latin glyphs are correct and Japanese ones become tofu.
+    from .font_resolver import configure_matplotlib_japanese_font
+
+    selected_font = configure_matplotlib_japanese_font()
+
     ai = _ai_payload(case)
     ep = _entry_plan(case)
     sel = _selected_candidate(case)
@@ -525,6 +532,13 @@ def render_royal_road_notification_card(
             line = (line + " " + w).strip()
     if line:
         _ptext(line, COLORS["text"])
+
+    if selected_font:
+        panel.text(
+            0.99, 0.01, f"font: {selected_font}",
+            transform=panel.transAxes, ha="right", va="bottom",
+            color=COLORS["muted"], fontsize=6, alpha=0.6,
+        )
 
     fig.savefig(out, dpi=160, facecolor=COLORS["bg"])
     plt.close(fig)

@@ -18,6 +18,8 @@ class ConsoleNotifier:
         print(header, file=self.stream)
         if decision.body:
             print(decision.body, file=self.stream)
+        if decision.image_path:
+            print(f"image: {decision.image_path}", file=self.stream)
         print("-" * 60, file=self.stream)
         return True
 

@@ -65,6 +65,61 @@ def test_run_once_ready_fixture_generates_notification_card(tmp_path):
     assert card.stat().st_size > 5000
 
 
+def test_run_once_ready_fixture_generates_and_attaches_card_path(tmp_path):
+    pytest_importorskip = __import__("pytest").importorskip
+    pytest_importorskip("matplotlib")
+
+    env = os.environ.copy()
+    card = tmp_path / "notification_card.png"
+    env["FX_MONITOR_FIXTURE_PATH"] = str(FIXTURES / "royal_road_ready_sell_payload.json")
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_RENDER_CARD"] = "true"
+    env["FX_MONITOR_CARD_PATH"] = str(card)
+    env["FX_MONITOR_ATTACH_CARD"] = "true"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Notification card:" in result.stdout
+    assert "Attach card: yes" in result.stdout
+    assert "image:" in result.stdout
+    assert card.exists()
+    assert card.stat().st_size > 5000
+
+
+def test_run_once_attach_card_disabled_does_not_set_image_path(tmp_path):
+    pytest_importorskip = __import__("pytest").importorskip
+    pytest_importorskip("matplotlib")
+
+    env = os.environ.copy()
+    card = tmp_path / "card.png"
+    env["FX_MONITOR_FIXTURE_PATH"] = str(FIXTURES / "royal_road_ready_sell_payload.json")
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_RENDER_CARD"] = "true"
+    env["FX_MONITOR_CARD_PATH"] = str(card)
+    env["FX_MONITOR_ATTACH_CARD"] = "false"
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Attach card: no" in result.stdout
+    # ConsoleNotifier prints `image: ...` only when decision.image_path is set;
+    # with attachment disabled we should not see it.
+    assert "image:" not in result.stdout
+
+
 def test_run_once_real_reviewers_disabled_suppresses_ready_fixture():
     result = _run(
         "royal_road_ready_sell_payload.json",

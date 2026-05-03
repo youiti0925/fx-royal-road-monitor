@@ -88,25 +88,42 @@ def main(argv: list[str] | None = None) -> int:
     cooldown = CooldownTracker()
     decision = decide(payload, rule, cmp_outcome, openai_r, claude_r, cooldown)
 
-    _print_summary(rule, openai_r, claude_r, cmp_outcome, decision)
-    dispatch(decision, [ConsoleNotifier()])
-
+    # Render the notification card (if requested + we have a MonitorCase) and
+    # optionally attach its path to the decision so notification backends can
+    # upload it. The card is rendered even when DRY_RUN=true so operators can
+    # eyeball the artifact; only the actual remote send is suppressed by
+    # ``dispatch()`` / DRY_RUN.
+    rendered_card_path: str | None = None
     if (
         case is not None
-        and os.environ.get("FX_MONITOR_RENDER_CARD", "false").lower() in ("1", "true", "yes")
+        and _env_truthy("FX_MONITOR_RENDER_CARD")
     ):
         out_path = os.environ.get("FX_MONITOR_CARD_PATH", "out/notification_card.png")
-        rendered = render_royal_road_notification_card(
-            case=case,
-            rule=rule,
-            openai_review=openai_r,
-            claude_review=claude_r,
-            compare_outcome=cmp_outcome,
-            decision=decision,
-            out_path=out_path,
+        rendered_card_path = str(
+            render_royal_road_notification_card(
+                case=case,
+                rule=rule,
+                openai_review=openai_r,
+                claude_review=claude_r,
+                compare_outcome=cmp_outcome,
+                decision=decision,
+                out_path=out_path,
+            )
         )
-        print(f"Notification card: {rendered}")
+        attach = _env_truthy("FX_MONITOR_ATTACH_CARD", default="true")
+        if attach:
+            decision = decision.model_copy(update={"image_path": rendered_card_path})
+
+    _print_summary(rule, openai_r, claude_r, cmp_outcome, decision)
+    if rendered_card_path:
+        print(f"Notification card: {rendered_card_path}")
+        print(f"Attach card: {'yes' if decision.image_path else 'no'}")
+    dispatch(decision, [ConsoleNotifier()])
     return 0
+
+
+def _env_truthy(name: str, *, default: str = "false") -> bool:
+    return os.environ.get(name, default).lower() in ("1", "true", "yes")
 
 
 def _summarize_reviewer(label: str, r) -> str:
