@@ -34,6 +34,7 @@ from ..core.rule_engine import evaluate, evaluate_monitor_case
 from ..knowledge.loader import load_knowledge_pack
 from ..notify.console_notifier import ConsoleNotifier
 from ..notify.notifier import CooldownTracker, decide, dispatch
+from ..render.chart_card_renderer import render_royal_road_notification_card
 
 
 def _demo_payload() -> ChartPayload:
@@ -89,6 +90,22 @@ def main(argv: list[str] | None = None) -> int:
 
     _print_summary(rule, openai_r, claude_r, cmp_outcome, decision)
     dispatch(decision, [ConsoleNotifier()])
+
+    if (
+        case is not None
+        and os.environ.get("FX_MONITOR_RENDER_CARD", "false").lower() in ("1", "true", "yes")
+    ):
+        out_path = os.environ.get("FX_MONITOR_CARD_PATH", "out/notification_card.png")
+        rendered = render_royal_road_notification_card(
+            case=case,
+            rule=rule,
+            openai_review=openai_r,
+            claude_review=claude_r,
+            compare_outcome=cmp_outcome,
+            decision=decision,
+            out_path=out_path,
+        )
+        print(f"Notification card: {rendered}")
     return 0
 
 

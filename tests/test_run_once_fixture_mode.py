@@ -40,6 +40,31 @@ def test_run_once_with_event_block_fixture_not_ready():
     assert "[READY]" not in result.stdout
 
 
+def test_run_once_ready_fixture_generates_notification_card(tmp_path):
+    pytest_importorskip = __import__("pytest").importorskip
+    pytest_importorskip("matplotlib")
+
+    env = os.environ.copy()
+    card = tmp_path / "notification_card.png"
+    env["FX_MONITOR_FIXTURE_PATH"] = str(FIXTURES / "royal_road_ready_sell_payload.json")
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_RENDER_CARD"] = "true"
+    env["FX_MONITOR_CARD_PATH"] = str(card)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Notification card:" in result.stdout
+    assert card.exists()
+    assert card.stat().st_size > 5000
+
+
 def test_run_once_real_reviewers_disabled_suppresses_ready_fixture():
     result = _run(
         "royal_road_ready_sell_payload.json",
