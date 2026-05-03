@@ -57,6 +57,46 @@ def test_disagree_does_not_become_ready(passing_payload):
     assert decision.level != "READY"
 
 
+def test_insufficient_ai_reviews_are_suppressed_not_watch(passing_payload):
+    rule = evaluate(passing_payload)
+    assert rule.verdict == "PASS"
+
+    # One reviewer UNKNOWN -> compare is INSUFFICIENT.
+    o = ReviewResult(provider="openai", verdict="UNKNOWN", bias="none", confidence=0.0)
+    c = ReviewResult(provider="claude", verdict="PASS", bias="long", confidence=0.7)
+    cmp_outcome = compare(o, c)
+    assert cmp_outcome.result == "INSUFFICIENT"
+
+    decision = decide(passing_payload, rule, cmp_outcome, o, c, CooldownTracker(), now=1000.0)
+    assert decision.level == "SUPPRESSED"
+    assert decision.should_dispatch is False
+    assert "insufficient" in decision.reason.lower()
+
+
+def test_insufficient_with_both_unknown_is_suppressed(passing_payload):
+    rule = evaluate(passing_payload)
+    o = ReviewResult(provider="openai", verdict="UNKNOWN", bias="none")
+    c = ReviewResult(provider="claude", verdict="UNKNOWN", bias="none")
+    cmp_outcome = compare(o, c)
+    assert cmp_outcome.result == "INSUFFICIENT"
+
+    decision = decide(passing_payload, rule, cmp_outcome, o, c, CooldownTracker(), now=1000.0)
+    assert decision.level == "SUPPRESSED"
+    assert decision.should_dispatch is False
+
+
+def test_agree_pass_still_ready_after_insufficient_change(passing_payload):
+    """Regression guard: the INSUFFICIENT->SUPPRESSED short-circuit must not
+    block an actual AGREE_PASS path."""
+    rule = evaluate(passing_payload)
+    cmp_outcome = compare(_pass_review("openai"), _pass_review("claude"))
+    assert cmp_outcome.result == "AGREE_PASS"
+
+    decision = decide(passing_payload, rule, cmp_outcome, None, None, CooldownTracker(), now=1000.0)
+    assert decision.level == "READY"
+    assert decision.should_dispatch is True
+
+
 def test_block_when_calendar_event_in_rule_engine():
     from datetime import datetime, timezone
 

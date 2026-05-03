@@ -72,6 +72,15 @@ def decide(
             reason="High-impact calendar event within 15 minutes.",
         )
 
+    if compare_outcome.result == "INSUFFICIENT":
+        # AI dual review could not be completed (disabled / missing key /
+        # SDK error / one returned UNKNOWN). Per policy, log to stdout via
+        # the run_once summary but do not push any notification.
+        return NotificationDecision(
+            level="SUPPRESSED",
+            reason="AI review insufficient; suppressing notification.",
+        )
+
     if rule.verdict == "PASS" and compare_outcome.result == "AGREE_PASS":
         if cooldown.is_cooling_down(payload.symbol, payload.timeframe, now):
             return NotificationDecision(
@@ -128,7 +137,7 @@ def dispatch(
     backends: list[NotifyBackend],
 ) -> dict[str, bool]:
     """Dispatch a decision to all backends. Never raises; returns per-backend success."""
-    if decision.level in ("SUPPRESSED", "INFO"):
+    if not decision.should_dispatch:
         return {}
     if _is_dry_run():
         # In dry-run we still let console-style backends print but skip remote ones.

@@ -138,6 +138,11 @@ class NotificationDecision(BaseModel):
     title: str = ""
     body: str = ""
 
+    @property
+    def should_dispatch(self) -> bool:
+        """True when this decision should be sent to notification backends."""
+        return self.level not in ("SUPPRESSED", "INFO")
+
 
 class MonitorCase(BaseModel):
     """One complete monitoring case.

@@ -48,9 +48,11 @@ def test_run_once_real_reviewers_disabled_suppresses_ready_fixture():
         ANTHROPIC_ENABLED="false",
     )
     # With both real reviewers disabled, both come back UNKNOWN -> compare
-    # is INSUFFICIENT and the notifier suppresses READY.
+    # is INSUFFICIENT and the notifier suppresses any notification.
     assert "INSUFFICIENT" in result.stdout
+    assert "Decision: SUPPRESSED" in result.stdout
     assert "[READY]" not in result.stdout
+    assert "[WATCH]" not in result.stdout
 
 
 def test_run_once_real_reviewers_missing_keys_suppresses_ready_fixture():
@@ -77,4 +79,6 @@ def test_run_once_real_reviewers_missing_keys_suppresses_ready_fixture():
 
     assert "openai_api_key_missing" in result.stdout
     assert "anthropic_api_key_missing" in result.stdout
+    assert "Decision: SUPPRESSED" in result.stdout
     assert "[READY]" not in result.stdout
+    assert "[WATCH]" not in result.stdout
