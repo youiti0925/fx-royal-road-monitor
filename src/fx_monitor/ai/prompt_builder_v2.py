@@ -122,12 +122,55 @@ def _format_principles(kp: dict[str, Any]) -> str:
 
     htf = principles.get("htf_supremacy")
     if htf:
-        out.append("\n### 【最上位原則】上位足の絶対的優位性 (HTF Supremacy)")
+        out.append("\n### 【最上位原則 1/2】上位足の絶対的優位性 (HTF Supremacy) — テクニカル軸")
         out.append(htf.get("description_ja", ""))
         layers = htf.get("mandatory_layers", [])
         if layers:
             out.append(f"  必須スキャン階層: {' → '.join(layers)}")
         for rule in htf.get("rules", []):
+            out.append(f"  - {rule}")
+
+    fundamentals = principles.get("fundamentals_supremacy")
+    if fundamentals:
+        out.append("\n### 【最上位原則 2/2】ファンダメンタルの絶対的優位性 (Fundamentals Supremacy) — イベント軸")
+        out.append(fundamentals.get("description_ja", ""))
+        checks = fundamentals.get("mandatory_checks", [])
+        if checks:
+            out.append("  必須確認項目:")
+            for c in checks:
+                out.append(f"    - {c}")
+        for rule in fundamentals.get("rules", []):
+            out.append(f"  - {rule}")
+
+    intervention = principles.get("intervention_2stage_trap")
+    if intervention:
+        out.append("\n### 為替介入の2段構え狩り (Intervention 2-Stage Trap)")
+        out.append(intervention.get("description_ja", ""))
+        for stage in intervention.get("stages", []):
+            out.append(f"  - {stage}")
+        amateur = intervention.get("amateur_action")
+        pro = intervention.get("professional_action")
+        if amateur:
+            out.append(f"  ❌ 素人の行動: {amateur}")
+        if pro:
+            out.append(f"  ✅ プロの行動: {pro}")
+        anti = intervention.get("anti_falling_knife_rule")
+        if anti:
+            out.append(f"  落ちてくるナイフ禁止: {anti}")
+        v_pattern = intervention.get("v_recovery_pattern")
+        if v_pattern:
+            out.append(f"  急落V字回復パターン: {v_pattern}")
+
+    crisis = principles.get("crisis_mode_strategy")
+    if crisis:
+        out.append("\n### クライシスモード戦略 (Crisis Mode Strategy)")
+        out.append(crisis.get("description_ja", ""))
+        triggers = crisis.get("trigger_conditions", [])
+        if triggers:
+            out.append("  発動条件 (いずれか1つで発動):")
+            for t in triggers:
+                out.append(f"    - {t}")
+        for rule in crisis.get("rules", []):
             out.append(f"  - {rule}")
 
     triple = principles.get("triple_confluence_doctrine")

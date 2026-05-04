@@ -181,13 +181,12 @@ def test_user_prompt_includes_v3_principles():
 
 
 def test_user_prompt_includes_v4_top_principles():
-    """v4 doctrine: HTF supremacy must be the FIRST principle, plus
-    Triple Confluence / Fibonacci zone / Breakout 3-signs / line filter
-    / 3-layer psychology must all reach the AI."""
+    """v4 doctrine markers (still present in v5 with the new 1/2 prefix
+    on the HTF heading)."""
     pack = _pack()
     p = build_decision_prompt(pack, retrieved=[])
     for token in [
-        "【最上位原則】上位足の絶対的優位性",
+        "上位足の絶対的優位性",
         "HTF Supremacy",
         "トリプル根拠",
         "Triple Confluence",
@@ -203,15 +202,15 @@ def test_user_prompt_includes_v4_top_principles():
 
 
 def test_htf_supremacy_appears_before_other_principles():
-    """HTF must be the FIRST section under 上位原則 — explicit ordering.
+    """HTF must precede triple/layered/MTF sections — explicit ordering.
 
-    We search for the specific section headers (### prefix) so the test
-    is not confused by the glossary mentioning the same term earlier.
+    v5 adds fundamentals_supremacy between HTF and triple, but the
+    relative order (HTF before everything else) still holds.
     """
     pack = _pack()
     p = build_decision_prompt(pack, retrieved=[])
     user = p.user
-    htf_idx = user.find("### 【最上位原則】上位足の絶対的優位性")
+    htf_idx = user.find("### 【最上位原則 1/2】上位足の絶対的優位性")
     triple_idx = user.find("### トリプル根拠")
     layered_idx = user.find("### 階層分析")
     mtf_idx = user.find("### MTF (マルチタイムフレーム) 原則")
@@ -245,25 +244,35 @@ def test_v4_glossary_includes_new_terms():
         assert term in glossary, f"missing v4 glossary term: {term!r}"
 
 
-def test_v4_doctrine_version_marker():
-    """The pack carries an explicit v4 doctrine_version marker."""
+def test_doctrine_version_marker():
+    """The pack carries an explicit doctrine_version marker (v4 or later).
+
+    Renamed from test_v4_doctrine_version_marker — v5 bumped the version
+    string but the underlying assertion is the same: doctrine version
+    must be tagged so we can detect drift in future commits.
+    """
     from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
 
     kp = load_knowledge_pack()
-    assert kp.get("doctrine_version", "").startswith("v4_"), (
-        f"doctrine_version should start with 'v4_', got {kp.get('doctrine_version')!r}"
+    version = kp.get("doctrine_version", "")
+    assert version.startswith(("v4_", "v5_", "v6_", "v7_", "v8_", "v9_")), (
+        f"doctrine_version should start with v4_ or later, got {version!r}"
     )
 
 
-def test_v4_procedure_steps_include_htf_full_scan_first():
-    """HTF full scan must appear FIRST in the procedure steps list."""
+def test_v4_procedure_steps_include_htf_full_scan():
+    """HTF full scan must appear in the procedure steps list (v5 moves
+    fundamental_environment_check ahead of it, but htf_full_scan stays
+    in the early-priority block)."""
     from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
 
     kp = load_knowledge_pack()
     steps = kp["procedure_steps"]
-    assert steps[0]["key"] == "htf_full_scan", (
-        f"first step must be htf_full_scan, got {steps[0]['key']!r}"
-    )
+    keys = [s["key"] for s in steps]
+    assert "htf_full_scan" in keys
+    htf_idx = keys.index("htf_full_scan")
+    # htf_full_scan should be in the first 6 steps (the priority block).
+    assert htf_idx < 6, f"htf_full_scan should be early-priority, got index {htf_idx}"
 
 
 def test_v4_procedure_steps_include_new_v4_keys():
@@ -282,6 +291,108 @@ def test_v4_procedure_steps_include_new_v4_keys():
         "triple_confluence_count",
     ]:
         assert key in keys, f"missing v4 procedure step: {key!r}"
+
+
+def test_user_prompt_includes_v5_fundamentals_principles():
+    """v5 doctrine: fundamentals_supremacy must appear right after HTF
+    supremacy. intervention_2stage_trap and crisis_mode_strategy must
+    also reach the AI as dedicated sections."""
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    for token in [
+        "【最上位原則 1/2】上位足の絶対的優位性",
+        "【最上位原則 2/2】ファンダメンタルの絶対的優位性",
+        "Fundamentals Supremacy",
+        "為替介入の2段構え狩り",
+        "Intervention 2-Stage Trap",
+        "クライシスモード戦略",
+        "Crisis Mode Strategy",
+        "落ちてくるナイフ",
+        "急落V字回復パターン",
+        "ファクトファースト",
+    ]:
+        assert token in p.user, f"missing v5 marker: {token!r}"
+
+
+def test_fundamentals_supremacy_appears_directly_after_htf():
+    """The two top-level supremacy principles must appear in pair: HTF
+    first, then fundamentals immediately after."""
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    user = p.user
+    htf_idx = user.find("### 【最上位原則 1/2】上位足の絶対的優位性")
+    fund_idx = user.find("### 【最上位原則 2/2】ファンダメンタルの絶対的優位性")
+    triple_idx = user.find("### トリプル根拠")
+    assert htf_idx > 0, "HTF supremacy section header missing"
+    assert fund_idx > htf_idx, "fundamentals supremacy must follow HTF"
+    assert triple_idx > fund_idx, (
+        "triple confluence must come after both supremacy principles"
+    )
+
+
+def test_v5_glossary_includes_fundamentals_terms():
+    """v5 added intervention, verbal intervention, falling knife, etc."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    glossary = kp["glossary"]
+    for term in [
+        "ファンダメンタル",
+        "為替介入 (Currency Intervention)",
+        "口先介入 (Verbal Intervention)",
+        "要人発言キーワード",
+        "介入の2段構え狩り (2-Stage Intervention Trap)",
+        "養分 (Liquidity Bait)",
+        "落ちてくるナイフ (Falling Knife)",
+        "急落V字回復パターン (Crash V-Recovery)",
+        "ファクトファースト原則 (Fact-First Doctrine)",
+        "クライシスモード (Crisis Mode)",
+        "中央銀行スタンス (Central Bank Stance)",
+        "経済指標サプライズ (Economic Surprise)",
+        "発表後の3パターン",
+    ]:
+        assert term in glossary, f"missing v5 glossary term: {term!r}"
+
+
+def test_v5_doctrine_version_marker():
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    assert kp.get("doctrine_version", "").startswith("v5_"), (
+        f"doctrine_version should start with 'v5_', got {kp.get('doctrine_version')!r}"
+    )
+
+
+def test_v5_procedure_steps_include_fundamentals_first():
+    """fundamental_environment_check should be the new index-0 step."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    steps = kp["procedure_steps"]
+    assert steps[0]["key"] == "fundamental_environment_check", (
+        f"first step must be fundamental_environment_check, got {steps[0]['key']!r}"
+    )
+    keys_in_order = [s["key"] for s in steps[:5]]
+    assert keys_in_order == [
+        "fundamental_environment_check",
+        "crisis_mode_detection",
+        "intervention_zone_check",
+        "verbal_intervention_scan",
+        "htf_full_scan",
+    ], f"v5 step order wrong: {keys_in_order}"
+
+
+def test_v5_principles_include_new_keys():
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    principles = kp["principles"]
+    for key in [
+        "fundamentals_supremacy",
+        "intervention_2stage_trap",
+        "crisis_mode_strategy",
+    ]:
+        assert key in principles, f"missing v5 principle: {key!r}"
 
 
 def test_user_prompt_includes_new_procedure_keys():
