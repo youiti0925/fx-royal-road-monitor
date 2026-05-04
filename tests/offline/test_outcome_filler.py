@@ -67,7 +67,7 @@ def test_fill_skips_recent_pending(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "corpus")
     now = datetime(2026, 5, 4, 10, 0, tzinfo=timezone.utc)
     # Pending entry from 30 minutes ago — too recent for 60-bar M5 lookahead.
-    store.add(_entry(now - timedelta(minutes=30)))
+    store.add(_entry(now - timedelta(minutes=30)), skip_validation=True)
 
     def fetch_future(symbol: str, asof: datetime, n: int) -> list[Candle]:
         raise AssertionError("should not fetch when too recent")
@@ -84,7 +84,7 @@ def test_fill_completes_when_age_sufficient(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "corpus")
     now = datetime(2026, 5, 4, 18, 0, tzinfo=timezone.utc)
     asof = now - timedelta(hours=10)  # plenty of age for 60 M5 bars
-    store.add(_entry(asof))
+    store.add(_entry(asof), skip_validation=True)
 
     def fetch_future(symbol: str, asof_arg: datetime, n: int) -> list[Candle]:
         # 60 bars dropping 50 pip — favourable for a SELL judgement.
@@ -104,7 +104,7 @@ def test_fill_records_failure_when_fetch_returns_empty(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "corpus")
     now = datetime(2026, 5, 4, 18, 0, tzinfo=timezone.utc)
     asof = now - timedelta(hours=10)
-    store.add(_entry(asof))
+    store.add(_entry(asof), skip_validation=True)
 
     def fetch_future(symbol: str, asof_arg: datetime, n: int) -> list[Candle]:
         return []

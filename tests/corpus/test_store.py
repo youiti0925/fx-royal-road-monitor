@@ -62,8 +62,8 @@ def test_empty_store_search_returns_empty(tmp_path: Path):
 def test_add_persists_across_reload(tmp_path: Path):
     root = tmp_path / "c2"
     s1 = JsonlVectorStore(root)
-    s1.add(_entry("a", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]))
-    s1.add(_entry("b", outcome_status="LOSE", vector=[0.0, 1.0, 0.0, 0.0]))
+    s1.add(_entry("a", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
+    s1.add(_entry("b", outcome_status="LOSE", vector=[0.0, 1.0, 0.0, 0.0]), skip_validation=True)
 
     s2 = JsonlVectorStore(root)
     assert len(s2) == 2
@@ -73,16 +73,16 @@ def test_add_persists_across_reload(tmp_path: Path):
 
 def test_duplicate_entry_id_rejected(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c3")
-    store.add(_entry("dup"))
+    store.add(_entry("dup"), skip_validation=True)
     with pytest.raises(ValueError):
-        store.add(_entry("dup"))
+        store.add(_entry("dup"), skip_validation=True)
 
 
 def test_search_returns_top_k_in_similarity_order(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c4")
-    store.add(_entry("close", outcome_status="WIN", vector=[1.0, 0.1, 0.0, 0.0]))
-    store.add(_entry("medium", outcome_status="WIN", vector=[1.0, 1.0, 0.0, 0.0]))
-    store.add(_entry("far", outcome_status="WIN", vector=[0.0, 0.0, 1.0, 0.0]))
+    store.add(_entry("close", outcome_status="WIN", vector=[1.0, 0.1, 0.0, 0.0]), skip_validation=True)
+    store.add(_entry("medium", outcome_status="WIN", vector=[1.0, 1.0, 0.0, 0.0]), skip_validation=True)
+    store.add(_entry("far", outcome_status="WIN", vector=[0.0, 0.0, 1.0, 0.0]), skip_validation=True)
 
     results = store.search_similar([1.0, 0.0, 0.0, 0.0], top_k=2)
     assert len(results) == 2
@@ -91,8 +91,8 @@ def test_search_returns_top_k_in_similarity_order(tmp_path: Path):
 
 def test_search_excludes_pending_outcomes_by_default(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c5")
-    store.add(_entry("ready", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]))
-    store.add(_entry("waiting", outcome_status="PENDING", vector=[1.0, 0.0, 0.0, 0.0]))
+    store.add(_entry("ready", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
+    store.add(_entry("waiting", outcome_status="PENDING", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
 
     results = store.search_similar([1.0, 0.0, 0.0, 0.0], top_k=10)
     assert [e.entry_id for _, e in results] == ["ready"]
@@ -100,7 +100,7 @@ def test_search_excludes_pending_outcomes_by_default(tmp_path: Path):
 
 def test_update_outcome_changes_status(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c6")
-    store.add(_entry("p1", outcome_status="PENDING"))
+    store.add(_entry("p1", outcome_status="PENDING"), skip_validation=True)
     new_outcome = OutcomeLabel(
         status="WIN",
         max_favorable_pip=42.0,
@@ -118,15 +118,15 @@ def test_update_outcome_changes_status(tmp_path: Path):
 
 def test_pending_outcomes_filter(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c7")
-    store.add(_entry("p", outcome_status="PENDING"))
-    store.add(_entry("d", outcome_status="WIN"))
+    store.add(_entry("p", outcome_status="PENDING"), skip_validation=True)
+    store.add(_entry("d", outcome_status="WIN"), skip_validation=True)
     pending = store.pending_outcomes()
     assert [e.entry_id for e in pending] == ["p"]
 
 
 def test_mark_dissent_sets_flag(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c8")
-    store.add(_entry("z", outcome_status="WIN"))
+    store.add(_entry("z", outcome_status="WIN"), skip_validation=True)
     assert store.mark_dissent("z", note="上位足と矛盾") is True
     e = store.get("z")
     assert e is not None
@@ -140,11 +140,9 @@ def test_recency_weight_promotes_recent_entries(tmp_path: Path):
     # Two entries with identical vectors. The recent one should win when
     # recency_weight is large.
     store.add(
-        _entry("old", asof=now - timedelta(days=180), outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0])
-    )
+        _entry("old", asof=now - timedelta(days=180), outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
     store.add(
-        _entry("new", asof=now - timedelta(days=1), outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0])
-    )
+        _entry("new", asof=now - timedelta(days=1), outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
     results = store.search_similar(
         [1.0, 0.0, 0.0, 0.0],
         top_k=2,
@@ -156,9 +154,9 @@ def test_recency_weight_promotes_recent_entries(tmp_path: Path):
 
 def test_search_multi_mode_returns_all_buckets(tmp_path: Path):
     store = JsonlVectorStore(tmp_path / "c11")
-    store.add(_entry("a", outcome_status="WIN"))
-    store.add(_entry("b", outcome_status="LOSE"))
-    store.add(_entry("c", outcome_status="NEUTRAL_GOOD"))
+    store.add(_entry("a", outcome_status="WIN"), skip_validation=True)
+    store.add(_entry("b", outcome_status="LOSE"), skip_validation=True)
+    store.add(_entry("c", outcome_status="NEUTRAL_GOOD"), skip_validation=True)
 
     modes = store.search_multi_mode(
         [1.0, 0.0, 0.0, 0.0],
@@ -188,8 +186,8 @@ def test_search_with_session_filter(tmp_path: Path):
     e2 = e2.model_copy(
         update={"market_pack": e2.market_pack.model_copy(update={"session": "LONDON"})}
     )
-    store.add(e1)
-    store.add(e2)
+    store.add(e1, skip_validation=True)
+    store.add(e2, skip_validation=True)
     london_only = store.search_similar(
         [1.0, 0.0, 0.0, 0.0], top_k=5, session_filter="LONDON"
     )
@@ -200,7 +198,7 @@ def test_search_with_session_filter(tmp_path: Path):
 def test_vector_file_rebuilt_when_out_of_sync(tmp_path: Path):
     root = tmp_path / "c10"
     s1 = JsonlVectorStore(root)
-    s1.add(_entry("a", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]))
+    s1.add(_entry("a", outcome_status="WIN", vector=[1.0, 0.0, 0.0, 0.0]), skip_validation=True)
     # Corrupt the vectors file.
     (root / "vectors.npy").write_bytes(b"garbage")
     s2 = JsonlVectorStore(root)

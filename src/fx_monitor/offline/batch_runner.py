@@ -115,6 +115,7 @@ def run_batch(
     knowledge_pack_path: Path | str | None = None,
     retrieval_top_k: int = 10,
     now_utc: datetime | None = None,
+    skip_corpus_validation: bool = False,
 ) -> BatchResult:
     """Process up to ``batch_size`` pending candidates.
 
@@ -189,7 +190,7 @@ def run_batch(
                 max_bars=outcome_lookahead_bars,
             )
             entry = entry.model_copy(update={"outcome": outcome})
-            store.add(entry)
+            store.add(entry, skip_validation=skip_corpus_validation)
             progress.mark_done(anchor_index)
             processed += 1
         except Exception as exc:  # pragma: no cover - exercised via test

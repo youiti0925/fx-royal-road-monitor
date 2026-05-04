@@ -71,7 +71,7 @@ def test_finalise_stores_corpus_entry_and_removes_pending():
             "procedure_steps": [],
         }
     )
-    result = finalise_check(entry_id=info["entry_id"], spec_json=spec_json)
+    result = finalise_check(entry_id=info["entry_id"], spec_json=spec_json, skip_corpus_validation=True)
     assert result["final_status"] == "WAIT_BREAKOUT"
     assert result["validation_ok"] is True
     assert result["corpus_size"] == 1
@@ -108,7 +108,7 @@ def test_finalise_downgrades_when_validation_fails():
             "procedure_steps": [],
         }
     )
-    result = finalise_check(entry_id=info["entry_id"], spec_json=spec_json)
+    result = finalise_check(entry_id=info["entry_id"], spec_json=spec_json, skip_corpus_validation=True)
     assert result["downgraded"] is True
     assert result["final_status"] == "UNKNOWN"
     assert any(

@@ -68,7 +68,7 @@ def _make_entry(
 def test_flag_dissent_marks_existing_entry():
     store = JsonlVectorStore(corpus_root("default"))
     asof = datetime(2026, 5, 4, 10, 0, tzinfo=timezone.utc)
-    store.add(_make_entry("e1", asof=asof, outcome_status="WIN"))
+    store.add(_make_entry("e1", asof=asof, outcome_status="WIN"), skip_validation=True)
 
     info = flag_dissent(entry_id="e1", note="上位足と矛盾")
     assert info["ok"] is True
@@ -89,7 +89,7 @@ def test_update_outcomes_uses_injected_fetcher():
     store = JsonlVectorStore(corpus_root("default"))
     now = datetime(2026, 5, 4, 18, 0, tzinfo=timezone.utc)
     asof = now - timedelta(hours=10)
-    store.add(_make_entry("p1", asof=asof, outcome_status="PENDING"))
+    store.add(_make_entry("p1", asof=asof, outcome_status="PENDING"), skip_validation=True)
 
     def stub_fetcher(symbol: str, asof_arg: datetime, n: int) -> list[Candle]:
         return [
@@ -111,9 +111,9 @@ def test_update_outcomes_uses_injected_fetcher():
 def test_monthly_report_aggregates_recent_entries():
     store = JsonlVectorStore(corpus_root("default"))
     now = datetime(2026, 5, 4, 10, 0, tzinfo=timezone.utc)
-    store.add(_make_entry("a", asof=now - timedelta(days=2), outcome_status="WIN"))
-    store.add(_make_entry("b", asof=now - timedelta(days=5), outcome_status="LOSE"))
-    store.add(_make_entry("c", asof=now - timedelta(days=40), outcome_status="WIN"))  # outside window
+    store.add(_make_entry("a", asof=now - timedelta(days=2), outcome_status="WIN"), skip_validation=True)
+    store.add(_make_entry("b", asof=now - timedelta(days=5), outcome_status="LOSE"), skip_validation=True)
+    store.add(_make_entry("c", asof=now - timedelta(days=40), outcome_status="WIN"), skip_validation=True)  # outside window
 
     report = build_report(days=30, now_utc=now)
     assert report["total_entries_in_window"] == 2

@@ -120,9 +120,9 @@ def test_render_entry_page_includes_spec_and_pack():
 def test_generate_dashboard_writes_files():
     now = datetime(2026, 5, 4, 12, 0, tzinfo=timezone.utc)
     store = JsonlVectorStore(corpus_root("default"))
-    store.add(_entry("a", asof=now - timedelta(hours=1)))
-    store.add(_entry("b", asof=now - timedelta(days=2), outcome_status="LOSE"))
-    store.add(_entry("old", asof=now - timedelta(days=60)))
+    store.add(_entry("a", asof=now - timedelta(hours=1)), skip_validation=True)
+    store.add(_entry("b", asof=now - timedelta(days=2), outcome_status="LOSE"), skip_validation=True)
+    store.add(_entry("old", asof=now - timedelta(days=60)), skip_validation=True)
 
     info = generate_dashboard(days=30, now_utc=now)
     out_root = Path(info["output_root"])

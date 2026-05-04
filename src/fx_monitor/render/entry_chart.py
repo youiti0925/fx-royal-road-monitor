@@ -88,27 +88,19 @@ def render_entry_chart_png(
     out = Path(out_path)
     out.parent.mkdir(parents=True, exist_ok=True)
 
-    try:
-        import matplotlib
+    # NOTE: previously this block had a try/except that silently wrote a
+    # 71-byte 1×1 PNG stub when matplotlib was missing, which then got
+    # committed as if it were a real chart (F2 in the validator audit).
+    # Removed deliberately — fail loud, never silent.
+    import matplotlib
 
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-        from matplotlib.gridspec import GridSpec
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
 
-        from .font_resolver import configure_matplotlib_japanese_font
+    from .font_resolver import configure_matplotlib_japanese_font
 
-        configure_matplotlib_japanese_font()
-    except Exception:
-        # Caller-friendly: write a tiny placeholder so the dashboard
-        # always has *something* to embed even when matplotlib is absent.
-        out.write_bytes(
-            bytes.fromhex(
-                "89504e470d0a1a0a0000000d49484452000000010000000108060000001f"
-                "15c4890000000d49444154789c63f8cfc0c0c0000000050001a5f8b9ed00"
-                "00000049454e44ae426082"
-            )
-        )
-        return out
+    configure_matplotlib_japanese_font()
 
     pack = entry.market_pack
     spec = entry.judgement

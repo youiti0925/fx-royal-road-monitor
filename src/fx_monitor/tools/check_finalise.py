@@ -32,7 +32,15 @@ def finalise_check(
     spec_json: str | dict,
     judgement_model: str = "claude-code-via-subscription",
     corpus_name: str = "default",
+    skip_corpus_validation: bool = False,
 ) -> dict:
+    """Finalise a pending judgement.
+
+    ``skip_corpus_validation`` (default False) bypasses the strict
+    :func:`entry_validator.validate_entry` check inside the corpus store.
+    Production callers must leave this False — a True value is intended only
+    for integration smoke tests that construct minimal stub specs.
+    """
     pending = pending_judgement_path(entry_id)
     if not pending.exists():
         raise FileNotFoundError(f"no pending judgement for entry_id={entry_id}")
@@ -64,7 +72,7 @@ def finalise_check(
         outcome=OutcomeLabel(status="PENDING"),
     )
     store = JsonlVectorStore(corpus_root(corpus_name))
-    store.add(entry)
+    store.add(entry, skip_validation=skip_corpus_validation)
 
     # Best-effort cleanup: keep the prompt for audit but drop the pending JSON.
     pending.unlink(missing_ok=True)

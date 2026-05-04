@@ -26,6 +26,7 @@ from pathlib import Path
 import numpy as np
 
 from .schema import CorpusEntry, OutcomeLabel
+from .entry_validator import validate_entry, CorpusValidationError
 
 
 class JsonlVectorStore:
@@ -95,9 +96,13 @@ class JsonlVectorStore:
 
     # ---- mutations ----
 
-    def add(self, entry: CorpusEntry) -> None:
+    def add(self, entry: CorpusEntry, *, skip_validation: bool = False) -> None:
         if any(e.entry_id == entry.entry_id for e in self._entries):
             raise ValueError(f"duplicate entry_id: {entry.entry_id}")
+        if not skip_validation:
+            issues = validate_entry(entry)
+            if issues:
+                raise CorpusValidationError(entry.entry_id, issues)
         self._append_one(entry)
 
     def update_outcome(self, entry_id: str, outcome: OutcomeLabel) -> bool:

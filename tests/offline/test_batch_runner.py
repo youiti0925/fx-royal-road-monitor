@@ -69,7 +69,7 @@ def test_run_batch_processes_up_to_batch_size(tmp_path: Path):
         batch_size=5,
         window_size=60,
         step=10,
-    )
+     skip_corpus_validation=True,)
 
     assert result.processed <= 5
     assert result.processed > 0
@@ -92,7 +92,7 @@ def test_run_batch_resumes_from_progress(tmp_path: Path):
         batch_size=3,
         window_size=60,
         step=10,
-    )
+     skip_corpus_validation=True,)
     second = run_batch(
         candles=candles,
         symbol="EURUSD=X",
@@ -103,7 +103,7 @@ def test_run_batch_resumes_from_progress(tmp_path: Path):
         batch_size=3,
         window_size=60,
         step=10,
-    )
+     skip_corpus_validation=True,)
 
     assert second.processed > 0
     assert first.processed + second.processed == len(store)
@@ -139,7 +139,7 @@ def test_run_batch_records_errors_without_aborting(tmp_path: Path):
         batch_size=4,
         window_size=60,
         step=10,
-    )
+     skip_corpus_validation=True,)
     assert result.errors == 1
     assert result.processed == result.processed  # tautology, but we want progress > 0
     assert result.processed >= 1
@@ -161,7 +161,7 @@ def test_run_batch_outcome_is_filled_for_internal_anchors(tmp_path: Path):
         window_size=60,
         step=20,
         outcome_lookahead_bars=30,
-    )
+     skip_corpus_validation=True,)
 
     for entry in store.all():
         # Anchor indices were chosen so that 30+ future bars exist.
