@@ -1,89 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
-<meta charset="utf-8">
-<title>Royal-road dashboard</title>
+<meta charset="utf-8"><title>Royal-road dashboard</title>
 <style>
 :root { color-scheme: light dark; }
 body {
     font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
-    margin: 0;
-    padding: 1.5rem;
-    background: #0b1220;
-    color: #e2e8f0;
-    line-height: 1.5;
+    margin: 0; padding: 1.5rem;
+    background: #0b1220; color: #e2e8f0; line-height: 1.5;
 }
-header {
-    border-bottom: 1px solid #334155;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-}
+header { border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1.5rem; }
 h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin-top: 1.6rem; font-size: 1.15rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.3rem; }
+h3 { margin-top: 1.2rem; font-size: 1rem; color: #cbd5e1; }
 .meta { color: #94a3b8; font-size: 0.9rem; }
 .grid {
-    display: grid;
+    display: grid; gap: 1rem;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
     margin: 1rem 0;
 }
-.card {
-    background: #111a2c;
-    border: 1px solid #1e293b;
-    border-radius: 6px;
-    padding: 1rem;
-}
+.card { background: #111a2c; border: 1px solid #1e293b; border-radius: 6px; padding: 1rem; }
 .card .label { color: #94a3b8; font-size: 0.85rem; }
 .card .value { font-size: 1.4rem; font-weight: 600; margin-top: 0.25rem; }
 .safety {
-    background: #422006;
-    border-left: 4px solid #ea580c;
-    padding: 0.6rem 1rem;
-    border-radius: 4px;
-    margin: 1rem 0;
-    font-size: 0.9rem;
+    background: #422006; border-left: 4px solid #ea580c;
+    padding: 0.6rem 1rem; border-radius: 4px; margin: 1rem 0; font-size: 0.9rem;
 }
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    font-size: 0.9rem;
+.postmortem {
+    background: #1e1b3b; border-left: 4px solid #a78bfa;
+    padding: 0.8rem 1rem; border-radius: 4px; margin: 1rem 0;
 }
-th, td {
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #1e293b;
-    text-align: left;
-}
+.postmortem.severity-high { border-left-color: #ef4444; background: #2c1414; }
+.postmortem.severity-medium { border-left-color: #f59e0b; background: #2c1f0a; }
+.postmortem h3 { margin-top: 0; color: #c4b5fd; }
+.postmortem.severity-high h3 { color: #fca5a5; }
+.postmortem.severity-medium h3 { color: #fcd34d; }
+table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; text-align: left; vertical-align: top; }
 th { background: #111a2c; color: #94a3b8; font-weight: 500; }
 tr:hover td { background: #0f172a; }
 .badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 999px; font-size: 0.75rem; font-weight: 600;
 }
-.badge-WIN { background: #064e3b; color: #6ee7b7; }
-.badge-LOSE { background: #7f1d1d; color: #fca5a5; }
-.badge-NEUTRAL_GOOD { background: #1e3a8a; color: #93c5fd; }
-.badge-NEUTRAL_MISSED { background: #713f12; color: #fcd34d; }
-.badge-PENDING { background: #334155; color: #cbd5e1; }
+.badge-WIN, .badge-PASS { background: #064e3b; color: #6ee7b7; }
+.badge-LOSE, .badge-BLOCK { background: #7f1d1d; color: #fca5a5; }
+.badge-NEUTRAL_GOOD, .badge-WAIT { background: #1e3a8a; color: #93c5fd; }
+.badge-NEUTRAL_MISSED, .badge-WARN { background: #713f12; color: #fcd34d; }
+.badge-PENDING, .badge-UNKNOWN { background: #334155; color: #cbd5e1; }
 .badge-DISSENT { background: #4c1d95; color: #c4b5fd; margin-left: 0.5rem; }
+.steps {
+    display: grid; gap: 0.4rem;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-size: 0.88rem;
+}
+.steps .num { color: #64748b; font-variant-numeric: tabular-nums; }
+.steps .key { color: #cbd5e1; min-width: 11rem; }
+.steps .reason { color: #94a3b8; }
 a { color: #60a5fa; text-decoration: none; }
 a:hover { text-decoration: underline; }
 pre {
-    background: #0f172a;
-    padding: 1rem;
-    border-radius: 6px;
-    overflow: auto;
-    font-size: 0.85rem;
+    background: #0f172a; padding: 1rem; border-radius: 6px;
+    overflow: auto; font-size: 0.82rem; max-height: 24rem;
 }
+details { margin: 0.6rem 0; }
+details summary { cursor: pointer; color: #93c5fd; font-size: 0.92rem; padding: 0.4rem 0; }
+details[open] summary { color: #60a5fa; }
+.chart-img { width: 100%; max-width: 100%; height: auto; border-radius: 6px; margin-top: 0.6rem; }
 </style>
 </head><body>
 <header>
 <h1>王道判定ダッシュボード</h1>
-<div class="meta">生成 2026-05-04 10:48 UTC ・ 直近 30 日</div>
+<div class="meta">生成 2026-05-04 11:18 UTC ・ 直近 30 日</div>
 </header>
 <div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
-<div class="grid"><div class="card"><div class="label">総コーパス件数</div><div class="value">6</div></div><div class="card"><div class="label">直近30日の判定数</div><div class="value">6</div></div><div class="card"><div class="label">WIN/LOSE 採点済</div><div class="value">2</div></div><div class="card"><div class="label">WIN率</div><div class="value">50.0%</div></div><div class="card"><div class="label">PENDING</div><div class="value">1</div></div><div class="card"><div class="label">違和感フラグ</div><div class="value">0</div></div></div>
+<div class="grid"><div class="card"><div class="label">総コーパス件数</div><div class="value">6</div></div><div class="card"><div class="label">直近30日の判定数</div><div class="value">6</div></div><div class="card"><div class="label">WIN/LOSE 採点済</div><div class="value">2</div></div><div class="card"><div class="label">WIN率</div><div class="value">50.0%</div></div><div class="card"><div class="label">PENDING</div><div class="value">1</div></div><div class="card"><div class="label">要分析(LOSE/MISSED)</div><div class="value">2</div></div><div class="card"><div class="label">違和感フラグ</div><div class="value">0</div></div></div>
 <h2>final_status 内訳</h2>
 <p class="meta">HOLD=1, WAIT_BREAKOUT=3, WAIT_TRIGGER=2</p>
 <h2>判定一覧 (新しい順, 最大200件)</h2>
