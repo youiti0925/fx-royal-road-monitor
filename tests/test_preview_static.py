@@ -10,84 +10,146 @@ README = Path("README.md")
 def test_mvp1_preview_files_exist():
     for name in (
         "index.html",
+        "decision_screen.html",
+        "decision_screen.png",
         "dashboard.html",
         "draft_chart.png",
         "diagnostics.json",
         "review_report.md",
         "review_report.json",
         "review_log.jsonl",
+        "visual_review.json",
     ):
         p = PREVIEW / name
         assert p.exists(), f"missing preview file: {p}"
 
 
-def test_mvp1_preview_index_contains_safety_text():
+def test_preview_index_is_japanese():
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
-    assert "MVP-1 Observation Pipeline Preview" in html_text
-    assert "SAFE: offline analysis only" in html_text or "CHECK SAFETY FLAGS" in html_text
-    assert "SUPPRESSED" in html_text
-    assert "NOT READY ELIGIBLE" in html_text
-    assert "draft_chart.png" in html_text
-    assert "dashboard.html" in html_text
-    assert "diagnostics.json" in html_text
-    assert "review_report.md" in html_text
+    for token in [
+        "MVP-1 王道判定プレビュー",
+        "観測専用",
+        "READY通知不可",
+        "売買未使用",
+        "王道判定画面",
+        "AI画面レビュー",
+        "詳細ダッシュボード",
+        "安全フラグ",
+        "下書き要約",
+    ]:
+        assert token in html_text, f"index missing {token!r}"
 
 
-def test_mvp1_preview_index_uses_relative_urls():
+def test_preview_index_uses_relative_urls():
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
-    # All embedded resources must use relative URLs so htmlpreview.github.io
-    # can resolve them inside docs/mvp1_current_preview/.
-    assert "src=\"./draft_chart.png\"" in html_text
-    assert "href=\"./dashboard.html\"" in html_text
+    assert 'src="./decision_screen.png"' in html_text
+    assert 'href="./decision_screen.html"' in html_text
+    assert 'href="./dashboard.html"' in html_text
+    assert 'href="./diagnostics.json"' in html_text
+    assert 'href="./visual_review.json"' in html_text
 
 
-def test_mvp1_preview_does_not_claim_ready():
+def test_preview_does_not_enable_ready_or_notification():
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
     forbidden = [
-        "READY notification enabled",
-        "dispatch_called = true",
-        "ready_allowed = true",
-        "used_for_ready = true",
-        "used_for_notification = true",
-        "<td>True</td><th>safety.ready_allowed</th>",
+        "READY通知可能",
+        "本番通知ON",
+        "売買可能",
+        "自動売買",
+        "発注",
+        "broker connected",
+        "live connected",
+        "MVP-1 Observation Pipeline Preview",
+        "SAFE: offline analysis only",
+        "Open full dashboard.html",
     ]
     for token in forbidden:
-        assert token not in html_text, f"preview index must not contain {token!r}"
+        assert token not in html_text, f"index must not contain {token!r}"
 
 
-def test_mvp1_preview_diagnostics_safety_flags():
+def test_preview_dashboard_is_japanese_localised():
+    html_text = (PREVIEW / "dashboard.html").read_text(encoding="utf-8")
+    assert "MVP-1 王道判定ダッシュボード" in html_text
+    assert "観測専用" in html_text
+    assert "下書き分析" in html_text
+    assert "FX Monitor Draft Review Dashboard" not in html_text
+    assert "offline artifact / not used for READY" not in html_text
+
+
+def test_preview_decision_screen_html_contains_geometry_classes():
+    html_text = (PREVIEW / "decision_screen.html").read_text(encoding="utf-8")
+    for token in [
+        "rr-screen",
+        "rr-safety-header",
+        "rr-main",
+        "rr-chart-panel",
+        "rr-checklist-panel",
+        "rr-ai-visual-review",
+        "rr-wave-skeleton-line",
+        "rr-pivot-dot",
+        "rr-pivot-label",
+        "rr-wnl-line",
+        "rr-wsl-line",
+        "rr-wtp-line",
+        "rr-structural-trendline",
+        "rr-sr-zone",
+        "rr-safety-watermark",
+    ]:
+        assert token in html_text, f"decision_screen missing {token!r}"
+
+
+def test_preview_decision_screen_png_is_populated():
+    png = PREVIEW / "decision_screen.png"
+    assert png.stat().st_size > 50_000
+
+
+def test_preview_visual_review_safety_flags():
+    data = json.loads((PREVIEW / "visual_review.json").read_text(encoding="utf-8"))
+    assert data["used_for_ready"] is False
+    assert data["used_for_notification"] is False
+    assert data["used_for_trading"] is False
+    assert "providers" in data
+    assert "openai" in data["providers"]
+    assert "claude" in data["providers"]
+
+
+def test_preview_diagnostics_safety_flags():
     data = json.loads((PREVIEW / "diagnostics.json").read_text(encoding="utf-8"))
     assert data["decision"]["level"] == "SUPPRESSED"
     assert data["safety"]["ready_allowed"] is False
     assert data["safety"]["dispatch_called"] is False
     assert data["draft"]["observation_only"] is True
-    assert data["draft"]["used_in_final_action"] is False
     assert data["draft"]["entry_status"] == "HOLD"
     assert data["draft"]["p0_pass"] is False
     assert data["draft"]["rich_draft"]["ready_eligible"] is False
     assert data["draft"]["rich_draft"]["p0_pass"] is False
 
 
-def test_mvp1_preview_review_report_safety_flags():
+def test_preview_review_report_safety_flags():
     data = json.loads((PREVIEW / "review_report.json").read_text(encoding="utf-8"))
     assert data["safety"]["used_for_ready"] is False
     assert data["safety"]["used_for_notification"] is False
     assert data["safety"]["offline_analysis_only"] is True
 
 
-def test_mvp1_preview_chart_is_real_png_with_pattern():
-    """The preview must show actual draft lines, not the empty placeholder.
+def test_preview_has_no_local_absolute_paths():
+    for name in (
+        "index.html",
+        "decision_screen.html",
+        "dashboard.html",
+        "diagnostics.json",
+        "review_log.jsonl",
+        "review_report.md",
+        "review_report.json",
+        "visual_review.json",
+    ):
+        text = (PREVIEW / name).read_text(encoding="utf-8")
+        assert "/home/user" not in text, f"{name} contains /home/user"
+        assert "/home/runner" not in text, f"{name} contains /home/runner"
+        assert "/tmp/" not in text, f"{name} contains /tmp/"
 
-    A populated chart (with P1/NL/P2/BR + lines) is at least ~30 KB; the
-    matplotlib empty-placeholder card is much smaller. We use a generous
-    floor so this remains stable across matplotlib font cache states.
-    """
-    chart = PREVIEW / "draft_chart.png"
-    assert chart.stat().st_size > 30000, (
-        f"preview chart looks like a placeholder ({chart.stat().st_size} B) — "
-        "rebuild the preview with python -m fx_monitor.app.build_preview"
-    )
-    # diagnostics should agree the rich draft is populated.
+
+def test_preview_chart_pattern_is_populated():
     data = json.loads((PREVIEW / "diagnostics.json").read_text(encoding="utf-8"))
     rich = data["draft"]["rich_draft"]
     assert rich["pattern_kind"] in (

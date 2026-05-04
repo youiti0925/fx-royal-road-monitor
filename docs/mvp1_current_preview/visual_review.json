@@ -1,0 +1,34 @@
+{
+  "schema_version": "visual_review_v1",
+  "providers": {
+    "openai": {
+      "verdict": "UNKNOWN",
+      "readability": "UNKNOWN",
+      "language": "UNKNOWN",
+      "royal_road_clarity": "UNKNOWN",
+      "line_visibility": "UNKNOWN",
+      "safety_clarity": "UNKNOWN",
+      "problems": [
+        "openai_disabled"
+      ],
+      "summary_ja": "OpenAIによる画面レビューは行えませんでした。"
+    },
+    "claude": {
+      "verdict": "UNKNOWN",
+      "readability": "UNKNOWN",
+      "language": "UNKNOWN",
+      "royal_road_clarity": "UNKNOWN",
+      "line_visibility": "UNKNOWN",
+      "safety_clarity": "UNKNOWN",
+      "problems": [
+        "anthropic_disabled"
+      ],
+      "summary_ja": "Claudeによる画面レビューは行えませんでした。"
+    }
+  },
+  "combined_verdict": "UNKNOWN",
+  "used_for_ready": false,
+  "used_for_notification": false,
+  "used_for_trading": false,
+  "context_summary": "symbol=EURUSD=X timeframe=M5 pattern=possible_double_top"
+}

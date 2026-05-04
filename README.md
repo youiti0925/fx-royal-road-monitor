@@ -320,34 +320,47 @@ Planning documents:
 - [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
 - [MVP-1 Observation Pipeline Freeze Report](docs/MVP1_OBSERVATION_PIPELINE_FREEZE_REPORT.md)
 
-## MVP-1 current preview
+## MVP-1 王道判定プレビュー
 
-One-click preview (no Actions tab, no zip download):
+URL を 1 つ開くだけで、王道判定画面 / 王道手順チェック /
+AI画面レビューを確認できます。Actions タブも zip ダウンロードも不要。
 
   https://htmlpreview.github.io/?https://raw.githubusercontent.com/youiti0925/fx-royal-road-monitor/main/docs/mvp1_current_preview/index.html
 
-The preview is generated from a safe CSV fixture
-(`tests/fixtures/ohlc_preview_sample.csv`) by
-`python -m fx_monitor.app.build_preview`. It shows:
+プレビューに含まれる主なファイル:
 
-- safety banner (SAFE / CHECK SAFETY FLAGS)
-- the draft chart inline (`draft_chart.png`)
-- decision / safety flags
-- snapshot summary
-- links to `dashboard.html`, `diagnostics.json`,
-  `review_report.md`, `review_report.json`,
-  `review_log.jsonl`
+- `index.html` … 入口 (日本語)
+- `decision_screen.png` … 王道判定画面 (AI画面レビュー対象)
+- `decision_screen.html` … 王道判定画面の HTML 版 (`rr-*` クラス付き SVG)
+- `dashboard.html` … 詳細ダッシュボード (日本語)
+- `visual_review.json` … OpenAI / Claude の画面評価結果
+- `diagnostics.json` / `review_report.md` / `review_report.json`
+  / `review_log.jsonl` / `draft_chart.png`
 
-It is observation-only. It does not produce READY. It does not
-dispatch notifications. It does not trade.
+この画面は **観測専用** です。
 
-To regenerate after a change:
+- READY通知には使いません
+- 通知 (Discord / LINE) には使いません
+- 売買・発注・自動売買には使いません
+- OANDA / live / paper には接続していません
+
+`visual_review.json` の中身も観測専用です
+(`used_for_ready=false` / `used_for_notification=false`
+/ `used_for_trading=false`)。
+
+プレビューを再生成する手順:
 
 ```bash
 python -m fx_monitor.app.build_preview
 git add docs/mvp1_current_preview
 git commit -m "docs: refresh MVP1 preview"
 ```
+
+プレビューは安全な CSV フィクスチャ
+(`tests/fixtures/ohlc_preview_sample.csv`) から生成されます。
+`build_preview` は環境変数から OPENAI_API_KEY / ANTHROPIC_API_KEY を
+明示的に剥がして実行するため、コミットされる成果物が個別の API キーや
+ホストパスを含むことはありません。
 
 ## ステータス
 
