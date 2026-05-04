@@ -245,6 +245,98 @@ def render_entry_chart_png(
             color=kind_col, fontsize=8, ha="center",
         )
 
+    # ---- ENTRY / STOP / TARGET / BREAKOUT prominent markers ----
+    # Detect from existing lines and points so the visual cues are unmissable.
+    # Marker is drawn at the right edge of the past window (idx n_past-1)
+    # so it's clear "this is what the AI says".
+    n_marker_x = max(n_past - 4, 0)
+
+    side_arrow = "▼" if spec.side == "SELL" else ("▲" if spec.side == "BUY" else "◆")
+
+    # ENTRY marker: scan lines for role=='entry_trigger', else use neckline.
+    entry_line = next(
+        (l for l in spec.lines if l.role == "entry_trigger" and l.price is not None),
+        None,
+    ) or next(
+        (l for l in spec.lines if l.kind == "neckline" and l.price is not None),
+        None,
+    )
+    if entry_line is not None:
+        ax_main.scatter(
+            [n_marker_x], [entry_line.price],
+            s=320, c="#fbbf24", marker="*",
+            edgecolors="white", linewidths=1.2, zorder=8,
+        )
+        ax_main.annotate(
+            f" ENTRY {side_arrow} {entry_line.price:.5f}",
+            xy=(n_marker_x, entry_line.price),
+            xytext=(8, 0), textcoords="offset points",
+            color="#fbbf24", fontsize=10, fontweight="bold", va="center", zorder=8,
+            bbox=dict(boxstyle="round,pad=0.3", facecolor=_CSS_PANEL,
+                      edgecolor="#fbbf24", linewidth=1.0, alpha=0.9),
+        )
+
+    # STOP marker: line.kind == 'invalidation'.
+    stop_line = next(
+        (l for l in spec.lines if l.kind == "invalidation" and l.price is not None),
+        None,
+    )
+    if stop_line is not None:
+        ax_main.scatter(
+            [n_marker_x], [stop_line.price],
+            s=220, c=_CSS_LINE_INVAL, marker="X",
+            edgecolors="white", linewidths=1.2, zorder=8,
+        )
+        ax_main.annotate(
+            f" STOP {stop_line.price:.5f}",
+            xy=(n_marker_x, stop_line.price),
+            xytext=(8, 0), textcoords="offset points",
+            color=_CSS_LINE_INVAL, fontsize=10, fontweight="bold", va="center", zorder=8,
+            bbox=dict(boxstyle="round,pad=0.3", facecolor=_CSS_PANEL,
+                      edgecolor=_CSS_LINE_INVAL, linewidth=1.0, alpha=0.9),
+        )
+
+    # TARGET marker: line.kind == 'target'.
+    target_line = next(
+        (l for l in spec.lines if l.kind == "target" and l.price is not None),
+        None,
+    )
+    if target_line is not None:
+        ax_main.scatter(
+            [n_marker_x], [target_line.price],
+            s=240, c=_CSS_LINE_TARGET, marker="D",
+            edgecolors="white", linewidths=1.2, zorder=8,
+        )
+        ax_main.annotate(
+            f" TARGET {target_line.price:.5f}",
+            xy=(n_marker_x, target_line.price),
+            xytext=(8, 0), textcoords="offset points",
+            color=_CSS_LINE_TARGET, fontsize=10, fontweight="bold", va="center", zorder=8,
+            bbox=dict(boxstyle="round,pad=0.3", facecolor=_CSS_PANEL,
+                      edgecolor=_CSS_LINE_TARGET, linewidth=1.0, alpha=0.9),
+        )
+
+    # BREAKOUT marker: scan points for role containing 'breakout'.
+    breakout_pt = next(
+        (p for p in spec.points
+         if "breakout" in p.role.lower() and p.index is not None and p.price is not None),
+        None,
+    )
+    if breakout_pt is not None:
+        ax_main.scatter(
+            [breakout_pt.index], [breakout_pt.price],
+            s=260, c="#06b6d4", marker="P",
+            edgecolors="white", linewidths=1.2, zorder=8,
+        )
+        ax_main.annotate(
+            f"BREAK",
+            xy=(breakout_pt.index, breakout_pt.price),
+            xytext=(0, -28), textcoords="offset points",
+            color="#06b6d4", fontsize=9, fontweight="bold", ha="center", zorder=8,
+            bbox=dict(boxstyle="round,pad=0.2", facecolor=_CSS_PANEL,
+                      edgecolor="#06b6d4", linewidth=1.0, alpha=0.9),
+        )
+
     # Outcome marker at the boundary
     if future_list:
         ax_main.axvline(n_past - 0.5, color="#fbbf24", linewidth=1.0, alpha=0.6, linestyle=":")
