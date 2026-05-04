@@ -232,15 +232,28 @@ def render_entry_chart_png(
             )
 
     # ---- AI points ----
+    # Compute y range so labels can be flipped when they would escape the
+    # chart frame (e.g. a major HIGH right at the top of the visible range).
+    y_lo, y_hi = ax_main.get_ylim() if ax_main.get_ylim()[1] > ax_main.get_ylim()[0] else (None, None)
     for p in spec.points:
         if p.index is None or p.price is None:
             continue
         kind_col = _CSS_PIVOT_HIGH if p.role.endswith("high") or "high" in p.role.lower() else _CSS_PIVOT_LOW
         ax_main.scatter([p.index], [p.price], s=60, c=kind_col, edgecolors="white", linewidths=0.6, zorder=5)
+        # Default: high-roles label above, low-roles label below.
+        is_high_role = "high" in p.role.lower()
+        offset = 12 if is_high_role else -22
+        # Flip label position if it would escape the chart frame.
+        if y_lo is not None and y_hi is not None:
+            y_span = y_hi - y_lo
+            if is_high_role and (y_hi - p.price) < y_span * 0.05:
+                offset = -22  # too close to top → push label down
+            elif (not is_high_role) and (p.price - y_lo) < y_span * 0.05:
+                offset = 12  # too close to bottom → push label up
         ax_main.annotate(
             f"{p.label}\n{p.price:.5f}",
             xy=(p.index, p.price),
-            xytext=(0, 12 if "high" in p.role.lower() else -22),
+            xytext=(0, offset),
             textcoords="offset points",
             color=kind_col, fontsize=8, ha="center",
         )
