@@ -16,11 +16,14 @@ jobs:
       - name: Forbid broker / order / live-trading identifiers in src
         run: |
           set -e
-          if grep -rn -E "(oanda|paper_broker|paper_trade|live_order|place_order|broker_api|execute_trade)" src/; then
+          # v4 adds oanda_open_order and order_book_api as additional explicit blocks:
+          # the doctrine treats OANDA Open Orders as a *concept* only; direct
+          # integration is permanently forbidden.
+          if grep -rn -E "(oanda|paper_broker|paper_trade|live_order|place_order|broker_api|execute_trade|oanda_open_order|order_book_api)" src/; then
             echo "::error::Forbidden broker / live-trading identifier found in src/"
             exit 1
           fi
-          echo "OK: no broker / live-trading identifiers"
+          echo "OK: no broker / live-trading / order-book identifiers"
 
       - name: Forbid notification dispatch in live/, tools/, corpus/
         run: |

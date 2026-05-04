@@ -180,6 +180,110 @@ def test_user_prompt_includes_v3_principles():
         assert token in p.user, f"missing principle marker: {token!r}"
 
 
+def test_user_prompt_includes_v4_top_principles():
+    """v4 doctrine: HTF supremacy must be the FIRST principle, plus
+    Triple Confluence / Fibonacci zone / Breakout 3-signs / line filter
+    / 3-layer psychology must all reach the AI."""
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    for token in [
+        "【最上位原則】上位足の絶対的優位性",
+        "HTF Supremacy",
+        "トリプル根拠",
+        "Triple Confluence",
+        "フィボナッチ・ゾーン doctrine",
+        "プライム",
+        "高勝率ブレイクアウトの3サイン",
+        "ビルドアップ4段階",
+        "ライン重要度4フィルター",
+        "反転の3独立動機",
+        "3層思考",
+    ]:
+        assert token in p.user, f"missing v4 marker: {token!r}"
+
+
+def test_htf_supremacy_appears_before_other_principles():
+    """HTF must be the FIRST section under 上位原則 — explicit ordering.
+
+    We search for the specific section headers (### prefix) so the test
+    is not confused by the glossary mentioning the same term earlier.
+    """
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    user = p.user
+    htf_idx = user.find("### 【最上位原則】上位足の絶対的優位性")
+    triple_idx = user.find("### トリプル根拠")
+    layered_idx = user.find("### 階層分析")
+    mtf_idx = user.find("### MTF (マルチタイムフレーム) 原則")
+    assert htf_idx > 0, "HTF supremacy section header missing"
+    assert triple_idx > htf_idx, "HTF must precede triple confluence section"
+    assert layered_idx > htf_idx, "HTF must precede layered analysis section"
+    assert mtf_idx > htf_idx, "HTF must precede MTF principle section"
+
+
+def test_v4_glossary_includes_new_terms():
+    """v4 added Stop Hunt Zone, Fibonacci, Build-up, etc."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    glossary = kp["glossary"]
+    for term in [
+        "ビルドアップ (Build-up)",
+        "ビルドアップ4段階",
+        "火薬庫 (Stop Hunt Zone)",
+        "損切り連鎖加速 (Stop Cascade)",
+        "3層思考 (事実→心理→予測)",
+        "フィボナッチ・リトレースメント",
+        "黄金比 61.8%",
+        "プライム・エントリーゾーン (50-61.8%)",
+        "ライン重要度4フィルター",
+        "キリ番 (Round Number)",
+        "ライン賞味期限 (Line Expiration)",
+        "トリプル根拠 (Triple Confluence)",
+        "MTF (Multi-Timeframe) 階層",
+    ]:
+        assert term in glossary, f"missing v4 glossary term: {term!r}"
+
+
+def test_v4_doctrine_version_marker():
+    """The pack carries an explicit v4 doctrine_version marker."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    assert kp.get("doctrine_version", "").startswith("v4_"), (
+        f"doctrine_version should start with 'v4_', got {kp.get('doctrine_version')!r}"
+    )
+
+
+def test_v4_procedure_steps_include_htf_full_scan_first():
+    """HTF full scan must appear FIRST in the procedure steps list."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    steps = kp["procedure_steps"]
+    assert steps[0]["key"] == "htf_full_scan", (
+        f"first step must be htf_full_scan, got {steps[0]['key']!r}"
+    )
+
+
+def test_v4_procedure_steps_include_new_v4_keys():
+    """Phase 9 (v4) added several new step keys."""
+    from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
+
+    kp = load_knowledge_pack()
+    keys = {s["key"] for s in kp["procedure_steps"]}
+    for key in [
+        "htf_full_scan",
+        "htf_lines_check",
+        "fibonacci_zone",
+        "buildup_check",
+        "stop_zone_estimation",
+        "retest_second_wave",
+        "triple_confluence_count",
+    ]:
+        assert key in keys, f"missing v4 procedure step: {key!r}"
+
+
 def test_user_prompt_includes_new_procedure_keys():
     """Phase 9 added MTF, confluence, MA-alignment and indicator-env steps."""
     pack = _pack()

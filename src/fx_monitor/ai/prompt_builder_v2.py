@@ -107,15 +107,70 @@ def _format_procedure_steps(kp: dict[str, Any]) -> str:
 
 
 def _format_principles(kp: dict[str, Any]) -> str:
-    """Render the higher-order doctrine (layered analysis, MTF, confluence,
-    indicator-environment filter, invalidation, pre-trade checklist) so the
-    AI applies them as constraints on top of the per-step procedure.
+    """Render the higher-order doctrine so the AI applies them as constraints
+    on top of the per-step procedure.
+
+    v4 ordering puts ``htf_supremacy`` first because it is the
+    user-stipulated top-level rule: lower-timeframe judgement is never
+    permitted without an explicit higher-timeframe scan.
     """
     principles = kp.get("principles") or {}
     if not principles:
         return ""
 
     out: list[str] = ["## 王道判定の上位原則 (procedure_steps の上に必ず適用)"]
+
+    htf = principles.get("htf_supremacy")
+    if htf:
+        out.append("\n### 【最上位原則】上位足の絶対的優位性 (HTF Supremacy)")
+        out.append(htf.get("description_ja", ""))
+        layers = htf.get("mandatory_layers", [])
+        if layers:
+            out.append(f"  必須スキャン階層: {' → '.join(layers)}")
+        for rule in htf.get("rules", []):
+            out.append(f"  - {rule}")
+
+    triple = principles.get("triple_confluence_doctrine")
+    if triple:
+        out.append("\n### トリプル根拠 (Triple Confluence) — 本 doctrine の核心")
+        out.append(triple.get("description_ja", ""))
+        for axis in triple.get("axes", []):
+            out.append(f"  - {axis}")
+        thresholds = triple.get("thresholds", {})
+        if thresholds:
+            out.append("  根拠数の判断基準:")
+            for k, v in thresholds.items():
+                out.append(f"    - {k}: {v}")
+
+    fib = principles.get("fibonacci_zone_doctrine")
+    if fib:
+        out.append("\n### フィボナッチ・ゾーン doctrine")
+        out.append(fib.get("description_ja", ""))
+        for r in fib.get("drawing_rules", []):
+            out.append(f"  - 引き方: {r}")
+        out.append("  レベル別戦略:")
+        for ls in fib.get("level_strategy", []):
+            out.append(
+                f"    - {ls.get('level')} (リスク {ls.get('risk')}): {ls.get('strategy')}"
+            )
+        anti = fib.get("anti_pinpoint_rule")
+        if anti:
+            out.append(f"  ピンポイント禁止: {anti}")
+
+    breakout = principles.get("breakout_3_signs")
+    if breakout:
+        out.append("\n### 高勝率ブレイクアウトの3サイン")
+        out.append(breakout.get("description_ja", ""))
+        for s in breakout.get("signs", []):
+            out.append(f"  - {s}")
+        stages = breakout.get("build_up_4_stages", [])
+        if stages:
+            out.append("  ビルドアップ4段階:")
+            for st in stages:
+                out.append(f"    - {st}")
+        anti = breakout.get("anti_simple_break_rule")
+        if anti:
+            out.append(f"  禁止: {anti}")
 
     layered = principles.get("layered_analysis")
     if layered:
@@ -133,6 +188,30 @@ def _format_principles(kp: dict[str, Any]) -> str:
             use = ", ".join(r.get("use", []))
             avoid = ", ".join(r.get("avoid", []))
             out.append(f"  - **{r.get('environment')}** → 使う: {use} / 避ける: {avoid}")
+        rsi_warn = env.get("rsi_trap_warning")
+        if rsi_warn:
+            out.append(f"  RSI罠警告: {rsi_warn}")
+
+    line_filter = principles.get("line_importance_filter")
+    if line_filter:
+        out.append("\n### ライン重要度4フィルター")
+        out.append(line_filter.get("description_ja", ""))
+        for f in line_filter.get("filters", []):
+            out.append(f"  - {f}")
+
+    reversal = principles.get("reversal_triple_motive")
+    if reversal:
+        out.append("\n### 反転の3独立動機")
+        out.append(reversal.get("description_ja", ""))
+        for m in reversal.get("motives", []):
+            out.append(f"  - {m}")
+
+    psych = principles.get("psychological_reading_3_layers")
+    if psych:
+        out.append("\n### 3層思考 (オーダー読解)")
+        out.append(psych.get("description_ja", ""))
+        for la in psych.get("layers", []):
+            out.append(f"  - {la}")
 
     mtf = principles.get("mtf_principle")
     if mtf:
@@ -161,6 +240,9 @@ def _format_principles(kp: dict[str, Any]) -> str:
             out.append(f"  - {r.get('entry_method')}: {r.get('stop_placement')}")
         if inval.get("rr_minimum") is not None:
             out.append(f"  - **RR最低**: {inval.get('rr_minimum')} 未満のシナリオは HOLD に強制降格")
+        principle_ja = inval.get("principle_ja")
+        if principle_ja:
+            out.append(f"  根本原則: {principle_ja}")
 
     checklist = principles.get("pre_trade_checklist")
     if checklist:
