@@ -49,3 +49,46 @@ def test_draft_payload_carries_pivots_into_ai_payload():
     assert "pivots" in ai
     assert "rough_support_resistance" in ai
     assert "rough_wave_context" in ai
+
+
+def test_draft_payload_contains_rich_draft_but_still_not_ready():
+    s = load_ohlc_csv(FIXTURES / "ohlc_sample.csv", symbol="EURUSD=X", timeframe="M5")
+    draft = build_royal_road_draft_payload_from_snapshot(s)
+
+    assert draft.rich_draft
+    assert draft.rich_draft["observation_only"] is True
+    assert draft.rich_draft["ready_eligible"] is False
+    assert draft.entry_plan["entry_status"] == "HOLD"
+    assert draft.royal_road_procedure_checklist["p0_pass"] is False
+    # The rule engine still refuses to PASS on a draft.
+    case = build_monitor_case_from_draft_payload(draft)
+    assert evaluate_monitor_case(case).verdict in ("UNKNOWN", "WARN")
+
+
+def test_draft_monitor_case_ai_payload_has_rich_draft_keys_only():
+    s = load_ohlc_csv(FIXTURES / "ohlc_sample.csv", symbol="EURUSD=X", timeframe="M5")
+    draft = build_royal_road_draft_payload_from_snapshot(s)
+    case = build_monitor_case_from_draft_payload(draft)
+
+    ai = case.ai_payload
+    # Draft suffix keys must be present.
+    for k in (
+        "rich_draft",
+        "pattern_levels_draft",
+        "wave_derived_lines_draft",
+        "structural_lines_draft",
+        "support_resistance_v2_draft",
+        "trendline_context_draft",
+        "royal_road_procedure_checklist_draft",
+    ):
+        assert k in ai
+
+    # Production-named keys must not leak in from the draft path.
+    for k in (
+        "pattern_levels",
+        "wave_derived_lines",
+        "structural_lines",
+        "support_resistance_v2",
+        "trendline_context",
+    ):
+        assert k not in ai

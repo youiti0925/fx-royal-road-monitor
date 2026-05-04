@@ -48,6 +48,7 @@ def build_monitor_case_from_draft_payload(
         calendar=CalendarInfo(high_impact_within_15min=False),
     )
 
+    rich = draft.rich_draft or {}
     ai_payload: dict[str, Any] = {
         "symbol": draft.symbol,
         "timeframe": draft.timeframe,
@@ -61,6 +62,17 @@ def build_monitor_case_from_draft_payload(
         "entry_plan": draft.entry_plan,
         "selected_entry_candidate": draft.selected_entry_candidate,
         "royal_road_procedure_checklist": draft.royal_road_procedure_checklist,
+        # Phase P1: rich draft keys, all _draft suffix so they cannot be
+        # mistaken for production payload keys.
+        "rich_draft": rich,
+        "pattern_levels_draft": rich.get("pattern_levels_draft"),
+        "wave_derived_lines_draft": rich.get("wave_derived_lines_draft"),
+        "structural_lines_draft": rich.get("structural_lines_draft"),
+        "support_resistance_v2_draft": rich.get("support_resistance_v2_draft"),
+        "trendline_context_draft": rich.get("trendline_context_draft"),
+        "royal_road_procedure_checklist_draft": rich.get(
+            "royal_road_procedure_checklist_draft"
+        ),
         "warnings": draft.warnings,
     }
 

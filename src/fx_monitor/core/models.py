@@ -210,6 +210,11 @@ class RoyalRoadDraftPayload(BaseModel):
     rough_support_resistance: dict[str, Any] = Field(default_factory=dict)
     rough_wave_context: dict[str, Any] = Field(default_factory=dict)
 
+    # Phase P1: rich royal-road-style draft keys derived from OHLC.
+    # All entries inside this bag carry observation_only=True / source=draft.
+    # They are never READY eligible.
+    rich_draft: dict[str, Any] = Field(default_factory=dict)
+
     entry_plan: dict[str, Any] = Field(default_factory=dict)
     selected_entry_candidate: dict[str, Any] = Field(default_factory=dict)
     royal_road_procedure_checklist: dict[str, Any] = Field(default_factory=dict)

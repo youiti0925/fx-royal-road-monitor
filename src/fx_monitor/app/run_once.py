@@ -106,6 +106,24 @@ def _run_market_draft_mode() -> int:
         f"observation_only={draft.observation_only}"
     )
 
+    rich = draft.rich_draft or {}
+    rich_pattern = (rich.get("pattern_levels_draft") or {}).get("pattern_kind")
+    rich_wave_lines = rich.get("wave_derived_lines_draft") or []
+    rich_structural_total = (
+        (rich.get("structural_lines_draft") or {}).get("counts") or {}
+    ).get("total", 0)
+    rich_trendlines = (
+        (rich.get("trendline_context_draft") or {}).get("selected_trendlines_top3") or []
+    )
+    print(
+        "Rich draft: "
+        f"pattern={rich_pattern} "
+        f"wave_lines={len(rich_wave_lines)} "
+        f"structural_lines={rich_structural_total} "
+        f"trendlines={len(rich_trendlines)} "
+        f"ready_eligible={rich.get('ready_eligible')}"
+    )
+
     case = build_monitor_case_from_draft_payload(draft)
     rule = evaluate_monitor_case(case)
     print(f"Rule: {rule.verdict} {rule.bias}")
@@ -224,6 +242,12 @@ def _write_market_draft_diagnostics(
     """Emit the per-run diagnostics JSON. Always called from feed mode."""
     zones = draft.rough_support_resistance.get("selected_level_zones_top5") or []
     rough_pattern = draft.rough_wave_context.get("rough_pattern_kind")
+    rich = draft.rich_draft or {}
+    rich_pattern = rich.get("pattern_levels_draft") or {}
+    rich_structural = rich.get("structural_lines_draft") or {}
+    rich_sr = rich.get("support_resistance_v2_draft") or {}
+    rich_trend = rich.get("trendline_context_draft") or {}
+    rich_checklist = rich.get("royal_road_procedure_checklist_draft") or {}
     diagnostics = {
         "mode": "market_draft",
         "feed": {
@@ -243,6 +267,17 @@ def _write_market_draft_diagnostics(
             "used_in_final_action": draft.used_in_final_action,
             "entry_status": draft.entry_plan.get("entry_status"),
             "p0_pass": draft.royal_road_procedure_checklist.get("p0_pass"),
+            "rich_draft": {
+                "schema_version": rich.get("schema_version"),
+                "ready_eligible": rich.get("ready_eligible"),
+                "pattern_kind": rich_pattern.get("pattern_kind"),
+                "pattern_available": rich_pattern.get("available"),
+                "wave_lines": len(rich.get("wave_derived_lines_draft") or []),
+                "structural_lines": (rich_structural.get("counts") or {}).get("total", 0),
+                "sr_zones": len(rich_sr.get("selected_level_zones_top5") or []),
+                "trendlines": len(rich_trend.get("selected_trendlines_top3") or []),
+                "p0_pass": rich_checklist.get("p0_pass"),
+            },
         },
         "rule": {
             "verdict": rule.verdict,

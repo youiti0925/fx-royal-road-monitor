@@ -68,6 +68,7 @@ def build_dashboard_html(
 ) -> str:
     feed = diagnostics.get("feed") or {}
     draft = diagnostics.get("draft") or {}
+    rich_draft = draft.get("rich_draft") or {}
     rule = diagnostics.get("rule") or {}
     ai = diagnostics.get("ai") or {}
     decision = diagnostics.get("decision") or {}
@@ -81,12 +82,19 @@ def build_dashboard_html(
     used_for_ready = summary_safety.get("used_for_ready")
     used_for_notification = summary_safety.get("used_for_notification")
 
+    rich_ready_eligible = rich_draft.get("ready_eligible")
+    rich_p0_pass = rich_draft.get("p0_pass")
+
     safety_ok = (
         decision.get("level") == "SUPPRESSED"
         and safety.get("ready_allowed") is False
         and safety.get("dispatch_called") is False
         and used_for_ready is False
         and used_for_notification is False
+        # Phase P1 invariant: rich draft must never claim READY eligibility
+        # or a passing P0 checklist. If either is set, flip the banner red.
+        and (rich_ready_eligible is None or rich_ready_eligible is False)
+        and (rich_p0_pass is None or rich_p0_pass is False)
     )
 
     safety_class = "ok" if safety_ok else "bad"
@@ -174,7 +182,12 @@ def build_dashboard_html(
 
       <div class="card">
         <h2>Draft</h2>
-        {_dict_items_table(draft)}
+        {_dict_items_table({k: v for k, v in draft.items() if k != "rich_draft"})}
+      </div>
+
+      <div class="card">
+        <h2>Rich draft</h2>
+        {_dict_items_table(rich_draft)}
       </div>
 
       <div class="card">

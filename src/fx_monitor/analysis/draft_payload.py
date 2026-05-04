@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Any
 
 from fx_monitor.analysis.pivots import detect_simple_pivots
+from fx_monitor.analysis.rich_draft import build_rich_draft
 from fx_monitor.analysis.rough_levels import build_rough_support_resistance
 from fx_monitor.core.models import MarketSnapshot, PivotPoint, RoyalRoadDraftPayload
 
@@ -78,6 +79,7 @@ def build_royal_road_draft_payload_from_snapshot(
     pivots = detect_simple_pivots(snapshot)
     sr = build_rough_support_resistance(pivots)
     wave = _rough_wave_context(pivots)
+    rich_draft = build_rich_draft(pivots=pivots, rough_support_resistance=sr)
 
     warnings: list[str] = []
     warnings.extend(snapshot.warnings)
@@ -136,6 +138,7 @@ def build_royal_road_draft_payload_from_snapshot(
         pivots=pivots,
         rough_support_resistance=sr,
         rough_wave_context=wave,
+        rich_draft=rich_draft,
         entry_plan=entry_plan,
         selected_entry_candidate=selected_candidate,
         royal_road_procedure_checklist=checklist,

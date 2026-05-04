@@ -215,3 +215,36 @@ def test_run_once_csv_feed_diagnostics_emitted_when_review_off(tmp_path):
     assert data["ai"]["openai"]["verdict"] == "not_run"
     assert data["ai"]["claude"]["verdict"] == "not_run"
     assert data["decision"]["level"] == "SUPPRESSED"
+
+
+def test_run_once_csv_feed_prints_rich_draft_counts(tmp_path):
+    env = os.environ.copy()
+    diag = tmp_path / "diagnostics.json"
+
+    env.pop("FX_MONITOR_FIXTURE_PATH", None)
+    env["FX_MONITOR_FEED"] = "csv"
+    env["FX_MONITOR_CSV_PATH"] = str(FIXTURES / "ohlc_sample.csv")
+    env["FX_MONITOR_SYMBOL"] = "EURUSD=X"
+    env["FX_MONITOR_TIMEFRAME"] = "M5"
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_REVIEW_DRAFT_WITH_AI"] = "false"
+    env["FX_MONITOR_DIAGNOSTICS_PATH"] = str(diag)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Rich draft:" in result.stdout
+    assert "ready_eligible=False" in result.stdout
+    assert "[READY]" not in result.stdout
+
+    data = json.loads(diag.read_text(encoding="utf-8"))
+    rd = data["draft"]["rich_draft"]
+    assert rd["ready_eligible"] is False
+    assert rd["p0_pass"] is False
+    assert "schema_version" in rd

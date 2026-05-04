@@ -137,6 +137,19 @@ Safety contract (enforced by tests + the rule engine):
 Use rich royal-road payload fixtures (`FX_MONITOR_FIXTURE_PATH=...`) for
 READY notification tests.
 
+Phase P1 rich draft keys are still observation-only:
+
+- `pattern_levels_draft`
+- `wave_derived_lines_draft`
+- `structural_lines_draft`
+- `support_resistance_v2_draft`
+- `trendline_context_draft`
+- `royal_road_procedure_checklist_draft`
+
+They are not READY eligible. The dashboard's safety banner flips to
+"CHECK SAFETY FLAGS" if `rich_draft.ready_eligible` or
+`rich_draft.p0_pass` is ever true.
+
 ## Draft AI review mode
 
 Feed mode can optionally send the observation-only draft payload to

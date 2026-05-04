@@ -129,3 +129,82 @@ def test_dashboard_cli_runs_via_subprocess(tmp_path):
     )
     assert "Dashboard:" in result.stdout
     assert out.exists()
+
+
+def test_dashboard_safety_flips_if_rich_draft_ready_eligible():
+    diagnostics = {
+        "draft": {
+            "rich_draft": {
+                "ready_eligible": True,
+                "p0_pass": False,
+            }
+        },
+        "decision": {"level": "SUPPRESSED"},
+        "safety": {"ready_allowed": False, "dispatch_called": False},
+    }
+    summary = {
+        "safety": {
+            "used_for_ready": False,
+            "used_for_notification": False,
+            "offline_analysis_only": True,
+        }
+    }
+
+    html_text = build_dashboard_html(
+        diagnostics=diagnostics, review_summary=summary
+    )
+    assert "CHECK SAFETY FLAGS" in html_text
+
+
+def test_dashboard_safety_flips_if_rich_draft_p0_pass_true():
+    diagnostics = {
+        "draft": {
+            "rich_draft": {
+                "ready_eligible": False,
+                "p0_pass": True,
+            }
+        },
+        "decision": {"level": "SUPPRESSED"},
+        "safety": {"ready_allowed": False, "dispatch_called": False},
+    }
+    summary = {
+        "safety": {
+            "used_for_ready": False,
+            "used_for_notification": False,
+            "offline_analysis_only": True,
+        }
+    }
+    html_text = build_dashboard_html(
+        diagnostics=diagnostics, review_summary=summary
+    )
+    assert "CHECK SAFETY FLAGS" in html_text
+
+
+def test_dashboard_renders_rich_draft_card():
+    diagnostics = {
+        "draft": {
+            "rich_draft": {
+                "schema_version": "rich_royal_road_draft_v1",
+                "ready_eligible": False,
+                "pattern_kind": "possible_double_top",
+                "wave_lines": 3,
+                "structural_lines": 4,
+                "p0_pass": False,
+            }
+        },
+        "decision": {"level": "SUPPRESSED"},
+        "safety": {"ready_allowed": False, "dispatch_called": False},
+    }
+    summary = {
+        "safety": {
+            "used_for_ready": False,
+            "used_for_notification": False,
+            "offline_analysis_only": True,
+        }
+    }
+    html_text = build_dashboard_html(
+        diagnostics=diagnostics, review_summary=summary
+    )
+    assert "Rich draft" in html_text
+    assert "rich_royal_road_draft_v1" in html_text
+    assert "possible_double_top" in html_text

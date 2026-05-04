@@ -114,6 +114,12 @@ Decision = SUPPRESSED
 
 ## 3. Phase P1: Rich structure draft
 
+Status:
+
+```
+first implementation added
+```
+
 Purpose:
 
 Create rich royal-road-like payload keys from OHLC, still
