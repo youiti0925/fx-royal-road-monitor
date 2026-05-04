@@ -45,4 +45,36 @@ def append_review_log(
     return p
 
 
-__all__ = ["append_review_log"]
+def read_review_log(path: str | Path) -> list[dict[str, Any]]:
+    """Read a JSONL review log into memory.
+
+    Bad lines are surfaced as ``{"mode": "invalid_json", "line_no": N,
+    "error": ...}`` placeholders rather than raised — the report code
+    must keep working even if a record was truncated mid-write.
+    """
+    p = Path(path)
+    if not p.exists():
+        return []
+
+    records: list[dict[str, Any]] = []
+    with p.open("r", encoding="utf-8") as f:
+        for i, line in enumerate(f, start=1):
+            text = line.strip()
+            if not text:
+                continue
+            try:
+                data = json.loads(text)
+                if isinstance(data, dict):
+                    records.append(data)
+            except json.JSONDecodeError:
+                records.append(
+                    {
+                        "mode": "invalid_json",
+                        "line_no": i,
+                        "error": "json_decode_error",
+                    }
+                )
+    return records
+
+
+__all__ = ["append_review_log", "read_review_log"]

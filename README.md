@@ -158,6 +158,22 @@ Hard contract:
 - Even if the mock reviewer happens to return PASS in this mode, the
   draft path stays SUPPRESSED.
 
+## Draft review report
+
+Aggregate the JSONL draft AI review log into a Markdown + JSON report:
+
+```bash
+python -m fx_monitor.app.review_report \
+    --log out/review_log.jsonl \
+    --md out/review_report.md \
+    --json out/review_report.json
+```
+
+The report counts top `missing` / `disagreements` / `reasons` from
+OpenAI and Claude, plus rough pattern / pivot / zone stats. It is
+**offline analysis only** — it is not used for READY decisions,
+notifications, trading, or order execution.
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
