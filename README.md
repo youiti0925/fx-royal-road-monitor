@@ -137,6 +137,27 @@ Safety contract (enforced by tests + the rule engine):
 Use rich royal-road payload fixtures (`FX_MONITOR_FIXTURE_PATH=...`) for
 READY notification tests.
 
+## Draft AI review mode
+
+Feed mode can optionally send the observation-only draft payload to
+OpenAI / Claude and append a JSONL summary for offline study:
+
+```env
+FX_MONITOR_REVIEW_DRAFT_WITH_AI=true
+FX_MONITOR_REVIEW_LOG_PATH=out/review_log.jsonl
+```
+
+Hard contract:
+
+- Draft AI review never dispatches notifications.
+- Draft AI review never produces READY.
+- `Decision: SUPPRESSED` is always printed.
+- The JSONL record contains only summary fields (verdict / bias /
+  confidence / a few reason lines) — no prompts, no raw payloads, no
+  API keys.
+- Even if the mock reviewer happens to return PASS in this mode, the
+  draft path stays SUPPRESSED.
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。

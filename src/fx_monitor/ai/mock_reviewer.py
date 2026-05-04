@@ -11,7 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from ..core.models import ChartPayload, ReviewResult
+from ..core.models import ChartPayload, MonitorCase, ReviewResult
 from ..core.rule_engine import evaluate
 from .schema import REQUIRED_STEP_KEYS, parse_review
 
@@ -116,8 +116,15 @@ class MockReviewer:
         self.provider = provider
         self.confidence = confidence
 
-    def review(self, payload: ChartPayload, image_bytes: bytes | None = None) -> ReviewResult:
-        rule = evaluate(payload)
+    def review(
+        self,
+        payload: ChartPayload | MonitorCase,
+        image_bytes: bytes | None = None,
+    ) -> ReviewResult:
+        # MonitorCase: mirror the legacy rule engine off ``chart_payload`` so
+        # the mock works unchanged in fixture / draft / demo paths.
+        chart_payload = payload.chart_payload if isinstance(payload, MonitorCase) else payload
+        rule = evaluate(chart_payload)
         if rule.verdict == "PASS":
             data = mock_ready_review(bias=rule.bias)
         elif rule.verdict == "WAIT":

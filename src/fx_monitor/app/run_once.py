@@ -41,6 +41,7 @@ from ..core.models import (
 from ..core.rule_engine import evaluate, evaluate_monitor_case
 from ..data.feed_selector import load_market_snapshot_from_env
 from ..knowledge.loader import load_knowledge_pack
+from ..logging import append_review_log
 from ..notify.console_notifier import ConsoleNotifier
 from ..notify.notifier import CooldownTracker, decide, dispatch
 from ..render.chart_card_renderer import render_royal_road_notification_card
@@ -75,11 +76,13 @@ def _run_market_draft_mode() -> int:
       1. fetch MarketSnapshot from FX_MONITOR_FEED
       2. build a RoyalRoadDraftPayload (pivots + rough S/R + rough wave)
       3. wrap in MonitorCase and run evaluate_monitor_case()
-      4. report Rule + (no AI) + INSUFFICIENT + SUPPRESSED
+      4. if FX_MONITOR_REVIEW_DRAFT_WITH_AI=true, call OpenAI / Claude
+         reviewers and append a JSONL summary record. The review result
+         does NOT influence the notification decision.
+      5. always report Decision SUPPRESSED.
 
-    AI reviewers are intentionally NOT called here: the draft is
-    observation-only and must never feed a notification, so spending
-    real API tokens on it would be wasteful.
+    Notification dispatch is never called from this path. AI's view on
+    the draft is captured purely for offline study.
     """
     snapshot = load_market_snapshot_from_env()
     print(
@@ -106,13 +109,76 @@ def _run_market_draft_mode() -> int:
     case = build_monitor_case_from_draft_payload(draft)
     rule = evaluate_monitor_case(case)
     print(f"Rule: {rule.verdict} {rule.bias}")
-    print("OpenAI: (not run)")
-    print("Claude: (not run)")
-    print("Compare: INSUFFICIENT")
-    print(
-        "Decision: SUPPRESSED "
-        "(draft payload only; READY disabled)"
+
+    if not _env_truthy("FX_MONITOR_REVIEW_DRAFT_WITH_AI"):
+        print("OpenAI: (not run)")
+        print("Claude: (not run)")
+        print("Compare: INSUFFICIENT")
+        print("Decision: SUPPRESSED (draft payload only; READY disabled)")
+        return 0
+
+    # --- Draft AI review (observation only) ---
+    pack = load_knowledge_pack()
+    if _env_truthy("AI_USE_MOCK"):
+        openai_review = MockReviewer(provider="openai").review(case)
+        claude_review = MockReviewer(provider="claude").review(case)
+    else:
+        openai_review = OpenAIReviewer(pack).review(case)
+        claude_review = ClaudeReviewer(pack).review(case)
+
+    cmp_outcome = compare(openai_review, claude_review)
+
+    print(f"OpenAI: {openai_review.verdict} {openai_review.bias}")
+    print(f"Claude: {claude_review.verdict} {claude_review.bias}")
+    print(f"Compare: {cmp_outcome.result}")
+    print("Decision: SUPPRESSED (draft AI review is observation-only)")
+
+    log_path = os.environ.get("FX_MONITOR_REVIEW_LOG_PATH", "out/review_log.jsonl")
+    append_review_log(
+        path=log_path,
+        record={
+            "mode": "draft_ai_review",
+            "symbol": snapshot.symbol,
+            "timeframe": snapshot.timeframe,
+            "source": snapshot.source,
+            "candles": len(snapshot.candles),
+            "pivots": len(draft.pivots),
+            "rough_pattern": rough_pattern,
+            "zones": len(zones),
+            "rule": {
+                "verdict": rule.verdict,
+                "bias": rule.bias,
+                "reasons": rule.reasons,
+            },
+            "openai": {
+                "verdict": openai_review.verdict,
+                "bias": openai_review.bias,
+                "confidence": openai_review.confidence,
+                "reasons": openai_review.reasons[:5],
+                "missing": openai_review.missing[:10],
+                "disagreements": openai_review.disagreements[:10],
+            },
+            "claude": {
+                "verdict": claude_review.verdict,
+                "bias": claude_review.bias,
+                "confidence": claude_review.confidence,
+                "reasons": claude_review.reasons[:5],
+                "missing": claude_review.missing[:10],
+                "disagreements": claude_review.disagreements[:10],
+            },
+            "compare": {
+                "result": cmp_outcome.result,
+                "notes": cmp_outcome.notes[:5],
+            },
+            "decision": "SUPPRESSED",
+            "safety": {
+                "observation_only": True,
+                "used_in_final_action": False,
+                "ready_allowed": False,
+            },
+        },
     )
+    print(f"Review log: {log_path}")
     return 0
 
 
