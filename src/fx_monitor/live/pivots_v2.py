@@ -43,29 +43,37 @@ _SCALE_RANK: dict[PivotScale, int] = {"micro": 0, "swing": 1, "major": 2}
 
 
 def _is_local_max(values: list[float], i: int, left: int, right: int) -> bool:
-    """Tie-tolerant local maximum check.
+    """Tie-tolerant local maximum check with anti-flat guard.
 
-    A candle qualifies as a local max if its value is >= every other value
-    in the window. The legacy detector required strict uniqueness, which
-    silently dropped pivots whose neighbours tied the extreme.
+    A candle qualifies as a local max if (a) its value is >= every other
+    value in the window, and (b) at least one neighbour is strictly
+    lower. Condition (b) prevents flat data from producing a pivot at
+    every bar while still allowing genuine peaks whose immediate
+    neighbours tie the extreme.
     """
     target = values[i]
+    has_strictly_lower = False
     for j in range(i - left, i + right + 1):
         if j == i:
             continue
         if values[j] > target:
             return False
-    return True
+        if values[j] < target:
+            has_strictly_lower = True
+    return has_strictly_lower
 
 
 def _is_local_min(values: list[float], i: int, left: int, right: int) -> bool:
     target = values[i]
+    has_strictly_higher = False
     for j in range(i - left, i + right + 1):
         if j == i:
             continue
         if values[j] < target:
             return False
-    return True
+        if values[j] > target:
+            has_strictly_higher = True
+    return has_strictly_higher
 
 
 def detect_multi_scale_pivots(
