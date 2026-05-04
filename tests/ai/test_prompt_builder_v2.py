@@ -134,12 +134,14 @@ def test_user_prompt_excludes_pollution_keys():
         assert forbidden not in p.user
 
 
-def test_user_prompt_lists_glossary_and_14_steps():
+def test_user_prompt_lists_glossary_and_procedure_steps():
     pack = _pack()
     p = build_decision_prompt(pack, retrieved=[])
     assert "## 用語定義" in p.user
-    assert "## 王道14手順" in p.user
-    # 14手順のキー名が全部現れること
+    # The procedure title is auto-numbered from the knowledge pack length,
+    # so just match the prefix and let the count grow.
+    assert "## 王道" in p.user and "手順" in p.user
+    # The original 14 step keys must all still be present.
     for key in [
         "environment",
         "htf_dow",
@@ -157,6 +159,39 @@ def test_user_prompt_lists_glossary_and_14_steps():
         "event_clear",
     ]:
         assert key in p.user
+
+
+def test_user_prompt_includes_v3_principles():
+    """The v3 doctrine adds higher-order principles: layered analysis,
+    indicator-environment filter, MTF, confluence axes, invalidation,
+    and the pre-trade checklist. They must reach the AI."""
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    for token in [
+        "## 王道判定の上位原則",
+        "階層分析",
+        "指標は環境に応じて使い分ける",
+        "MTF",
+        "コンフルエンス 5軸",
+        "損切り",
+        "インバリデーション",
+        "自己診断",
+    ]:
+        assert token in p.user, f"missing principle marker: {token!r}"
+
+
+def test_user_prompt_includes_new_procedure_keys():
+    """Phase 9 added MTF, confluence, MA-alignment and indicator-env steps."""
+    pack = _pack()
+    p = build_decision_prompt(pack, retrieved=[])
+    for key in [
+        "ma_alignment",
+        "indicator_environment",
+        "divergence_check",
+        "mtf_alignment",
+        "confluence_count",
+    ]:
+        assert key in p.user, f"missing procedure step key: {key!r}"
 
 
 def test_cold_start_renders_explicit_hint():

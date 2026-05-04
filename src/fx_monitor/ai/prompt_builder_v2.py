@@ -99,10 +99,77 @@ def _format_procedure_steps(kp: dict[str, Any]) -> str:
     steps = kp.get("procedure_steps") or []
     if not steps:
         return ""
-    lines = ["## 王道14手順 (全手順について判定し procedure_steps[] に出力すること)"]
+    n = len(steps)
+    lines = [f"## 王道{n}手順 (全手順について判定し procedure_steps[] に出力すること)"]
     for i, s in enumerate(steps, 1):
         lines.append(f"{i}. **{s.get('name_ja')}** ({s.get('key')}): {s.get('definition_ja')}")
     return "\n".join(lines)
+
+
+def _format_principles(kp: dict[str, Any]) -> str:
+    """Render the higher-order doctrine (layered analysis, MTF, confluence,
+    indicator-environment filter, invalidation, pre-trade checklist) so the
+    AI applies them as constraints on top of the per-step procedure.
+    """
+    principles = kp.get("principles") or {}
+    if not principles:
+        return ""
+
+    out: list[str] = ["## 王道判定の上位原則 (procedure_steps の上に必ず適用)"]
+
+    layered = principles.get("layered_analysis")
+    if layered:
+        out.append(f"\n### 階層分析")
+        out.append(layered.get("description_ja", ""))
+        for layer in layered.get("layers", []):
+            tools = ", ".join(layer.get("tools", []))
+            out.append(f"  - **{layer.get('name')}**: {tools}")
+
+    env = principles.get("indicator_environment_filter")
+    if env:
+        out.append(f"\n### 指標は環境に応じて使い分ける")
+        out.append(env.get("description_ja", ""))
+        for r in env.get("rules", []):
+            use = ", ".join(r.get("use", []))
+            avoid = ", ".join(r.get("avoid", []))
+            out.append(f"  - **{r.get('environment')}** → 使う: {use} / 避ける: {avoid}")
+
+    mtf = principles.get("mtf_principle")
+    if mtf:
+        out.append(f"\n### MTF (マルチタイムフレーム) 原則")
+        out.append(mtf.get("description_ja", ""))
+        for rule in mtf.get("rules", []):
+            out.append(f"  - {rule}")
+
+    conf = principles.get("confluence_axes")
+    if conf:
+        out.append(f"\n### コンフルエンス 5軸")
+        out.append(conf.get("description_ja", ""))
+        for axis in conf.get("axes", []):
+            out.append(f"  - {axis}")
+        thresholds = conf.get("thresholds", {})
+        if thresholds:
+            out.append("  軸数の判断基準:")
+            for k, v in thresholds.items():
+                out.append(f"    - {k}: {v}")
+
+    inval = principles.get("invalidation_placement")
+    if inval:
+        out.append(f"\n### 損切り (インバリデーション) の置き方")
+        out.append(inval.get("description_ja", ""))
+        for r in inval.get("rules", []):
+            out.append(f"  - {r.get('entry_method')}: {r.get('stop_placement')}")
+        if inval.get("rr_minimum") is not None:
+            out.append(f"  - **RR最低**: {inval.get('rr_minimum')} 未満のシナリオは HOLD に強制降格")
+
+    checklist = principles.get("pre_trade_checklist")
+    if checklist:
+        out.append(f"\n### 自己診断 6項目チェックリスト (毎回最後に確認)")
+        out.append(checklist.get("description_ja", ""))
+        for i, item in enumerate(checklist.get("items", []), 1):
+            out.append(f"  {i}. {item}")
+
+    return "\n".join(out)
 
 
 def _format_few_shot(kp: dict[str, Any]) -> str:
@@ -197,6 +264,10 @@ def build_decision_prompt(
     glossary = _format_glossary(knowledge_pack)
     if glossary:
         sections.append("\n" + glossary)
+
+    principles = _format_principles(knowledge_pack)
+    if principles:
+        sections.append("\n" + principles)
 
     procedure = _format_procedure_steps(knowledge_pack)
     if procedure:
