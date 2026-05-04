@@ -112,7 +112,14 @@ def fetch_ohlc(
     if df is None or df.empty:
         return FetchResult([], "yfinance", None)
 
-    df = df.reset_index().rename(
+    # yfinance returns a MultiIndex on columns when given a single ticker
+    # (("Open", "EURUSD=X"), ...). Flatten it before renaming.
+    if hasattr(df.columns, "nlevels") and df.columns.nlevels > 1:
+        df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+
+    df = df.reset_index()
+    df.columns = [c[0] if isinstance(c, tuple) else c for c in df.columns]
+    df = df.rename(
         columns={
             "Datetime": "t",
             "Date": "t",
