@@ -70,3 +70,9 @@ def test_monitor_workflow_runs_draft_review_command():
     text = _text()
     assert "python -m fx_monitor.app.run_once" in text
     assert "python -m fx_monitor.app.review_report" in text
+
+
+def test_monitor_workflow_uploads_diagnostics_artifact():
+    text = _text()
+    assert 'FX_MONITOR_DIAGNOSTICS_PATH: "out/diagnostics.json"' in text
+    assert "out/diagnostics.json" in text

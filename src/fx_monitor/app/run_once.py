@@ -41,7 +41,7 @@ from ..core.models import (
 from ..core.rule_engine import evaluate, evaluate_monitor_case
 from ..data.feed_selector import load_market_snapshot_from_env
 from ..knowledge.loader import load_knowledge_pack
-from ..logging import append_review_log
+from ..logging import append_review_log, write_diagnostics
 from ..notify.console_notifier import ConsoleNotifier
 from ..notify.notifier import CooldownTracker, decide, dispatch
 from ..render.chart_card_renderer import render_royal_road_notification_card
@@ -110,11 +110,28 @@ def _run_market_draft_mode() -> int:
     rule = evaluate_monitor_case(case)
     print(f"Rule: {rule.verdict} {rule.bias}")
 
-    if not _env_truthy("FX_MONITOR_REVIEW_DRAFT_WITH_AI"):
+    review_draft = _env_truthy("FX_MONITOR_REVIEW_DRAFT_WITH_AI")
+    diag_path = os.environ.get("FX_MONITOR_DIAGNOSTICS_PATH", "out/diagnostics.json")
+
+    openai_review = None
+    claude_review = None
+    cmp_outcome = None
+
+    if not review_draft:
         print("OpenAI: (not run)")
         print("Claude: (not run)")
         print("Compare: INSUFFICIENT")
         print("Decision: SUPPRESSED (draft payload only; READY disabled)")
+        _write_market_draft_diagnostics(
+            diag_path=diag_path,
+            snapshot=snapshot,
+            draft=draft,
+            rule=rule,
+            review_draft=False,
+            openai_review=None,
+            claude_review=None,
+            cmp_outcome=None,
+        )
         return 0
 
     # --- Draft AI review (observation only) ---
@@ -179,7 +196,91 @@ def _run_market_draft_mode() -> int:
         },
     )
     print(f"Review log: {log_path}")
+
+    _write_market_draft_diagnostics(
+        diag_path=diag_path,
+        snapshot=snapshot,
+        draft=draft,
+        rule=rule,
+        review_draft=True,
+        openai_review=openai_review,
+        claude_review=claude_review,
+        cmp_outcome=cmp_outcome,
+    )
     return 0
+
+
+def _write_market_draft_diagnostics(
+    *,
+    diag_path: str,
+    snapshot,
+    draft,
+    rule,
+    review_draft: bool,
+    openai_review,
+    claude_review,
+    cmp_outcome,
+) -> None:
+    """Emit the per-run diagnostics JSON. Always called from feed mode."""
+    zones = draft.rough_support_resistance.get("selected_level_zones_top5") or []
+    rough_pattern = draft.rough_wave_context.get("rough_pattern_kind")
+    diagnostics = {
+        "mode": "market_draft",
+        "feed": {
+            "source": snapshot.source,
+            "symbol": snapshot.symbol,
+            "timeframe": snapshot.timeframe,
+            "candles": len(snapshot.candles),
+            "last_close": snapshot.last_close,
+            "warnings": list(snapshot.warnings),
+        },
+        "draft": {
+            "pivots": len(draft.pivots),
+            "rough_pattern": rough_pattern,
+            "zones": len(zones),
+            "warnings": list(draft.warnings),
+            "observation_only": draft.observation_only,
+            "used_in_final_action": draft.used_in_final_action,
+            "entry_status": draft.entry_plan.get("entry_status"),
+            "p0_pass": draft.royal_road_procedure_checklist.get("p0_pass"),
+        },
+        "rule": {
+            "verdict": rule.verdict,
+            "bias": rule.bias,
+            "reasons": list(rule.reasons),
+        },
+        "ai": {
+            "review_draft_with_ai": review_draft,
+            "openai": {
+                "enabled": os.getenv("OPENAI_ENABLED", "false"),
+                "verdict": openai_review.verdict if openai_review else "not_run",
+                "bias": openai_review.bias if openai_review else "none",
+                "reasons": openai_review.reasons[:5] if openai_review else [],
+                "missing": openai_review.missing[:10] if openai_review else [],
+            },
+            "claude": {
+                "enabled": os.getenv("ANTHROPIC_ENABLED", "false"),
+                "verdict": claude_review.verdict if claude_review else "not_run",
+                "bias": claude_review.bias if claude_review else "none",
+                "reasons": claude_review.reasons[:5] if claude_review else [],
+                "missing": claude_review.missing[:10] if claude_review else [],
+            },
+            "compare": {
+                "result": cmp_outcome.result if cmp_outcome else "INSUFFICIENT",
+            },
+        },
+        "decision": {
+            "level": "SUPPRESSED",
+            "reason": "draft payload only; READY disabled",
+        },
+        "safety": {
+            "ready_allowed": False,
+            "dispatch_called": False,
+            "dry_run": os.getenv("DRY_RUN", "true"),
+        },
+    }
+    write_diagnostics(path=diag_path, data=diagnostics)
+    print(f"Diagnostics: {diag_path}")
 
 
 def main(argv: list[str] | None = None) -> int:

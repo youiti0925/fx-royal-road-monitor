@@ -144,3 +144,74 @@ def test_run_once_csv_feed_draft_ai_review_real_disabled_logs_unknown(tmp_path):
     assert data["openai"]["verdict"] == "UNKNOWN"
     assert data["claude"]["verdict"] == "UNKNOWN"
     assert data["decision"] == "SUPPRESSED"
+
+
+def test_run_once_csv_feed_writes_diagnostics(tmp_path):
+    env = os.environ.copy()
+    diag = tmp_path / "diagnostics.json"
+
+    env.pop("FX_MONITOR_FIXTURE_PATH", None)
+    env["FX_MONITOR_FEED"] = "csv"
+    env["FX_MONITOR_CSV_PATH"] = str(FIXTURES / "ohlc_sample.csv")
+    env["FX_MONITOR_SYMBOL"] = "EURUSD=X"
+    env["FX_MONITOR_TIMEFRAME"] = "M5"
+    env["AI_USE_MOCK"] = "false"
+    env["OPENAI_ENABLED"] = "false"
+    env["ANTHROPIC_ENABLED"] = "false"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_REVIEW_DRAFT_WITH_AI"] = "true"
+    env["FX_MONITOR_DIAGNOSTICS_PATH"] = str(diag)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Diagnostics:" in result.stdout
+    assert diag.exists()
+
+    data = json.loads(diag.read_text(encoding="utf-8"))
+    assert data["mode"] == "market_draft"
+    assert data["feed"]["symbol"] == "EURUSD=X"
+    assert data["draft"]["observation_only"] is True
+    assert data["decision"]["level"] == "SUPPRESSED"
+    assert data["safety"]["ready_allowed"] is False
+    assert data["safety"]["dispatch_called"] is False
+    # Pin: never store raw secrets.
+    assert "OPENAI_API_KEY" not in json.dumps(data)
+    assert "ANTHROPIC_API_KEY" not in json.dumps(data)
+
+
+def test_run_once_csv_feed_diagnostics_emitted_when_review_off(tmp_path):
+    env = os.environ.copy()
+    diag = tmp_path / "diagnostics.json"
+
+    env.pop("FX_MONITOR_FIXTURE_PATH", None)
+    env["FX_MONITOR_FEED"] = "csv"
+    env["FX_MONITOR_CSV_PATH"] = str(FIXTURES / "ohlc_sample.csv")
+    env["FX_MONITOR_SYMBOL"] = "EURUSD=X"
+    env["FX_MONITOR_TIMEFRAME"] = "M5"
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    # Review explicitly OFF.
+    env["FX_MONITOR_REVIEW_DRAFT_WITH_AI"] = "false"
+    env["FX_MONITOR_DIAGNOSTICS_PATH"] = str(diag)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Diagnostics:" in result.stdout
+    assert diag.exists()
+    data = json.loads(diag.read_text(encoding="utf-8"))
+    assert data["ai"]["review_draft_with_ai"] is False
+    assert data["ai"]["openai"]["verdict"] == "not_run"
+    assert data["ai"]["claude"]["verdict"] == "not_run"
+    assert data["decision"]["level"] == "SUPPRESSED"

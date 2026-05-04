@@ -203,6 +203,30 @@ Safety contract (pinned by `tests/test_workflow_static.py`):
 - No order execution
 - No font / API-key files committed
 
+### Diagnostics artifact
+
+Each scheduled draft-review run also writes:
+
+```
+out/diagnostics.json
+```
+
+It records:
+
+- feed source / symbol / timeframe / candle count / warnings
+- draft pivot / zone / rough-pattern counts + observation-only flag
+- rule verdict / bias / reasons
+- AI reviewer verdicts (or `"not_run"` when the review is skipped)
+- compare result
+- decision level (`SUPPRESSED`)
+- safety flags (`ready_allowed=false`, `dispatch_called=false`,
+  `dry_run`)
+
+Secrets, tokens, API keys, webhooks, prompts, and raw payloads are
+**not** stored — `write_diagnostics()` redacts any key matching
+`api_key` / `token` / `secret` / `webhook` (case-insensitive)
+recursively before write.
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。

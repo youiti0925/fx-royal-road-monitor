@@ -71,6 +71,7 @@ jobs:
       # Draft AI review (observation only — never notifies).
       FX_MONITOR_REVIEW_DRAFT_WITH_AI: "true"
       FX_MONITOR_REVIEW_LOG_PATH: "out/review_log.jsonl"
+      FX_MONITOR_DIAGNOSTICS_PATH: "out/diagnostics.json"
 
       # Notification cards are not relevant for draft mode.
       FX_MONITOR_RENDER_CARD: "false"
@@ -121,5 +122,6 @@ jobs:
             out/review_log.jsonl
             out/review_report.md
             out/review_report.json
+            out/diagnostics.json
           if-no-files-found: warn
           retention-days: 14
