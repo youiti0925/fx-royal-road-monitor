@@ -52,3 +52,18 @@ def test_publish_preview_workflow_does_not_enable_trading_or_paper():
     ]
     for token in forbidden:
         assert token not in text, f"workflow must not contain {token!r}"
+
+
+def test_publish_preview_workflow_uploads_artifact_and_writes_summary():
+    text = _text()
+    assert "actions/upload-artifact" in text
+    assert "mvp1-ai-authored-preview" in text
+    assert "GITHUB_STEP_SUMMARY" in text
+    assert "htmlpreview.github.io" in text
+
+
+def test_publish_preview_workflow_uploads_preflight_and_repair_log():
+    text = _text()
+    # New observability artifacts produced by the hardened pipeline.
+    assert "preflight.json" in text
+    assert "decision_screen_repair_log.json" in text

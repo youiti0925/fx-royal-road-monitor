@@ -61,6 +61,44 @@ jobs:
       - name: Run tests
         run: pytest
 
+      - name: Upload preview artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mvp1-ai-authored-preview-${{ github.run_id }}
+          path: |
+            docs/mvp1_current_preview/index.html
+            docs/mvp1_current_preview/decision_screen.html
+            docs/mvp1_current_preview/decision_screen.png
+            docs/mvp1_current_preview/openai_decision_screen_spec.json
+            docs/mvp1_current_preview/claude_decision_screen_spec.json
+            docs/mvp1_current_preview/decision_screen_spec_compare.json
+            docs/mvp1_current_preview/decision_screen_repair_log.json
+            docs/mvp1_current_preview/preflight.json
+            docs/mvp1_current_preview/diagnostics.json
+            docs/mvp1_current_preview/review_report.md
+            docs/mvp1_current_preview/review_report.json
+            docs/mvp1_current_preview/review_log.jsonl
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Write workflow summary
+        if: always()
+        run: |
+          {
+            echo "## MVP-1 AI-authored preview"
+            echo ""
+            echo "Preview URL:"
+            echo ""
+            echo "  https://htmlpreview.github.io/?https://raw.githubusercontent.com/youiti0925/fx-royal-road-monitor/main/docs/mvp1_current_preview/index.html"
+            echo ""
+            echo "If this run failed, check whether OPENAI_API_KEY and ANTHROPIC_API_KEY are configured as repository secrets."
+            echo ""
+            echo "Mode: ai-authored"
+            echo ""
+            echo "Renderer paints **only** AI-authored lines / points / zones. Never used for READY / notification / trading."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Commit refreshed preview
         run: |
           git config user.name "github-actions[bot]"

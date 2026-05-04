@@ -27,22 +27,25 @@ import html
 from pathlib import Path
 from typing import Any
 
+# Dark navy theme — chart panel sits on a slightly lighter slate
+# so the AI-authored lines show up clearly. CSS class names
+# (rr-*) are unchanged; only the colour palette shifts.
 COLORS = {
-    "bg": "#f4f7fb",
-    "panel": "#ffffff",
-    "grid": "#d9e2ef",
-    "text": "#172033",
-    "muted": "#60708a",
-    "openai": "#2563eb",
-    "claude": "#7c3aed",
-    "consensus": "#0f766e",
-    "conflict": "#dc2626",
+    "bg": "#0b1220",        # page background (very dark navy)
+    "panel": "#111a2c",     # chart / card background (dark slate)
+    "grid": "#1f2a44",      # subtle grid lines
+    "text": "#e2e8f0",      # body text on dark
+    "muted": "#94a3b8",     # secondary text
+    "openai": "#3b82f6",    # OpenAI-only lines
+    "claude": "#a78bfa",    # Claude-only lines
+    "consensus": "#22d3ee", # cyan/teal for consensus
+    "conflict": "#f87171",  # red/orange for conflict
     "zone": "#60a5fa",
-    "ready": "#16a34a",
-    "wait": "#f59e0b",
-    "block": "#ef4444",
+    "ready": "#22c55e",
+    "wait": "#facc15",
+    "block": "#f87171",
     "unknown": "#94a3b8",
-    "warn": "#d97706",
+    "warn": "#facc15",
 }
 
 
@@ -379,39 +382,42 @@ def _build_inline_svg(
 _CSS = """
 body { margin: 0; font-family: -apple-system, BlinkMacSystemFont,
   "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif;
-  background: #f4f7fb; color: #172033; }
+  background: #0b1220; color: #e2e8f0; }
 .rr-screen { max-width: 1200px; margin: 0 auto; padding: 18px; }
-.rr-safety-header { background: #0f172a; color: white;
-  padding: 16px 20px; border-radius: 14px; margin-bottom: 14px; }
+.rr-safety-header { background: #060a14; color: #f8fafc;
+  padding: 16px 20px; border-radius: 14px; margin-bottom: 14px;
+  border: 1px solid #1f2a44; }
 .rr-safety-header h1 { font-size: 20px; margin: 0 0 4px; }
-.rr-safety-header .sub { color: #cbd5e1; font-size: 12px; }
-.rr-safety-banner { background: #dcfce7; color: #166534;
+.rr-safety-header .sub { color: #94a3b8; font-size: 12px; }
+.rr-safety-banner { background: #052e16; color: #bbf7d0;
   font-weight: 700; padding: 12px 14px; border-radius: 10px;
-  margin-bottom: 14px; font-size: 14px; }
+  margin-bottom: 14px; font-size: 14px;
+  border: 1px solid #166534; }
 .rr-main { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
 .rr-chart-panel, .rr-checklist-panel, .rr-ai-visual-review,
 .rr-spec-cards, .rr-comparison-card {
-  background: white; border: 1px solid #dbe4f0; border-radius: 14px;
-  padding: 14px; box-shadow: 0 6px 16px rgba(15, 23, 42, .04); }
+  background: #111a2c; border: 1px solid #1f2a44; border-radius: 14px;
+  padding: 14px; color: #e2e8f0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .4); }
 .rr-chart-panel svg { width: 100%; height: auto; display: block; }
 .rr-chart-panel h2, .rr-checklist-panel h2, .rr-ai-visual-review h2,
 .rr-spec-cards h2, .rr-comparison-card h2 {
-  font-size: 15px; margin: 0 0 10px; }
+  font-size: 15px; margin: 0 0 10px; color: #f1f5f9; }
 .rr-spec-cards { margin-top: 14px; display: grid;
   grid-template-columns: 1fr 1fr; gap: 14px; }
 .rr-comparison-card { margin-top: 14px; }
 .rr-ai-visual-review { margin-top: 14px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { border-bottom: 1px solid #e5eaf2; padding: 7px 6px;
-  text-align: left; vertical-align: top; }
-th { color: #475569; width: 38%; font-weight: 600; }
-.muted { color: #64748b; font-size: 12px; }
+th, td { border-bottom: 1px solid #1f2a44; padding: 7px 6px;
+  text-align: left; vertical-align: top; color: #e2e8f0; }
+th { color: #94a3b8; width: 38%; font-weight: 600; }
+.muted { color: #94a3b8; font-size: 12px; }
 .legend span { display: inline-block; padding: 2px 8px;
   border-radius: 999px; margin-right: 6px; font-size: 11px; }
-.legend .openai { background: #dbeafe; color: #1e40af; }
-.legend .claude { background: #ede9fe; color: #6d28d9; }
-.legend .consensus { background: #ccfbf1; color: #115e59; }
-.legend .conflict { background: #fee2e2; color: #991b1b; }
+.legend .openai { background: #1e3a8a; color: #dbeafe; }
+.legend .claude { background: #4c1d95; color: #ede9fe; }
+.legend .consensus { background: #134e4a; color: #ccfbf1; }
+.legend .conflict { background: #7f1d1d; color: #fee2e2; }
 """
 
 

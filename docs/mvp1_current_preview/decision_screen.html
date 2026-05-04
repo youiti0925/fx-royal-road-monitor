@@ -6,39 +6,42 @@
   <style>
 body { margin: 0; font-family: -apple-system, BlinkMacSystemFont,
   "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif;
-  background: #f4f7fb; color: #172033; }
+  background: #0b1220; color: #e2e8f0; }
 .rr-screen { max-width: 1200px; margin: 0 auto; padding: 18px; }
-.rr-safety-header { background: #0f172a; color: white;
-  padding: 16px 20px; border-radius: 14px; margin-bottom: 14px; }
+.rr-safety-header { background: #060a14; color: #f8fafc;
+  padding: 16px 20px; border-radius: 14px; margin-bottom: 14px;
+  border: 1px solid #1f2a44; }
 .rr-safety-header h1 { font-size: 20px; margin: 0 0 4px; }
-.rr-safety-header .sub { color: #cbd5e1; font-size: 12px; }
-.rr-safety-banner { background: #dcfce7; color: #166534;
+.rr-safety-header .sub { color: #94a3b8; font-size: 12px; }
+.rr-safety-banner { background: #052e16; color: #bbf7d0;
   font-weight: 700; padding: 12px 14px; border-radius: 10px;
-  margin-bottom: 14px; font-size: 14px; }
+  margin-bottom: 14px; font-size: 14px;
+  border: 1px solid #166534; }
 .rr-main { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
 .rr-chart-panel, .rr-checklist-panel, .rr-ai-visual-review,
 .rr-spec-cards, .rr-comparison-card {
-  background: white; border: 1px solid #dbe4f0; border-radius: 14px;
-  padding: 14px; box-shadow: 0 6px 16px rgba(15, 23, 42, .04); }
+  background: #111a2c; border: 1px solid #1f2a44; border-radius: 14px;
+  padding: 14px; color: #e2e8f0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .4); }
 .rr-chart-panel svg { width: 100%; height: auto; display: block; }
 .rr-chart-panel h2, .rr-checklist-panel h2, .rr-ai-visual-review h2,
 .rr-spec-cards h2, .rr-comparison-card h2 {
-  font-size: 15px; margin: 0 0 10px; }
+  font-size: 15px; margin: 0 0 10px; color: #f1f5f9; }
 .rr-spec-cards { margin-top: 14px; display: grid;
   grid-template-columns: 1fr 1fr; gap: 14px; }
 .rr-comparison-card { margin-top: 14px; }
 .rr-ai-visual-review { margin-top: 14px; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { border-bottom: 1px solid #e5eaf2; padding: 7px 6px;
-  text-align: left; vertical-align: top; }
-th { color: #475569; width: 38%; font-weight: 600; }
-.muted { color: #64748b; font-size: 12px; }
+th, td { border-bottom: 1px solid #1f2a44; padding: 7px 6px;
+  text-align: left; vertical-align: top; color: #e2e8f0; }
+th { color: #94a3b8; width: 38%; font-weight: 600; }
+.muted { color: #94a3b8; font-size: 12px; }
 .legend span { display: inline-block; padding: 2px 8px;
   border-radius: 999px; margin-right: 6px; font-size: 11px; }
-.legend .openai { background: #dbeafe; color: #1e40af; }
-.legend .claude { background: #ede9fe; color: #6d28d9; }
-.legend .consensus { background: #ccfbf1; color: #115e59; }
-.legend .conflict { background: #fee2e2; color: #991b1b; }
+.legend .openai { background: #1e3a8a; color: #dbeafe; }
+.legend .claude { background: #4c1d95; color: #ede9fe; }
+.legend .consensus { background: #134e4a; color: #ccfbf1; }
+.legend .conflict { background: #7f1d1d; color: #fee2e2; }
 </style>
 </head>
 <body>
@@ -66,17 +69,17 @@ th { color: #475569; width: 38%; font-weight: 600; }
     <main class="rr-main">
       <section class="rr-chart-panel">
         <h2>AI生成 王道判定画面 (EURUSD=X M5)</h2>
-        <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI生成 王道判定画面"><rect x="0" y="0" width="1000" height="540" fill="#ffffff" stroke="#d9e2ef"/>
-<line x1="60" y1="140.0" x2="920" y2="140.0" stroke="#d9e2ef" stroke-width="0.5"/>
-<line x1="60" y1="230.0" x2="920" y2="230.0" stroke="#d9e2ef" stroke-width="0.5"/>
-<line x1="60" y1="320.0" x2="920" y2="320.0" stroke="#d9e2ef" stroke-width="0.5"/>
-<line x1="60" y1="410.0" x2="920" y2="410.0" stroke="#d9e2ef" stroke-width="0.5"/>
-<text x="52" y="504.0" text-anchor="end" font-size="11" fill="#60708a">0.9860</text>
-<text x="52" y="413.99999999999926" text-anchor="end" font-size="11" fill="#60708a">0.9916</text>
-<text x="52" y="324.00000000000034" text-anchor="end" font-size="11" fill="#60708a">0.9972</text>
-<text x="52" y="234.00000000000142" text-anchor="end" font-size="11" fill="#60708a">1.0028</text>
-<text x="52" y="144.0000000000007" text-anchor="end" font-size="11" fill="#60708a">1.0084</text>
-<text x="52" y="54.0" text-anchor="end" font-size="11" fill="#60708a">1.0140</text>
+        <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI生成 王道判定画面"><rect x="0" y="0" width="1000" height="540" fill="#111a2c" stroke="#1f2a44"/>
+<line x1="60" y1="140.0" x2="920" y2="140.0" stroke="#1f2a44" stroke-width="0.5"/>
+<line x1="60" y1="230.0" x2="920" y2="230.0" stroke="#1f2a44" stroke-width="0.5"/>
+<line x1="60" y1="320.0" x2="920" y2="320.0" stroke="#1f2a44" stroke-width="0.5"/>
+<line x1="60" y1="410.0" x2="920" y2="410.0" stroke="#1f2a44" stroke-width="0.5"/>
+<text x="52" y="504.0" text-anchor="end" font-size="11" fill="#94a3b8">0.9860</text>
+<text x="52" y="413.99999999999926" text-anchor="end" font-size="11" fill="#94a3b8">0.9916</text>
+<text x="52" y="324.00000000000034" text-anchor="end" font-size="11" fill="#94a3b8">0.9972</text>
+<text x="52" y="234.00000000000142" text-anchor="end" font-size="11" fill="#94a3b8">1.0028</text>
+<text x="52" y="144.0000000000007" text-anchor="end" font-size="11" fill="#94a3b8">1.0084</text>
+<text x="52" y="54.0" text-anchor="end" font-size="11" fill="#94a3b8">1.0140</text>
 <g class="rr-sr-zone" data-count="0"></g>
 <g class="rr-pivot-dot" data-count="0"></g>
 <g class="rr-pivot-label" data-count="0"></g>
@@ -88,8 +91,8 @@ th { color: #475569; width: 38%; font-weight: 600; }
 <g class="rr-structural-neckline" data-count="0"></g>
 <g class="rr-structural-invalidation" data-count="0"></g>
 <g class="rr-structural-target" data-count="0"></g>
-<text class="rr-safety-watermark" x="500" y="300" text-anchor="middle" font-size="44" fill="#ef4444" fill-opacity="0.10" font-weight="800" transform="rotate(-12 500 300)">観測専用 / NOT READY</text>
-<text x="500" y="280" text-anchor="middle" font-size="18" fill="#60708a">AIによる王道判定画面が未生成 (観測専用プレースホルダー)</text></svg>
+<text class="rr-safety-watermark" x="500" y="300" text-anchor="middle" font-size="44" fill="#f87171" fill-opacity="0.10" font-weight="800" transform="rotate(-12 500 300)">観測専用 / NOT READY</text>
+<text x="500" y="280" text-anchor="middle" font-size="18" fill="#94a3b8">AIによる王道判定画面が未生成 (観測専用プレースホルダー)</text></svg>
         <p class="muted">
           rendererはAI specを描画するだけです。specに無い線を勝手に描きません。
         </p>

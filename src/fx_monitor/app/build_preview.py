@@ -454,6 +454,31 @@ def main(argv: list[str] | None = None) -> int:
 
     env = _safe_env(csv_rel, work_rel, mode=args.mode)
 
+    # Preflight: in ai-authored mode, fail fast if API keys are
+    # missing so we never produce a UNKNOWN-placeholder preview
+    # that's been advertised as AI-generated.
+    if args.mode == "ai-authored":
+        from ..ai.preflight import check_ai_authored_preview_preflight
+
+        preflight = check_ai_authored_preview_preflight(env)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / "preflight.json").write_text(
+            json.dumps(preflight.to_dict(), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        if not preflight.ok:
+            print("AI-authored preflight failed:")
+            for tag in preflight.errors:
+                print(f"  - {tag}")
+            for tag in preflight.warnings:
+                print(f"  warning: {tag}")
+            print(
+                "Non-zero exit. Configure OPENAI_API_KEY and "
+                "ANTHROPIC_API_KEY (and OPENAI_ENABLED / "
+                "ANTHROPIC_ENABLED) before retrying."
+            )
+            return 2
+
     _run([sys.executable, "-m", "fx_monitor.app.run_once"], env=env, cwd=REPO_ROOT)
     _run(
         [
@@ -504,8 +529,61 @@ def main(argv: list[str] | None = None) -> int:
 
     # Ask each AI to author its own decision screen spec. Without API
     # keys (the committed preview default) both come back UNKNOWN.
-    openai_spec = OpenAIReviewer().build_decision_screen_spec(market_analysis_pack=pack)
-    claude_spec = ClaudeReviewer().build_decision_screen_spec(market_analysis_pack=pack)
+    from ..ai.decision_screen_spec_schema import (
+        validate_decision_screen_spec_for_user_preview,
+    )
+
+    openai_reviewer = OpenAIReviewer()
+    claude_reviewer = ClaudeReviewer()
+
+    openai_spec = openai_reviewer.build_decision_screen_spec(
+        market_analysis_pack=pack
+    )
+    claude_spec = claude_reviewer.build_decision_screen_spec(
+        market_analysis_pack=pack
+    )
+
+    repair_log: dict[str, Any] = {"openai": None, "claude": None}
+
+    # One repair pass per provider when the first spec fails the
+    # user-preview validation. In safe-local mode the providers are
+    # disabled and the repair pass also returns SAFE-UNKNOWN, which
+    # is fine — the validator decides whether to fail the run later.
+    o_errors = validate_decision_screen_spec_for_user_preview(
+        openai_spec, "openai"
+    )
+    if o_errors:
+        prev = openai_spec.model_dump(mode="json")
+        repaired = openai_reviewer.repair_decision_screen_spec(
+            market_analysis_pack=pack,
+            previous_spec=prev,
+            validation_errors=o_errors,
+        )
+        repair_log["openai"] = {
+            "first_pass_errors": o_errors,
+            "post_repair_errors": validate_decision_screen_spec_for_user_preview(
+                repaired, "openai"
+            ),
+        }
+        openai_spec = repaired
+
+    c_errors = validate_decision_screen_spec_for_user_preview(
+        claude_spec, "claude"
+    )
+    if c_errors:
+        prev = claude_spec.model_dump(mode="json")
+        repaired = claude_reviewer.repair_decision_screen_spec(
+            market_analysis_pack=pack,
+            previous_spec=prev,
+            validation_errors=c_errors,
+        )
+        repair_log["claude"] = {
+            "first_pass_errors": c_errors,
+            "post_repair_errors": validate_decision_screen_spec_for_user_preview(
+                repaired, "claude"
+            ),
+        }
+        claude_spec = repaired
 
     comparison = compare_decision_screen_specs(
         openai_spec=openai_spec, claude_spec=claude_spec
@@ -524,6 +602,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     (out_dir / "decision_screen_spec_compare.json").write_text(
         json.dumps(comparison, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (out_dir / "decision_screen_repair_log.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "decision_screen_repair_log_v1",
+                "openai": repair_log["openai"],
+                "claude": repair_log["claude"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
 

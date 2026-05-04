@@ -233,4 +233,46 @@ __all__ = [
     "decision_screen_spec_schema_as_json",
     "parse_decision_screen_spec",
     "safe_unknown_spec",
+    "validate_decision_screen_spec_for_user_preview",
 ]
+
+
+def validate_decision_screen_spec_for_user_preview(
+    spec: dict | AiDecisionScreenSpec,
+    provider: str,
+) -> list[str]:
+    """Return a list of validation errors that disqualify a spec from
+    being shown as a user-facing AI-authored decision screen.
+
+    A populated spec for a user preview must:
+    - have ``final_status`` other than UNKNOWN
+    - have at least one ``points`` entry
+    - have at least one ``lines`` entry
+    - have at least one ``procedure_steps`` entry
+    - keep the four hard-contract safety flags exactly safe
+    """
+    if isinstance(spec, AiDecisionScreenSpec):
+        data = spec.model_dump(mode="json")
+    elif isinstance(spec, dict):
+        data = spec
+    else:
+        return [f"{provider}_spec_not_dict"]
+
+    errors: list[str] = []
+    if (data.get("final_status") or "UNKNOWN") == "UNKNOWN":
+        errors.append(f"{provider}_final_status_unknown")
+    if not data.get("points"):
+        errors.append(f"{provider}_points_empty")
+    if not data.get("lines"):
+        errors.append(f"{provider}_lines_empty")
+    if not data.get("procedure_steps"):
+        errors.append(f"{provider}_procedure_steps_empty")
+    if data.get("observation_only") is not True:
+        errors.append(f"{provider}_observation_only_not_true")
+    if data.get("used_for_ready") is not False:
+        errors.append(f"{provider}_used_for_ready_not_false")
+    if data.get("used_for_notification") is not False:
+        errors.append(f"{provider}_used_for_notification_not_false")
+    if data.get("used_for_trading") is not False:
+        errors.append(f"{provider}_used_for_trading_not_false")
+    return errors

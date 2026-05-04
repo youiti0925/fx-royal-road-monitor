@@ -397,9 +397,19 @@ python -m fx_monitor.app.build_preview \
 `.github/workflows/publish_mvp1_preview.yml` を **手動実行** すると、
 リポジトリ secrets (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) を使って
 `--mode ai-authored` で preview を再生成し、`docs/mvp1_current_preview/`
-に commit + push します。schedule では動かしません。secrets が無い
-場合は workflow が失敗するので、placeholder preview が静かに置かれる
-ことはありません。
+に commit + push します。schedule では動かしません。
+
+ハードニング:
+
+- **preflight**: API キーが無ければ workflow は即失敗し
+  `preflight.json` を成果物として残します。「placeholder preview を
+  AI生成済みと偽装する」状態には絶対なりません。
+- **repair pass**: 1回目の AI spec が空 / UNKNOWN / 安全違反だった
+  場合、validation error を伝えて 1 回だけ修復リクエストを送ります。
+  結果は `decision_screen_repair_log.json` に記録されます。
+- **artifact**: 全ての preview ファイルが
+  `mvp1-ai-authored-preview-<run_id>` artifact として 14 日間保管され、
+  workflow summary に preview URL が表示されます。
 
 ## ステータス
 

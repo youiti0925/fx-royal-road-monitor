@@ -86,6 +86,71 @@ def build_decision_screen_prompt(
 
 __all__ = [
     "build_decision_screen_prompt",
+    "build_decision_screen_repair_prompt",
     "BuiltDecisionScreenPrompt",
     "DECISION_SCREEN_SYSTEM",
 ]
+
+
+_REPAIR_SYSTEM = (
+    DECISION_SCREEN_SYSTEM
+    + "\n\n"
+    + "前回のあなたの出力はユーザー確認用previewとして不十分でした。\n"
+    + "validation_errors を読み、不足を埋めた完全な AiDecisionScreenSpec\n"
+    + "JSON を返してください。具体的には以下を満たしてください:\n"
+    + "- points を空にしない (王道判定に使う pivot を最低1つは出す)\n"
+    + "- lines を空にしない (採用した線を最低1つは出す)\n"
+    + "- procedure_steps を空にしない (王道15項目の主要な status を出す)\n"
+    + "- observation_only=true / used_for_ready=false /\n"
+    + "  used_for_notification=false / used_for_trading=false を必ず維持\n"
+    + "- 不明な場合でも、利用可能な candles / pivots から「観測専用の\n"
+    + "  参考線」として reason_ja 付きで出してください。\n"
+    + "- それでも線が引けない場合は final_status=HOLD として\n"
+    + "  procedure_steps を埋めてください (UNKNOWN のままにしない)。"
+)
+
+
+def build_decision_screen_repair_prompt(
+    *,
+    market_analysis_pack: dict,
+    previous_spec: dict,
+    validation_errors: list[str],
+    provider: str,
+) -> BuiltDecisionScreenPrompt:
+    """Repair prompt for one retry pass.
+
+    Includes the validation errors from the first attempt and the
+    full prior spec so the model sees what it produced and what
+    failed user-preview validation.
+    """
+    pack_json = json.dumps(market_analysis_pack, ensure_ascii=False, indent=2)
+    prev_json = json.dumps(previous_spec, ensure_ascii=False, indent=2)
+    errors_block = "\n".join(f"- {e}" for e in validation_errors) or "- (none)"
+
+    user = (
+        "## 出力JSON schema (AiDecisionScreenSpec)\n"
+        "```json\n"
+        f"{decision_screen_spec_schema_as_json()}\n"
+        "```\n\n"
+        "## あなたの前回の出力 (修正対象)\n"
+        "```json\n"
+        f"{prev_json}\n"
+        "```\n\n"
+        "## ユーザー確認用previewとしての validation_errors\n"
+        f"{errors_block}\n\n"
+        "## 市場データ材料 (再掲)\n"
+        "```json\n"
+        f"{pack_json}\n"
+        "```\n\n"
+        f"## あなたの provider 識別子\n"
+        f"provider = \"{provider}\"\n\n"
+        "## 修正タスク\n"
+        "上記 validation_errors を解消した AiDecisionScreenSpec を\n"
+        "1つだけJSONで返してください。\n"
+        "points を空にしない / lines を空にしない /\n"
+        "procedure_steps を空にしない /\n"
+        "observation_only=true / used_for_ready=false /\n"
+        "used_for_notification=false / used_for_trading=false /\n"
+        "READY通知 / 通知 / 売買 / 取引執行 には絶対つなげない。"
+    )
+    return BuiltDecisionScreenPrompt(system=_REPAIR_SYSTEM, user=user)

@@ -211,3 +211,15 @@ def test_preview_shows_build_mode():
     """Index must record which build mode produced the preview."""
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
     assert "build_preview mode" in html_text
+
+
+def test_preview_repair_log_present():
+    """Every preview run records whether a repair pass was needed."""
+    p = PREVIEW / "decision_screen_repair_log.json"
+    assert p.exists()
+    data = json.loads(p.read_text(encoding="utf-8"))
+    assert data.get("schema_version") == "decision_screen_repair_log_v1"
+    # In safe-local both providers fail validation and trigger repair,
+    # so the log must record the first-pass errors per provider.
+    assert "openai" in data
+    assert "claude" in data
