@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>MVP-1 王道判定プレビュー</title>
+  <title>MVP-1 AI生成 王道判定プレビュー</title>
   <style>
     body { margin:0; font-family: -apple-system, BlinkMacSystemFont,
        "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif;
@@ -28,14 +28,13 @@
     .links a { display:inline-block; margin-right:12px; padding:8px 12px;
        border-radius:8px; background:#e2e8f0; color:#1e293b;
        text-decoration:none; font-size:13px; font-weight:600; }
-    .links a:hover { background:#cbd5e1; }
     .muted { color:#64748b; font-size:12px; }
     footer { color:#64748b; font-size:12px; padding:24px; text-align:center; }
   </style>
 </head>
 <body>
   <header>
-    <h1>MVP-1 王道判定プレビュー</h1>
+    <h1>MVP-1 AI生成 王道判定プレビュー</h1>
     <div class="sub">
       観測専用 / READY通知不可 / 売買未使用 /
       OANDA・live・paper未接続 / 取引執行未使用
@@ -45,12 +44,13 @@
     <div class="banner ok">安全: 観測専用 / READY通知不可 / 売買未使用</div>
 
     <section>
-      <h2>王道判定画面 (decision_screen)</h2>
+      <h2>AI生成 王道判定画面 (OpenAI + Claude が線を設計)</h2>
       <img class="screen" src="./decision_screen.png"
-           alt="王道判定画面 (観測専用)">
+           alt="AI生成 王道判定画面 (観測専用)">
       <p class="muted">
-        画面内に「観測専用 / NOT READY ELIGIBLE」を明記。
-        ENTRY指示ではありません。本番READY判定には未使用。
+        rendererはAI specを描画するだけです。specに無い線を勝手に追加しません。
+        OpenAI案 / Claude案 / 二者比較 / 一致 / 不一致 が
+        decision_screen.html / decision_screen.png に表示されます。
       </p>
       <p class="links" style="margin-top:8px">
         <a href="./decision_screen.html">王道判定画面HTMLを開く</a>
@@ -59,28 +59,22 @@
     </section>
 
     <section>
-      <h2>AI画面レビュー (画面の見やすさのみ。売買判定ではありません)</h2>
-      <table><tr><th>OpenAI</th><td>判定: <b>UNKNOWN</b><br>日本語UI: UNKNOWN<br>線の見やすさ: UNKNOWN<br>安全性表記: UNKNOWN<br><span class='muted'>OpenAIによる画面レビューは行えませんでした。</span></td></tr><tr><th>Claude</th><td>判定: <b>UNKNOWN</b><br>日本語UI: UNKNOWN<br>線の見やすさ: UNKNOWN<br>安全性表記: UNKNOWN<br><span class='muted'>Claudeによる画面レビューは行えませんでした。</span></td></tr>
-        <tr><th>総合判定</th><td><b>UNKNOWN</b></td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>安全フラグ</h2>
-      <table><tr><th>判定</th><td>SUPPRESSED</td></tr><tr><th>READY許可</th><td>False</td></tr><tr><th>通知実行</th><td>False</td></tr><tr><th>rich_draft.ready_eligible</th><td>False</td></tr><tr><th>rich_draft.p0_pass</th><td>False</td></tr><tr><th>REVIEW.used_for_ready</th><td>False</td></tr><tr><th>REVIEW.used_for_notification</th><td>False</td></tr><tr><th>REVIEW.offline_analysis_only</th><td>True</td></tr></table>
-    </section>
-
-    <section>
-      <h2>下書き要約</h2>
-      <table><tr><th>symbol</th><td>EURUSD=X</td></tr><tr><th>timeframe</th><td>M5</td></tr><tr><th>source</th><td>csv:tests/fixtures/ohlc_preview_sample.csv</td></tr><tr><th>candles</th><td>25</td></tr><tr><th>last_close</th><td>1.102</td></tr><tr><th>rich_draft.pattern_kind</th><td>possible_double_top</td></tr><tr><th>rich_draft.wave_lines</th><td>3</td></tr><tr><th>rich_draft.structural_lines</th><td>4</td></tr></table>
+      <h2>AI画面設計サマリ</h2>
+      <table><tr><th>OpenAI画面設計</th><td>UNKNOWN</td></tr><tr><th>Claude画面設計</th><td>UNKNOWN</td></tr><tr><th>二者比較 (一致 / 不一致)</th><td>UNKNOWN</td></tr><tr><th>symbol</th><td>EURUSD=X</td></tr><tr><th>timeframe</th><td>M5</td></tr><tr><th>decision.level</th><td>SUPPRESSED</td></tr><tr><th>safety.ready_allowed</th><td>False</td></tr><tr><th>safety.dispatch_called</th><td>False</td></tr></table>
+      <p class="muted">
+        OpenAI と Claude が一致しない場合、いずれの判断も画面に並べて表示します。
+        システムが片方を勝手に採用することはありません。
+      </p>
     </section>
 
     <section class="links">
       <h2>追加データ</h2>
+      <a href="./openai_decision_screen_spec.json">OpenAI画面設計JSON</a>
+      <a href="./claude_decision_screen_spec.json">Claude画面設計JSON</a>
+      <a href="./decision_screen_spec_compare.json">二者比較JSON</a>
       <a href="./diagnostics.json">診断JSON</a>
       <a href="./review_report.md">AIレビュー集計 (md)</a>
       <a href="./review_report.json">AIレビュー集計 (json)</a>
-      <a href="./visual_review.json">画面レビュー詳細 (json)</a>
       <a href="./review_log.jsonl">レビュー生ログ</a>
       <a href="./draft_chart.png">下書きチャート (旧形式)</a>
     </section>

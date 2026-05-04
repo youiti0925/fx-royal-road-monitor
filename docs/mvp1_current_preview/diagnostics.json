@@ -1,6 +1,6 @@
 {
   "diagnostics_schema": "fx_monitor_diagnostics_v1",
-  "written_at_utc": "2026-05-04T03:48:14.368237+00:00",
+  "written_at_utc": "2026-05-04T04:12:00.595686+00:00",
   "mode": "market_draft",
   "feed": {
     "source": "csv:tests/fixtures/ohlc_preview_sample.csv",

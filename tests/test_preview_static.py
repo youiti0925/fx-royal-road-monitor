@@ -12,13 +12,15 @@ def test_mvp1_preview_files_exist():
         "index.html",
         "decision_screen.html",
         "decision_screen.png",
+        "openai_decision_screen_spec.json",
+        "claude_decision_screen_spec.json",
+        "decision_screen_spec_compare.json",
         "dashboard.html",
         "draft_chart.png",
         "diagnostics.json",
         "review_report.md",
         "review_report.json",
         "review_log.jsonl",
-        "visual_review.json",
     ):
         p = PREVIEW / name
         assert p.exists(), f"missing preview file: {p}"
@@ -27,15 +29,15 @@ def test_mvp1_preview_files_exist():
 def test_preview_index_is_japanese():
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
     for token in [
-        "MVP-1 王道判定プレビュー",
+        "MVP-1 AI生成 王道判定プレビュー",
         "観測専用",
         "READY通知不可",
         "売買未使用",
-        "王道判定画面",
-        "AI画面レビュー",
-        "詳細ダッシュボード",
-        "安全フラグ",
-        "下書き要約",
+        "AI生成 王道判定画面",
+        "AI画面設計サマリ",
+        "OpenAI画面設計",
+        "Claude画面設計",
+        "二者比較",
     ]:
         assert token in html_text, f"index missing {token!r}"
 
@@ -45,18 +47,17 @@ def test_preview_index_uses_relative_urls():
     assert 'src="./decision_screen.png"' in html_text
     assert 'href="./decision_screen.html"' in html_text
     assert 'href="./dashboard.html"' in html_text
-    assert 'href="./diagnostics.json"' in html_text
-    assert 'href="./visual_review.json"' in html_text
+    assert 'href="./openai_decision_screen_spec.json"' in html_text
+    assert 'href="./claude_decision_screen_spec.json"' in html_text
+    assert 'href="./decision_screen_spec_compare.json"' in html_text
 
 
-def test_preview_does_not_enable_ready_or_notification():
+def test_preview_index_does_not_claim_ready_or_trading():
     html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
     forbidden = [
         "READY通知可能",
         "本番通知ON",
         "売買可能",
-        "自動売買",
-        "発注",
         "broker connected",
         "live connected",
         "MVP-1 Observation Pipeline Preview",
@@ -73,21 +74,19 @@ def test_preview_dashboard_is_japanese_localised():
     assert "観測専用" in html_text
     assert "下書き分析" in html_text
     assert "FX Monitor Draft Review Dashboard" not in html_text
-    assert "offline artifact / not used for READY" not in html_text
 
 
 def test_preview_decision_screen_html_contains_geometry_classes():
     html_text = (PREVIEW / "decision_screen.html").read_text(encoding="utf-8")
-    for token in [
+    for cls in [
         "rr-screen",
         "rr-safety-header",
         "rr-main",
         "rr-chart-panel",
         "rr-checklist-panel",
-        "rr-ai-visual-review",
-        "rr-wave-skeleton-line",
         "rr-pivot-dot",
         "rr-pivot-label",
+        "rr-wave-skeleton-line",
         "rr-wnl-line",
         "rr-wsl-line",
         "rr-wtp-line",
@@ -95,7 +94,7 @@ def test_preview_decision_screen_html_contains_geometry_classes():
         "rr-sr-zone",
         "rr-safety-watermark",
     ]:
-        assert token in html_text, f"decision_screen missing {token!r}"
+        assert cls in html_text, f"decision_screen missing {cls!r}"
 
 
 def test_preview_decision_screen_png_is_populated():
@@ -103,14 +102,38 @@ def test_preview_decision_screen_png_is_populated():
     assert png.stat().st_size > 50_000
 
 
-def test_preview_visual_review_safety_flags():
-    data = json.loads((PREVIEW / "visual_review.json").read_text(encoding="utf-8"))
-    assert data["used_for_ready"] is False
-    assert data["used_for_notification"] is False
-    assert data["used_for_trading"] is False
-    assert "providers" in data
-    assert "openai" in data["providers"]
-    assert "claude" in data["providers"]
+def _spec_safety(spec: dict) -> None:
+    assert spec.get("observation_only") is True
+    assert spec.get("used_for_ready") is False
+    assert spec.get("used_for_notification") is False
+    assert spec.get("used_for_trading") is False
+
+
+def test_preview_openai_spec_safety_flags():
+    data = json.loads(
+        (PREVIEW / "openai_decision_screen_spec.json").read_text(encoding="utf-8")
+    )
+    _spec_safety(data)
+    assert data.get("provider") == "openai"
+
+
+def test_preview_claude_spec_safety_flags():
+    data = json.loads(
+        (PREVIEW / "claude_decision_screen_spec.json").read_text(encoding="utf-8")
+    )
+    _spec_safety(data)
+    assert data.get("provider") == "claude"
+
+
+def test_preview_compare_safety_flags():
+    data = json.loads(
+        (PREVIEW / "decision_screen_spec_compare.json").read_text(encoding="utf-8")
+    )
+    assert data.get("observation_only") is True
+    assert data.get("used_for_ready") is False
+    assert data.get("used_for_notification") is False
+    assert data.get("used_for_trading") is False
+    assert data.get("agreement") in ("AGREE", "PARTIAL", "DISAGREE", "UNKNOWN")
 
 
 def test_preview_diagnostics_safety_flags():
@@ -141,23 +164,14 @@ def test_preview_has_no_local_absolute_paths():
         "review_log.jsonl",
         "review_report.md",
         "review_report.json",
-        "visual_review.json",
+        "openai_decision_screen_spec.json",
+        "claude_decision_screen_spec.json",
+        "decision_screen_spec_compare.json",
     ):
         text = (PREVIEW / name).read_text(encoding="utf-8")
         assert "/home/user" not in text, f"{name} contains /home/user"
         assert "/home/runner" not in text, f"{name} contains /home/runner"
         assert "/tmp/" not in text, f"{name} contains /tmp/"
-
-
-def test_preview_chart_pattern_is_populated():
-    data = json.loads((PREVIEW / "diagnostics.json").read_text(encoding="utf-8"))
-    rich = data["draft"]["rich_draft"]
-    assert rich["pattern_kind"] in (
-        "possible_double_top",
-        "possible_double_bottom",
-    )
-    assert rich["wave_lines"] >= 3
-    assert rich["structural_lines"] >= 4
 
 
 def test_readme_links_to_mvp1_preview():

@@ -320,33 +320,46 @@ Planning documents:
 - [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
 - [MVP-1 Observation Pipeline Freeze Report](docs/MVP1_OBSERVATION_PIPELINE_FREEZE_REPORT.md)
 
-## MVP-1 王道判定プレビュー
+## MVP-1 AI生成 王道判定プレビュー
 
-URL を 1 つ開くだけで、王道判定画面 / 王道手順チェック /
-AI画面レビューを確認できます。Actions タブも zip ダウンロードも不要。
+URL を 1 つ開くだけで、OpenAI と Claude が独立に作成した王道判定画面案
+と二者比較を確認できます。Actions タブも zip ダウンロードも不要です。
 
   https://htmlpreview.github.io/?https://raw.githubusercontent.com/youiti0925/fx-royal-road-monitor/main/docs/mvp1_current_preview/index.html
+
+設計:
+
+- **AI が画面の設計者** です。OpenAI / Claude がそれぞれ独立に
+  `AiDecisionScreenSpec` (王道判定画面の設計JSON) を作成します。
+- **renderer は清書係** です。AI spec に書かれた線・点・ゾーン・
+  王道手順チェックだけを描画し、specに無い線を勝手に追加しません。
+- **二者比較は隠さず表示** します。一致した線は consensus、
+  どちらか片方だけの線、価格不一致 (conflict) は色を分けて
+  画面に並べます。
 
 プレビューに含まれる主なファイル:
 
 - `index.html` … 入口 (日本語)
-- `decision_screen.png` … 王道判定画面 (AI画面レビュー対象)
+- `decision_screen.png` … AI生成 王道判定画面
 - `decision_screen.html` … 王道判定画面の HTML 版 (`rr-*` クラス付き SVG)
+- `openai_decision_screen_spec.json` … OpenAI の画面設計
+- `claude_decision_screen_spec.json` … Claude の画面設計
+- `decision_screen_spec_compare.json` … 二者比較結果
 - `dashboard.html` … 詳細ダッシュボード (日本語)
-- `visual_review.json` … OpenAI / Claude の画面評価結果
 - `diagnostics.json` / `review_report.md` / `review_report.json`
   / `review_log.jsonl` / `draft_chart.png`
 
 この画面は **観測専用** です。
 
-- READY通知には使いません
-- 通知 (Discord / LINE) には使いません
-- 売買・発注・自動売買には使いません
+- READY通知には使いません (`used_for_ready=false`)
+- 通知 (Discord / LINE) には使いません (`used_for_notification=false`)
+- 売買・取引執行には使いません (`used_for_trading=false`)
 - OANDA / live / paper には接続していません
 
-`visual_review.json` の中身も観測専用です
-(`used_for_ready=false` / `used_for_notification=false`
-/ `used_for_trading=false`)。
+各 spec / 比較 JSON も `observation_only=true` /
+`used_for_ready=false` / `used_for_notification=false` /
+`used_for_trading=false` を必ず含みます。schema が違反を検知した
+場合は `final_status="UNKNOWN"` に強制ダウングレードします。
 
 プレビューを再生成する手順:
 
@@ -360,7 +373,9 @@ git commit -m "docs: refresh MVP1 preview"
 (`tests/fixtures/ohlc_preview_sample.csv`) から生成されます。
 `build_preview` は環境変数から OPENAI_API_KEY / ANTHROPIC_API_KEY を
 明示的に剥がして実行するため、コミットされる成果物が個別の API キーや
-ホストパスを含むことはありません。
+ホストパスを含むことはありません。API キーが無い状態では両 spec が
+SAFE-UNKNOWN として保存され、二者比較は `agreement="UNKNOWN"`、
+画面には「AIによる王道判定画面が未生成」と明示されます。
 
 ## ステータス
 

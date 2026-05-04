@@ -1,0 +1,16 @@
+{
+  "schema_version": "decision_screen_spec_compare_v1",
+  "observation_only": true,
+  "used_for_ready": false,
+  "used_for_notification": false,
+  "used_for_trading": false,
+  "agreement": "UNKNOWN",
+  "side_match": true,
+  "final_status_match": true,
+  "matched_lines": [],
+  "openai_only": [],
+  "claude_only": [],
+  "conflicts": [],
+  "step_disagreements": [],
+  "summary_ja": "AIによる王道判定画面が未完成です。"
+}

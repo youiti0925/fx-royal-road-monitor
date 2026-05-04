@@ -22,6 +22,13 @@ from .visual_review_schema import (
     parse_visual_review,
     visual_review_schema_as_dict,
 )
+from .decision_screen_prompt_builder import build_decision_screen_prompt
+from .decision_screen_spec_schema import (
+    AiDecisionScreenSpec,
+    decision_screen_spec_schema_as_dict,
+    parse_decision_screen_spec,
+    safe_unknown_spec,
+)
 
 _TOOL_NAME = "submit_ai_royal_road_review"
 
@@ -186,6 +193,102 @@ class ClaudeReviewer:
                 return _visual_unknown("anthropic_visual_tool_input_not_dict")
 
         return _visual_unknown("anthropic_visual_tool_use_missing")
+
+
+    def build_decision_screen_spec(
+        self,
+        *,
+        market_analysis_pack: dict[str, Any],
+    ) -> AiDecisionScreenSpec:
+        """Ask Claude to author a royal-road decision screen spec."""
+        symbol = str(market_analysis_pack.get("symbol", "UNKNOWN"))
+        timeframe = str(market_analysis_pack.get("timeframe", "UNKNOWN"))
+
+        if os.getenv("ANTHROPIC_ENABLED", "false").lower() not in ("1", "true", "yes"):
+            return safe_unknown_spec(
+                provider="claude",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason="anthropic_disabled",
+            )
+        api_key = self._explicit_api_key or os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            return safe_unknown_spec(
+                provider="claude",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason="anthropic_api_key_missing",
+            )
+
+        try:
+            import anthropic
+        except Exception as exc:
+            return safe_unknown_spec(
+                provider="claude",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason=f"anthropic_sdk_import_failed:{type(exc).__name__}",
+            )
+
+        prompt = build_decision_screen_prompt(
+            market_analysis_pack=market_analysis_pack, provider="claude"
+        )
+        schema = decision_screen_spec_schema_as_dict()
+        tool_name = "submit_decision_screen_spec"
+        try:
+            client = anthropic.Anthropic(api_key=api_key)
+            msg = client.messages.create(
+                model=self.model,
+                max_tokens=4096,
+                temperature=0,
+                system=prompt.system,
+                messages=[{"role": "user", "content": prompt.user}],
+                tools=[
+                    {
+                        "name": tool_name,
+                        "description": (
+                            "Submit a royal-road decision screen spec as "
+                            "strict structured JSON. Use exactly once."
+                        ),
+                        "input_schema": schema,
+                    }
+                ],
+                tool_choice={"type": "tool", "name": tool_name},
+            )
+        except Exception as exc:
+            return safe_unknown_spec(
+                provider="claude",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason=f"anthropic_decision_screen_failed:{type(exc).__name__}",
+            )
+
+        for block in getattr(msg, "content", None) or []:
+            if (
+                getattr(block, "type", None) == "tool_use"
+                and getattr(block, "name", "") == tool_name
+            ):
+                data = getattr(block, "input", None)
+                if isinstance(data, dict):
+                    return parse_decision_screen_spec(
+                        provider="claude",
+                        payload=data,
+                        symbol=symbol,
+                        timeframe=timeframe,
+                    )
+                return safe_unknown_spec(
+                    provider="claude",
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    reason="anthropic_decision_screen_tool_input_not_dict",
+                )
+
+        return safe_unknown_spec(
+            provider="claude",
+            symbol=symbol,
+            timeframe=timeframe,
+            reason="anthropic_decision_screen_tool_use_missing",
+        )
 
 
 def _visual_unknown(reason: str) -> VisualReview:

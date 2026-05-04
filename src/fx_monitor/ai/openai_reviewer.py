@@ -23,6 +23,13 @@ from .visual_review_schema import (
     parse_visual_review,
     visual_review_schema_as_dict,
 )
+from .decision_screen_prompt_builder import build_decision_screen_prompt
+from .decision_screen_spec_schema import (
+    AiDecisionScreenSpec,
+    decision_screen_spec_schema_as_dict,
+    parse_decision_screen_spec,
+    safe_unknown_spec,
+)
 
 
 def _unknown(reason: str) -> ReviewResult:
@@ -165,6 +172,90 @@ class OpenAIReviewer:
             return _visual_unknown(f"openai_visual_review_failed:{type(exc).__name__}")
 
         return parse_visual_review("openai", text)
+
+
+    def build_decision_screen_spec(
+        self,
+        *,
+        market_analysis_pack: dict[str, Any],
+    ) -> AiDecisionScreenSpec:
+        """Ask OpenAI to author a royal-road decision screen spec.
+
+        The model is the analyst + screen designer. Failure / disabled
+        / missing-key paths all return a SAFE-UNKNOWN spec.
+        """
+        symbol = str(market_analysis_pack.get("symbol", "UNKNOWN"))
+        timeframe = str(market_analysis_pack.get("timeframe", "UNKNOWN"))
+
+        if os.getenv("OPENAI_ENABLED", "false").lower() not in ("1", "true", "yes"):
+            return safe_unknown_spec(
+                provider="openai",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason="openai_disabled",
+            )
+        api_key = self._explicit_api_key or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return safe_unknown_spec(
+                provider="openai",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason="openai_api_key_missing",
+            )
+
+        try:
+            from openai import OpenAI
+        except Exception as exc:
+            return safe_unknown_spec(
+                provider="openai",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason=f"openai_sdk_import_failed:{type(exc).__name__}",
+            )
+
+        prompt = build_decision_screen_prompt(
+            market_analysis_pack=market_analysis_pack, provider="openai"
+        )
+        try:
+            client = OpenAI(api_key=api_key)
+            response = client.responses.create(
+                model=self.model,
+                input=[
+                    {"role": "system", "content": prompt.system},
+                    {"role": "user", "content": prompt.user},
+                ],
+                text={
+                    "format": {
+                        "type": "json_schema",
+                        "name": "ai_decision_screen_spec",
+                        "strict": False,
+                        "schema": decision_screen_spec_schema_as_dict(),
+                    }
+                },
+                temperature=0,
+            )
+            text = getattr(response, "output_text", None)
+            if not text:
+                return safe_unknown_spec(
+                    provider="openai",
+                    symbol=symbol,
+                    timeframe=timeframe,
+                    reason="openai_decision_screen_empty_output",
+                )
+        except Exception as exc:
+            return safe_unknown_spec(
+                provider="openai",
+                symbol=symbol,
+                timeframe=timeframe,
+                reason=f"openai_decision_screen_failed:{type(exc).__name__}",
+            )
+
+        return parse_decision_screen_spec(
+            provider="openai",
+            payload=text,
+            symbol=symbol,
+            timeframe=timeframe,
+        )
 
 
 def _visual_unknown(reason: str) -> VisualReview:

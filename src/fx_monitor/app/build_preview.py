@@ -1,18 +1,25 @@
-"""Build the Japanese-UI MVP-1 royal-road decision preview.
+"""Build the MVP-1 AI-authored royal-road decision preview.
 
-Pipeline (every output observation-only, no READY, no dispatch):
+Pipeline (every output observation-only — no READY, no dispatch):
 
   1. Run feed mode against the populated CSV fixture.
      -> review_log.jsonl, diagnostics.json, draft_chart.png
   2. Generate review_report.md / review_report.json.
   3. Generate dashboard.html and post-process to Japanese headings.
-  4. Build the royal-road decision screen (HTML inline-SVG + PNG).
-  5. Run AI visual review against the decision screen PNG. The visual
-     review never feeds READY / notification / trading; if API keys
-     are absent (the default), each provider returns UNKNOWN.
-  6. Scrub absolute filesystem paths from the JSON / JSONL outputs so
-     committed artifacts do not leak the build host's directory.
-  7. Render index.html in Japanese with the decision screen inline.
+  4. Build a market_analysis_pack from snapshot + rich_draft +
+     diagnostics + the royal-road knowledge pack.
+  5. Ask OpenAI to author an AiDecisionScreenSpec.
+  6. Ask Claude to author an AiDecisionScreenSpec.
+  7. Compare the two specs.
+  8. Render the AI-authored decision screen (HTML + PNG) — the
+     renderer paints **only** what the specs say. No system-side
+     line drawing.
+  9. Scrub absolute filesystem paths from JSON / JSONL outputs.
+ 10. Render the Japanese index.html.
+
+When API keys are absent (the default for the committed preview),
+both specs come back as SAFE-UNKNOWN and the comparison is UNKNOWN.
+The renderer renders an explicit "AI が画面を生成していない" state.
 
 Open the result via:
   https://htmlpreview.github.io/?https://raw.githubusercontent.com/
@@ -64,7 +71,6 @@ def _safe_env(csv_rel: str, work_rel: str) -> dict[str, str]:
         "FX_MONITOR_DRAFT_CHART_PATH": f"{work_rel}/draft_chart.png",
     }
     env.pop("FX_MONITOR_FIXTURE_PATH", None)
-    # Reproducible committed preview: do not call live APIs.
     env.pop("OPENAI_API_KEY", None)
     env.pop("ANTHROPIC_API_KEY", None)
     return env
@@ -117,7 +123,7 @@ _DASHBOARD_JA_RENAMES = (
     ),
     (
         "It is never used for trading, READY decisions, or notifications.",
-        "売買 / READY判定 / 通知には使いません。",
+        "売買・READY判定・通知 には使いません。",
     ),
 )
 
@@ -132,75 +138,36 @@ def _localize_dashboard_html(path: Path) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def _run_visual_review(decision_png: Path, context_summary: str) -> dict[str, Any]:
-    from ..ai.claude_reviewer import ClaudeReviewer
-    from ..ai.openai_reviewer import OpenAIReviewer
-
-    image_bytes = decision_png.read_bytes() if decision_png.exists() else b""
-
-    openai_review = OpenAIReviewer().visual_review(
-        image_bytes=image_bytes, context_summary=context_summary
-    )
-    claude_review = ClaudeReviewer().visual_review(
-        image_bytes=image_bytes, context_summary=context_summary
-    )
-
-    def _to_summary(r: Any) -> dict[str, Any]:
-        return {
-            "verdict": r.verdict,
-            "readability": r.readability,
-            "language": r.language,
-            "royal_road_clarity": r.royal_road_clarity,
-            "line_visibility": r.line_visibility,
-            "safety_clarity": r.safety_clarity,
-            "problems": list(r.problems[:5]),
-            "summary_ja": r.summary_ja,
-        }
-
-    combined = "UNKNOWN"
-    if openai_review.verdict == "PASS" and claude_review.verdict == "PASS":
-        combined = "PASS"
-    elif "FAIL" in (openai_review.verdict, claude_review.verdict):
-        combined = "FAIL"
-    elif "WARN" in (openai_review.verdict, claude_review.verdict):
-        combined = "WARN"
-
-    return {
-        "schema_version": "visual_review_v1",
-        "providers": {
-            "openai": _to_summary(openai_review),
-            "claude": _to_summary(claude_review),
-        },
-        "combined_verdict": combined,
-        "used_for_ready": False,
-        "used_for_notification": False,
-        "used_for_trading": False,
-        "context_summary": context_summary,
-    }
-
-
 def _esc(value: Any) -> str:
     return html.escape(str(value))
 
 
-def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
+def _render_index_html(
+    out_dir: Path,
+    openai_spec: dict[str, Any],
+    claude_spec: dict[str, Any],
+    comparison: dict[str, Any],
+) -> str:
     diag = json.loads((out_dir / "diagnostics.json").read_text(encoding="utf-8"))
     summary = json.loads((out_dir / "review_report.json").read_text(encoding="utf-8"))
 
     decision = diag.get("decision") or {}
     safety = diag.get("safety") or {}
     feed = diag.get("feed") or {}
-    rich = (diag.get("draft") or {}).get("rich_draft") or {}
     summary_safety = summary.get("safety") or {}
 
     safe = (
         decision.get("level") == "SUPPRESSED"
         and safety.get("ready_allowed") is False
         and safety.get("dispatch_called") is False
-        and rich.get("ready_eligible") is False
-        and rich.get("p0_pass") is False
         and summary_safety.get("used_for_ready") is False
         and summary_safety.get("used_for_notification") is False
+        and openai_spec.get("used_for_ready") is False
+        and openai_spec.get("used_for_notification") is False
+        and openai_spec.get("used_for_trading") is False
+        and claude_spec.get("used_for_ready") is False
+        and claude_spec.get("used_for_notification") is False
+        and claude_spec.get("used_for_trading") is False
     )
     banner_class = "ok" if safe else "bad"
     banner_text = (
@@ -209,46 +176,17 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
         else "安全フラグ要確認 / CHECK SAFETY FLAGS"
     )
 
-    visual_rows = []
-    for name, label in (("openai", "OpenAI"), ("claude", "Claude")):
-        r = (visual_review.get("providers") or {}).get(name) or {}
-        visual_rows.append(
-            "<tr>"
-            f"<th>{_esc(label)}</th>"
-            f"<td>判定: <b>{_esc(r.get('verdict', 'UNKNOWN'))}</b><br>"
-            f"日本語UI: {_esc(r.get('language', 'UNKNOWN'))}<br>"
-            f"線の見やすさ: {_esc(r.get('line_visibility', 'UNKNOWN'))}<br>"
-            f"安全性表記: {_esc(r.get('safety_clarity', 'UNKNOWN'))}<br>"
-            f"<span class='muted'>{_esc(r.get('summary_ja', ''))}</span></td>"
-            "</tr>"
-        )
-    combined_v = visual_review.get("combined_verdict") or "UNKNOWN"
-
-    flags_rows = "".join(
+    rows = "".join(
         f"<tr><th>{_esc(k)}</th><td>{_esc(v)}</td></tr>"
         for k, v in (
-            ("判定", decision.get("level")),
-            ("READY許可", safety.get("ready_allowed")),
-            ("通知実行", safety.get("dispatch_called")),
-            ("rich_draft.ready_eligible", rich.get("ready_eligible")),
-            ("rich_draft.p0_pass", rich.get("p0_pass")),
-            ("REVIEW.used_for_ready", summary_safety.get("used_for_ready")),
-            ("REVIEW.used_for_notification", summary_safety.get("used_for_notification")),
-            ("REVIEW.offline_analysis_only", summary_safety.get("offline_analysis_only")),
-        )
-    )
-
-    feed_rows = "".join(
-        f"<tr><th>{_esc(k)}</th><td>{_esc(v)}</td></tr>"
-        for k, v in (
+            ("OpenAI画面設計", openai_spec.get("final_status")),
+            ("Claude画面設計", claude_spec.get("final_status")),
+            ("二者比較 (一致 / 不一致)", comparison.get("agreement")),
             ("symbol", feed.get("symbol")),
             ("timeframe", feed.get("timeframe")),
-            ("source", feed.get("source")),
-            ("candles", feed.get("candles")),
-            ("last_close", feed.get("last_close")),
-            ("rich_draft.pattern_kind", rich.get("pattern_kind")),
-            ("rich_draft.wave_lines", rich.get("wave_lines")),
-            ("rich_draft.structural_lines", rich.get("structural_lines")),
+            ("decision.level", decision.get("level")),
+            ("safety.ready_allowed", safety.get("ready_allowed")),
+            ("safety.dispatch_called", safety.get("dispatch_called")),
         )
     )
 
@@ -256,7 +194,7 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>MVP-1 王道判定プレビュー</title>
+  <title>MVP-1 AI生成 王道判定プレビュー</title>
   <style>
     body {{ margin:0; font-family: -apple-system, BlinkMacSystemFont,
        "Noto Sans CJK JP", "Yu Gothic", "Meiryo", sans-serif;
@@ -282,14 +220,13 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
     .links a {{ display:inline-block; margin-right:12px; padding:8px 12px;
        border-radius:8px; background:#e2e8f0; color:#1e293b;
        text-decoration:none; font-size:13px; font-weight:600; }}
-    .links a:hover {{ background:#cbd5e1; }}
     .muted {{ color:#64748b; font-size:12px; }}
     footer {{ color:#64748b; font-size:12px; padding:24px; text-align:center; }}
   </style>
 </head>
 <body>
   <header>
-    <h1>MVP-1 王道判定プレビュー</h1>
+    <h1>MVP-1 AI生成 王道判定プレビュー</h1>
     <div class="sub">
       観測専用 / READY通知不可 / 売買未使用 /
       OANDA・live・paper未接続 / 取引執行未使用
@@ -299,12 +236,13 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
     <div class="banner {banner_class}">{_esc(banner_text)}</div>
 
     <section>
-      <h2>王道判定画面 (decision_screen)</h2>
+      <h2>AI生成 王道判定画面 (OpenAI + Claude が線を設計)</h2>
       <img class="screen" src="./decision_screen.png"
-           alt="王道判定画面 (観測専用)">
+           alt="AI生成 王道判定画面 (観測専用)">
       <p class="muted">
-        画面内に「観測専用 / NOT READY ELIGIBLE」を明記。
-        ENTRY指示ではありません。本番READY判定には未使用。
+        rendererはAI specを描画するだけです。specに無い線を勝手に追加しません。
+        OpenAI案 / Claude案 / 二者比較 / 一致 / 不一致 が
+        decision_screen.html / decision_screen.png に表示されます。
       </p>
       <p class="links" style="margin-top:8px">
         <a href="./decision_screen.html">王道判定画面HTMLを開く</a>
@@ -313,28 +251,22 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
     </section>
 
     <section>
-      <h2>AI画面レビュー (画面の見やすさのみ。売買判定ではありません)</h2>
-      <table>{"".join(visual_rows)}
-        <tr><th>総合判定</th><td><b>{_esc(combined_v)}</b></td></tr>
-      </table>
-    </section>
-
-    <section>
-      <h2>安全フラグ</h2>
-      <table>{flags_rows}</table>
-    </section>
-
-    <section>
-      <h2>下書き要約</h2>
-      <table>{feed_rows}</table>
+      <h2>AI画面設計サマリ</h2>
+      <table>{rows}</table>
+      <p class="muted">
+        OpenAI と Claude が一致しない場合、いずれの判断も画面に並べて表示します。
+        システムが片方を勝手に採用することはありません。
+      </p>
     </section>
 
     <section class="links">
       <h2>追加データ</h2>
+      <a href="./openai_decision_screen_spec.json">OpenAI画面設計JSON</a>
+      <a href="./claude_decision_screen_spec.json">Claude画面設計JSON</a>
+      <a href="./decision_screen_spec_compare.json">二者比較JSON</a>
       <a href="./diagnostics.json">診断JSON</a>
       <a href="./review_report.md">AIレビュー集計 (md)</a>
       <a href="./review_report.json">AIレビュー集計 (json)</a>
-      <a href="./visual_review.json">画面レビュー詳細 (json)</a>
       <a href="./review_log.jsonl">レビュー生ログ</a>
       <a href="./draft_chart.png">下書きチャート (旧形式)</a>
     </section>
@@ -352,7 +284,7 @@ def _render_index_html(out_dir: Path, visual_review: dict[str, Any]) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="fx_monitor.app.build_preview",
-        description="Build the MVP-1 royal-road decision preview (Japanese).",
+        description="Build the MVP-1 AI-authored decision-screen preview.",
     )
     parser.add_argument("--csv", default=str(DEFAULT_CSV))
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
@@ -379,29 +311,19 @@ def main(argv: list[str] | None = None) -> int:
     _run([sys.executable, "-m", "fx_monitor.app.run_once"], env=env, cwd=REPO_ROOT)
     _run(
         [
-            sys.executable,
-            "-m",
-            "fx_monitor.app.review_report",
-            "--log",
-            f"{work_rel}/review_log.jsonl",
-            "--md",
-            f"{work_rel}/review_report.md",
-            "--json",
-            f"{work_rel}/review_report.json",
+            sys.executable, "-m", "fx_monitor.app.review_report",
+            "--log", f"{work_rel}/review_log.jsonl",
+            "--md", f"{work_rel}/review_report.md",
+            "--json", f"{work_rel}/review_report.json",
         ],
         cwd=REPO_ROOT,
     )
     _run(
         [
-            sys.executable,
-            "-m",
-            "fx_monitor.app.dashboard",
-            "--diagnostics",
-            f"{work_rel}/diagnostics.json",
-            "--summary",
-            f"{work_rel}/review_report.json",
-            "--html",
-            f"{work_rel}/dashboard.html",
+            sys.executable, "-m", "fx_monitor.app.dashboard",
+            "--diagnostics", f"{work_rel}/diagnostics.json",
+            "--summary", f"{work_rel}/review_report.json",
+            "--html", f"{work_rel}/dashboard.html",
         ],
         cwd=REPO_ROOT,
     )
@@ -411,44 +333,68 @@ def main(argv: list[str] | None = None) -> int:
         if src.exists():
             shutil.copy2(src, out_dir / name)
 
+    # Build the AI-input pack from the same data the feed pipeline saw.
+    from ..ai.claude_reviewer import ClaudeReviewer
+    from ..ai.decision_screen_spec_compare import compare_decision_screen_specs
+    from ..ai.market_analysis_pack import build_market_analysis_pack
+    from ..ai.openai_reviewer import OpenAIReviewer
     from ..analysis import build_royal_road_draft_payload_from_snapshot
     from ..data.csv_feed import load_ohlc_csv
+    from ..knowledge.loader import load_knowledge_pack
     from ..render.royal_road_decision_screen import (
         build_royal_road_decision_screen_html,
         render_royal_road_decision_screen_png,
     )
 
     diag = json.loads((out_dir / "diagnostics.json").read_text(encoding="utf-8"))
-    summary = json.loads((out_dir / "review_report.json").read_text(encoding="utf-8"))
-
     snap = load_ohlc_csv(csv_path, symbol="EURUSD=X", timeframe="M5")
     full_draft = build_royal_road_draft_payload_from_snapshot(snap)
-    full_rich_draft = full_draft.rich_draft or {}
-
-    decision_png = out_dir / "decision_screen.png"
-    render_royal_road_decision_screen_png(
-        rich_draft=full_rich_draft,
+    pack = build_market_analysis_pack(
+        snapshot=snap,
+        rich_draft=full_draft,
         diagnostics=diag,
-        out_path=decision_png,
+        knowledge_pack_text=load_knowledge_pack().text,
     )
 
-    feed = diag.get("feed") or {}
-    rich = (diag.get("draft") or {}).get("rich_draft") or {}
-    context = (
-        f"symbol={feed.get('symbol')} timeframe={feed.get('timeframe')} "
-        f"pattern={rich.get('pattern_kind')}"
+    # Ask each AI to author its own decision screen spec. Without API
+    # keys (the committed preview default) both come back UNKNOWN.
+    openai_spec = OpenAIReviewer().build_decision_screen_spec(market_analysis_pack=pack)
+    claude_spec = ClaudeReviewer().build_decision_screen_spec(market_analysis_pack=pack)
+
+    comparison = compare_decision_screen_specs(
+        openai_spec=openai_spec, claude_spec=claude_spec
     )
-    visual_review = _run_visual_review(decision_png, context_summary=context)
-    (out_dir / "visual_review.json").write_text(
-        json.dumps(visual_review, ensure_ascii=False, indent=2),
+
+    openai_dump = openai_spec.model_dump(mode="json")
+    claude_dump = claude_spec.model_dump(mode="json")
+
+    (out_dir / "openai_decision_screen_spec.json").write_text(
+        json.dumps(openai_dump, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (out_dir / "claude_decision_screen_spec.json").write_text(
+        json.dumps(claude_dump, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    (out_dir / "decision_screen_spec_compare.json").write_text(
+        json.dumps(comparison, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
+    decision_png = out_dir / "decision_screen.png"
+    render_royal_road_decision_screen_png(
+        openai_spec=openai_dump,
+        claude_spec=claude_dump,
+        comparison=comparison,
+        market_analysis_pack=pack,
+        out_path=decision_png,
+    )
+
     decision_html = build_royal_road_decision_screen_html(
-        rich_draft=full_rich_draft,
-        diagnostics=diag,
-        review_summary=summary,
-        visual_review=visual_review,
+        openai_spec=openai_dump,
+        claude_spec=claude_dump,
+        comparison=comparison,
+        market_analysis_pack=pack,
     )
     (out_dir / "decision_screen.html").write_text(decision_html, encoding="utf-8")
 
@@ -459,30 +405,40 @@ def main(argv: list[str] | None = None) -> int:
         "review_log.jsonl",
         "review_report.md",
         "review_report.json",
-        "visual_review.json",
+        "openai_decision_screen_spec.json",
+        "claude_decision_screen_spec.json",
+        "decision_screen_spec_compare.json",
     ):
         _scrub_file(out_dir / name)
 
-    index_html = _render_index_html(out_dir, visual_review)
+    # Remove orphan files from the previous (visual_review) preview design.
+    for old in ("visual_review.json",):
+        p = out_dir / old
+        if p.exists():
+            p.unlink()
+
+    index_html = _render_index_html(out_dir, openai_dump, claude_dump, comparison)
     (out_dir / "index.html").write_text(index_html, encoding="utf-8")
 
     files = [
         "index.html",
         "decision_screen.html",
         "decision_screen.png",
+        "openai_decision_screen_spec.json",
+        "claude_decision_screen_spec.json",
+        "decision_screen_spec_compare.json",
         "dashboard.html",
         "draft_chart.png",
         "diagnostics.json",
         "review_report.md",
         "review_report.json",
         "review_log.jsonl",
-        "visual_review.json",
     ]
     print(f"Preview written to: {out_dir}")
     for name in files:
         p = out_dir / name
         size = p.stat().st_size if p.exists() else 0
-        print(f"  {name:<22}: {size} B")
+        print(f"  {name:<38}: {size} B")
     return 0
 
 
