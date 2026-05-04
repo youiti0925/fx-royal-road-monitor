@@ -73,6 +73,10 @@ jobs:
       FX_MONITOR_REVIEW_LOG_PATH: "out/review_log.jsonl"
       FX_MONITOR_DIAGNOSTICS_PATH: "out/diagnostics.json"
 
+      # Phase P2 visual validation (observation only).
+      FX_MONITOR_RENDER_DRAFT_CHART: "true"
+      FX_MONITOR_DRAFT_CHART_PATH: "out/draft_chart.png"
+
       # Notification cards are not relevant for draft mode.
       FX_MONITOR_RENDER_CARD: "false"
       FX_MONITOR_ATTACH_CARD: "false"
@@ -133,5 +137,6 @@ jobs:
             out/review_report.json
             out/diagnostics.json
             out/dashboard.html
+            out/draft_chart.png
           if-no-files-found: warn
           retention-days: 14

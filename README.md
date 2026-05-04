@@ -150,6 +150,25 @@ They are not READY eligible. The dashboard's safety banner flips to
 "CHECK SAFETY FLAGS" if `rich_draft.ready_eligible` or
 `rich_draft.p0_pass` is ever true.
 
+### Draft chart visual validation
+
+Phase P2 renders an observation-only chart from `rich_draft`:
+
+```env
+FX_MONITOR_RENDER_DRAFT_CHART=true
+FX_MONITOR_DRAFT_CHART_PATH=out/draft_chart.png
+```
+
+The image carries an "OBSERVATION ONLY / NOT READY ELIGIBLE /
+source=draft / ready_eligible=False" banner. The dashboard surfaces an
+"Open draft chart" link in the Rich draft card when the chart is
+present in the same `out/` directory.
+
+This chart is never used for READY decisions, notifications, trading,
+or order execution. It exists solely so a human can inspect whether
+the draft P1/NL/P2/BR (or B1/NL/B2/BR), WNL_D1 / WSL_D1 / WTP_D1, and
+SNL_D1 / SIL_D1 / STP_D1 / STL_D1 lines look reasonable on the chart.
+
 ## Draft AI review mode
 
 Feed mode can optionally send the observation-only draft payload to

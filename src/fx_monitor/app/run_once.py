@@ -45,6 +45,7 @@ from ..logging import append_review_log, write_diagnostics
 from ..notify.console_notifier import ConsoleNotifier
 from ..notify.notifier import CooldownTracker, decide, dispatch
 from ..render.chart_card_renderer import render_royal_road_notification_card
+from ..render.draft_chart_renderer import render_draft_rich_chart
 
 
 def _demo_payload() -> ChartPayload:
@@ -124,6 +125,27 @@ def _run_market_draft_mode() -> int:
         f"ready_eligible={rich.get('ready_eligible')}"
     )
 
+    draft_chart_path: str | None = None
+    if _env_truthy("FX_MONITOR_RENDER_DRAFT_CHART"):
+        chart_out = os.environ.get(
+            "FX_MONITOR_DRAFT_CHART_PATH", "out/draft_chart.png"
+        )
+        try:
+            rendered = render_draft_rich_chart(
+                rich_draft=rich,
+                out_path=chart_out,
+                title=(
+                    f"{snapshot.symbol} {snapshot.timeframe} "
+                    f"rich draft (observation only)"
+                ),
+            )
+            draft_chart_path = str(rendered)
+            print(f"Draft chart: {draft_chart_path}")
+        except Exception as exc:
+            # Renderer is already defensive, but be paranoid: never let
+            # chart rendering bring down the workflow.
+            print(f"Draft chart: skipped ({type(exc).__name__})")
+
     case = build_monitor_case_from_draft_payload(draft)
     rule = evaluate_monitor_case(case)
     print(f"Rule: {rule.verdict} {rule.bias}")
@@ -149,6 +171,7 @@ def _run_market_draft_mode() -> int:
             openai_review=None,
             claude_review=None,
             cmp_outcome=None,
+            draft_chart_path=draft_chart_path,
         )
         return 0
 
@@ -224,6 +247,7 @@ def _run_market_draft_mode() -> int:
         openai_review=openai_review,
         claude_review=claude_review,
         cmp_outcome=cmp_outcome,
+        draft_chart_path=draft_chart_path,
     )
     return 0
 
@@ -238,6 +262,7 @@ def _write_market_draft_diagnostics(
     openai_review,
     claude_review,
     cmp_outcome,
+    draft_chart_path: str | None = None,
 ) -> None:
     """Emit the per-run diagnostics JSON. Always called from feed mode."""
     zones = draft.rough_support_resistance.get("selected_level_zones_top5") or []
@@ -277,6 +302,8 @@ def _write_market_draft_diagnostics(
                 "sr_zones": len(rich_sr.get("selected_level_zones_top5") or []),
                 "trendlines": len(rich_trend.get("selected_trendlines_top3") or []),
                 "p0_pass": rich_checklist.get("p0_pass"),
+                "chart_path": draft_chart_path,
+                "chart_rendered": draft_chart_path is not None,
             },
         },
         "rule": {

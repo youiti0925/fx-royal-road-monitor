@@ -82,3 +82,10 @@ def test_monitor_workflow_generates_dashboard_artifact():
     text = _text()
     assert "python -m fx_monitor.app.dashboard" in text
     assert "out/dashboard.html" in text
+
+
+def test_monitor_workflow_renders_draft_chart_artifact():
+    text = _text()
+    assert 'FX_MONITOR_RENDER_DRAFT_CHART: "true"' in text
+    assert 'FX_MONITOR_DRAFT_CHART_PATH: "out/draft_chart.png"' in text
+    assert "out/draft_chart.png" in text

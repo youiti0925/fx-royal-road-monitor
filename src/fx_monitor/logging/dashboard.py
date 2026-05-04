@@ -43,6 +43,22 @@ def _dict_items_table(data: dict[str, Any] | None) -> str:
     return "<table>" + "\n".join(rows) + "</table>"
 
 
+def _chart_link_html(chart_path: Any) -> str:
+    """Render an "Open draft chart" anchor when a chart_path is set.
+
+    The link uses a relative URL (just the filename) so the dashboard
+    works inside a downloaded artifact zip where dashboard.html and
+    draft_chart.png live next to each other.
+    """
+    if not chart_path:
+        return ""
+    name = Path(str(chart_path)).name
+    return (
+        f"<p><a href='{_esc(name)}' "
+        f"rel='noopener noreferrer'>Open draft chart</a></p>"
+    )
+
+
 def _top_list(items: list[dict[str, Any]] | None) -> str:
     if not items:
         return "<p class='muted'>No items</p>"
@@ -188,6 +204,7 @@ def build_dashboard_html(
       <div class="card">
         <h2>Rich draft</h2>
         {_dict_items_table(rich_draft)}
+        {_chart_link_html(rich_draft.get("chart_path"))}
       </div>
 
       <div class="card">

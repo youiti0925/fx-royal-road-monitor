@@ -248,3 +248,73 @@ def test_run_once_csv_feed_prints_rich_draft_counts(tmp_path):
     assert rd["ready_eligible"] is False
     assert rd["p0_pass"] is False
     assert "schema_version" in rd
+
+
+def test_run_once_csv_feed_renders_draft_chart(tmp_path):
+    pytest_importorskip = __import__("pytest").importorskip
+    pytest_importorskip("matplotlib")
+
+    env = os.environ.copy()
+    diag = tmp_path / "diagnostics.json"
+    chart = tmp_path / "draft_chart.png"
+
+    env.pop("FX_MONITOR_FIXTURE_PATH", None)
+    env["FX_MONITOR_FEED"] = "csv"
+    env["FX_MONITOR_CSV_PATH"] = str(FIXTURES / "ohlc_sample.csv")
+    env["FX_MONITOR_SYMBOL"] = "EURUSD=X"
+    env["FX_MONITOR_TIMEFRAME"] = "M5"
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_REVIEW_DRAFT_WITH_AI"] = "false"
+    env["FX_MONITOR_DIAGNOSTICS_PATH"] = str(diag)
+    env["FX_MONITOR_RENDER_DRAFT_CHART"] = "true"
+    env["FX_MONITOR_DRAFT_CHART_PATH"] = str(chart)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Draft chart:" in result.stdout
+    assert "[READY]" not in result.stdout
+    assert chart.exists()
+
+    data = json.loads(diag.read_text(encoding="utf-8"))
+    rd = data["draft"]["rich_draft"]
+    assert rd["chart_rendered"] is True
+    assert rd["chart_path"] == str(chart)
+    assert rd["ready_eligible"] is False
+
+
+def test_run_once_csv_feed_draft_chart_off_by_default(tmp_path):
+    env = os.environ.copy()
+    diag = tmp_path / "diagnostics.json"
+
+    env.pop("FX_MONITOR_FIXTURE_PATH", None)
+    env["FX_MONITOR_FEED"] = "csv"
+    env["FX_MONITOR_CSV_PATH"] = str(FIXTURES / "ohlc_sample.csv")
+    env["FX_MONITOR_SYMBOL"] = "EURUSD=X"
+    env["FX_MONITOR_TIMEFRAME"] = "M5"
+    env["AI_USE_MOCK"] = "true"
+    env["DRY_RUN"] = "true"
+    env["FX_MONITOR_REVIEW_DRAFT_WITH_AI"] = "false"
+    env["FX_MONITOR_DIAGNOSTICS_PATH"] = str(diag)
+    env.pop("FX_MONITOR_RENDER_DRAFT_CHART", None)
+    env.pop("FX_MONITOR_DRAFT_CHART_PATH", None)
+
+    result = subprocess.run(
+        [sys.executable, "-m", "fx_monitor.app.run_once"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    assert "Draft chart:" not in result.stdout
+    data = json.loads(diag.read_text(encoding="utf-8"))
+    rd = data["draft"]["rich_draft"]
+    assert rd["chart_rendered"] is False
+    assert rd["chart_path"] is None

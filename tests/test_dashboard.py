@@ -208,3 +208,59 @@ def test_dashboard_renders_rich_draft_card():
     assert "Rich draft" in html_text
     assert "rich_royal_road_draft_v1" in html_text
     assert "possible_double_top" in html_text
+
+
+def test_dashboard_shows_open_draft_chart_link_when_chart_path_set():
+    diagnostics = {
+        "draft": {
+            "rich_draft": {
+                "ready_eligible": False,
+                "p0_pass": False,
+                "chart_path": "out/draft_chart.png",
+                "chart_rendered": True,
+            }
+        },
+        "decision": {"level": "SUPPRESSED"},
+        "safety": {"ready_allowed": False, "dispatch_called": False},
+    }
+    summary = {
+        "safety": {
+            "used_for_ready": False,
+            "used_for_notification": False,
+            "offline_analysis_only": True,
+        }
+    }
+
+    html_text = build_dashboard_html(
+        diagnostics=diagnostics, review_summary=summary
+    )
+    assert "Open draft chart" in html_text
+    # Use relative filename only (works inside artifact zip).
+    assert "href='draft_chart.png'" in html_text
+    assert "SAFE: offline analysis only" in html_text
+
+
+def test_dashboard_safety_still_flips_red_with_chart_when_ready_eligible():
+    diagnostics = {
+        "draft": {
+            "rich_draft": {
+                "ready_eligible": True,
+                "p0_pass": False,
+                "chart_path": "out/draft_chart.png",
+                "chart_rendered": True,
+            }
+        },
+        "decision": {"level": "SUPPRESSED"},
+        "safety": {"ready_allowed": False, "dispatch_called": False},
+    }
+    summary = {
+        "safety": {
+            "used_for_ready": False,
+            "used_for_notification": False,
+            "offline_analysis_only": True,
+        }
+    }
+    html_text = build_dashboard_html(
+        diagnostics=diagnostics, review_summary=summary
+    )
+    assert "CHECK SAFETY FLAGS" in html_text
