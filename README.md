@@ -318,6 +318,7 @@ Planning documents:
 
 - [Scheduled Draft Review Runbook](docs/RUNBOOK_SCHEDULED_DRAFT_REVIEW.md)
 - [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
+- [MVP-1 Observation Pipeline Freeze Report](docs/MVP1_OBSERVATION_PIPELINE_FREEZE_REPORT.md)
 
 ## ステータス
 

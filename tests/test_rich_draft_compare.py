@@ -91,15 +91,38 @@ def test_compare_pattern_mismatch_recorded():
 
 
 def test_compare_does_not_emit_ready_or_notification_signal():
-    """Belt-and-suspenders: the result dict must never contain anything
-    that could be mistaken for a READY decision or a notification."""
+    """The compare result must never contain anything that could be
+    mistaken for a READY decision or a notification dispatch.
+
+    We can't simply ban the substring "READY" because the safety flag
+    name ``used_for_ready`` legitimately contains it. Instead we ban
+    the specific JSON fragments that *would* indicate an actionable
+    READY / dispatch / notification.
+    """
     result = compare_rich_draft_to_reference(draft=_draft(), reference=_ref())
-    serialized = json.dumps(result)
-    for forbidden in ("READY", "NOTIFY", "DISPATCH"):
-        assert forbidden not in serialized.upper().split("READY_ALLOWED")[0] or True
-    # Explicit invariants:
+
+    assert result["offline_analysis_only"] is True
     assert result["used_for_ready"] is False
     assert result["used_for_notification"] is False
+
+    serialized = json.dumps(result).upper()
+
+    forbidden_fragments = [
+        '"VERDICT": "READY"',
+        '"DECISION": "READY"',
+        '"LEVEL": "READY"',
+        '"SHOULD_DISPATCH": TRUE',
+        '"DISPATCH": TRUE',
+        '"NOTIFY": TRUE',
+        '"NOTIFICATION": TRUE',
+        '"USED_FOR_READY": TRUE',
+        '"USED_FOR_NOTIFICATION": TRUE',
+    ]
+
+    for fragment in forbidden_fragments:
+        assert fragment not in serialized, (
+            f"compare report must not contain {fragment!r}"
+        )
 
 
 def test_compare_rejects_non_dict_input():
