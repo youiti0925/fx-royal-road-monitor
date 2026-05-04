@@ -227,6 +227,38 @@ Secrets, tokens, API keys, webhooks, prompts, and raw payloads are
 `api_key` / `token` / `secret` / `webhook` (case-insensitive)
 recursively before write.
 
+### Draft review dashboard
+
+The scheduled workflow also writes:
+
+```
+out/dashboard.html
+```
+
+It combines `out/diagnostics.json` and `out/review_report.json` into a
+single static HTML page (no JS, no external resources). The top of the
+page shows a coloured safety banner — green ("SAFE: offline analysis
+only") when every safety flag is correct, red ("CHECK SAFETY FLAGS")
+otherwise. Below it: feed / draft / rule / OpenAI / Claude / compare /
+decision cards plus top OpenAI / Claude `missing` and `disagreements`
+tables.
+
+The dashboard is **offline-only** and is not used for:
+
+- READY decisions
+- notifications
+- trading
+- order execution
+
+Generate manually:
+
+```bash
+python -m fx_monitor.app.dashboard \
+    --diagnostics out/diagnostics.json \
+    --summary out/review_report.json \
+    --html out/dashboard.html
+```
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。

@@ -76,3 +76,9 @@ def test_monitor_workflow_uploads_diagnostics_artifact():
     text = _text()
     assert 'FX_MONITOR_DIAGNOSTICS_PATH: "out/diagnostics.json"' in text
     assert "out/diagnostics.json" in text
+
+
+def test_monitor_workflow_generates_dashboard_artifact():
+    text = _text()
+    assert "python -m fx_monitor.app.dashboard" in text
+    assert "out/dashboard.html" in text

@@ -113,6 +113,15 @@ jobs:
             --md out/review_report.md \
             --json out/review_report.json
 
+      - name: Generate dashboard
+        if: always()
+        run: |
+          mkdir -p out
+          python -m fx_monitor.app.dashboard \
+            --diagnostics out/diagnostics.json \
+            --summary out/review_report.json \
+            --html out/dashboard.html
+
       - name: Upload draft review artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -123,5 +132,6 @@ jobs:
             out/review_report.md
             out/review_report.json
             out/diagnostics.json
+            out/dashboard.html
           if-no-files-found: warn
           retention-days: 14
