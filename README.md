@@ -320,6 +320,35 @@ Planning documents:
 - [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
 - [MVP-1 Observation Pipeline Freeze Report](docs/MVP1_OBSERVATION_PIPELINE_FREEZE_REPORT.md)
 
+## MVP-1 current preview
+
+One-click preview (no Actions tab, no zip download):
+
+  https://htmlpreview.github.io/?https://raw.githubusercontent.com/youiti0925/fx-royal-road-monitor/main/docs/mvp1_current_preview/index.html
+
+The preview is generated from a safe CSV fixture
+(`tests/fixtures/ohlc_preview_sample.csv`) by
+`python -m fx_monitor.app.build_preview`. It shows:
+
+- safety banner (SAFE / CHECK SAFETY FLAGS)
+- the draft chart inline (`draft_chart.png`)
+- decision / safety flags
+- snapshot summary
+- links to `dashboard.html`, `diagnostics.json`,
+  `review_report.md`, `review_report.json`,
+  `review_log.jsonl`
+
+It is observation-only. It does not produce READY. It does not
+dispatch notifications. It does not trade.
+
+To regenerate after a change:
+
+```bash
+python -m fx_monitor.app.build_preview
+git add docs/mvp1_current_preview
+git commit -m "docs: refresh MVP1 preview"
+```
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。

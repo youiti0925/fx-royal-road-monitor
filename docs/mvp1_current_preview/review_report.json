@@ -1,0 +1,74 @@
+{
+  "total_records": 1,
+  "invalid_records": 0,
+  "mode_counts": {
+    "draft_ai_review": 1
+  },
+  "symbol_counts": {
+    "EURUSD=X": 1
+  },
+  "timeframe_counts": {
+    "M5": 1
+  },
+  "rule_verdicts": {
+    "UNKNOWN": 1
+  },
+  "openai_verdicts": {
+    "UNKNOWN": 1
+  },
+  "claude_verdicts": {
+    "UNKNOWN": 1
+  },
+  "compare_results": {
+    "INSUFFICIENT": 1
+  },
+  "decisions": {
+    "SUPPRESSED": 1
+  },
+  "rough_patterns": {
+    "possible_double_top": 1
+  },
+  "pivots": {
+    "count": 1,
+    "min": 4,
+    "max": 4,
+    "avg": 4.0
+  },
+  "zones": {
+    "count": 1,
+    "min": 0,
+    "max": 0,
+    "avg": 0.0
+  },
+  "top_openai_missing": [
+    {
+      "value": "openai_disabled",
+      "count": 1
+    }
+  ],
+  "top_claude_missing": [
+    {
+      "value": "anthropic_disabled",
+      "count": 1
+    }
+  ],
+  "top_openai_disagreements": [],
+  "top_claude_disagreements": [],
+  "top_openai_reasons": [
+    {
+      "value": "openai_disabled",
+      "count": 1
+    }
+  ],
+  "top_claude_reasons": [
+    {
+      "value": "anthropic_disabled",
+      "count": 1
+    }
+  ],
+  "safety": {
+    "used_for_notification": false,
+    "used_for_ready": false,
+    "offline_analysis_only": true
+  }
+}

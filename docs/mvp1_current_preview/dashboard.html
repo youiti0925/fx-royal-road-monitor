@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>FX Monitor Draft Review Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Noto Sans CJK JP",
+        "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+    }
+    header {
+      padding: 20px 28px;
+      background: #0f172a;
+      color: white;
+    }
+    h1 { margin: 0; font-size: 24px; }
+    .sub { color: #cbd5e1; margin-top: 6px; }
+    main { padding: 24px; }
+    .safety {
+      padding: 16px 18px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+    .safety.ok { background: #dcfce7; color: #166534; }
+    .safety.bad { background: #fee2e2; color: #991b1b; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: white;
+      border: 1px solid #dbe4f0;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+    }
+    .wide { grid-column: span 2; }
+    .full { grid-column: 1 / -1; }
+    h2 { font-size: 16px; margin: 0 0 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid #e5eaf2; padding: 7px 6px;
+              text-align: left; vertical-align: top; }
+    th { color: #475569; width: 38%; }
+    .num { text-align: right; }
+    .muted { color: #64748b; }
+    .pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .suppressed { background: #fee2e2; color: #991b1b; }
+    footer { color: #64748b; font-size: 12px; padding: 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>FX Monitor Draft Review Dashboard</h1>
+    <div class="sub">offline artifact / not used for READY / not used for notification</div>
+  </header>
+  <main>
+    <div class="safety ok">SAFE: offline analysis only</div>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Feed</h2>
+        <table><tr><th>source</th><td>csv:/home/user/fx-royal-road-monitor/tests/fixtures/ohlc_preview_sample.csv</td></tr>
+<tr><th>symbol</th><td>EURUSD=X</td></tr>
+<tr><th>timeframe</th><td>M5</td></tr>
+<tr><th>candles</th><td>25</td></tr>
+<tr><th>last_close</th><td>1.102</td></tr>
+<tr><th>warnings</th><td>[]</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Draft</h2>
+        <table><tr><th>pivots</th><td>4</td></tr>
+<tr><th>rough_pattern</th><td>possible_double_top</td></tr>
+<tr><th>zones</th><td>0</td></tr>
+<tr><th>warnings</th><td>[]</td></tr>
+<tr><th>observation_only</th><td>True</td></tr>
+<tr><th>used_in_final_action</th><td>False</td></tr>
+<tr><th>entry_status</th><td>HOLD</td></tr>
+<tr><th>p0_pass</th><td>False</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Rich draft</h2>
+        <table><tr><th>schema_version</th><td>rich_royal_road_draft_v1</td></tr>
+<tr><th>ready_eligible</th><td>False</td></tr>
+<tr><th>pattern_kind</th><td>possible_double_top</td></tr>
+<tr><th>pattern_available</th><td>True</td></tr>
+<tr><th>wave_lines</th><td>3</td></tr>
+<tr><th>structural_lines</th><td>4</td></tr>
+<tr><th>sr_zones</th><td>0</td></tr>
+<tr><th>trendlines</th><td>1</td></tr>
+<tr><th>p0_pass</th><td>False</td></tr>
+<tr><th>chart_path</th><td>/home/user/fx-royal-road-monitor/out/draft_chart.png</td></tr>
+<tr><th>chart_rendered</th><td>True</td></tr></table>
+        <p><a href='draft_chart.png' rel='noopener noreferrer'>Open draft chart</a></p>
+      </div>
+
+      <div class="card">
+        <h2>Decision</h2>
+        <p><span class="pill suppressed">SUPPRESSED</span></p>
+        <table><tr><th>level</th><td>SUPPRESSED</td></tr>
+<tr><th>reason</th><td>draft payload only; READY disabled</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Rule</h2>
+        <table><tr><th>verdict</th><td>UNKNOWN</td></tr>
+<tr><th>bias</th><td>none</td></tr>
+<tr><th>reasons</th><td>[&#x27;Draft observation-only payload; READY disabled.&#x27;]</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>OpenAI</h2>
+        <table><tr><th>enabled</th><td>false</td></tr>
+<tr><th>verdict</th><td>UNKNOWN</td></tr>
+<tr><th>bias</th><td>none</td></tr>
+<tr><th>reasons</th><td>[&#x27;openai_disabled&#x27;]</td></tr>
+<tr><th>missing</th><td>[&#x27;openai_disabled&#x27;]</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Claude</h2>
+        <table><tr><th>enabled</th><td>false</td></tr>
+<tr><th>verdict</th><td>UNKNOWN</td></tr>
+<tr><th>bias</th><td>none</td></tr>
+<tr><th>reasons</th><td>[&#x27;anthropic_disabled&#x27;]</td></tr>
+<tr><th>missing</th><td>[&#x27;anthropic_disabled&#x27;]</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Compare</h2>
+        <table><tr><th>result</th><td>INSUFFICIENT</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Review summary</h2>
+        <table><tr><th>total_records</th><td>1</td></tr>
+<tr><th>invalid_records</th><td>0</td></tr>
+<tr><th>decisions</th><td>{&#x27;SUPPRESSED&#x27;: 1}</td></tr>
+<tr><th>compare_results</th><td>{&#x27;INSUFFICIENT&#x27;: 1}</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Safety flags</h2>
+        <table><tr><th>diagnostics.ready_allowed</th><td>False</td></tr>
+<tr><th>diagnostics.dispatch_called</th><td>False</td></tr>
+<tr><th>summary.used_for_ready</th><td>False</td></tr>
+<tr><th>summary.used_for_notification</th><td>False</td></tr>
+<tr><th>offline_analysis_only</th><td>True</td></tr></table>
+      </div>
+
+      <div class="card wide">
+        <h2>Top OpenAI missing</h2>
+        <table><tr><th>value</th><th>count</th></tr><tr><td>openai_disabled</td><td class='num'>1</td></tr></table>
+      </div>
+
+      <div class="card">
+        <h2>Top Claude missing</h2>
+        <table><tr><th>value</th><th>count</th></tr><tr><td>anthropic_disabled</td><td class='num'>1</td></tr></table>
+      </div>
+
+      <div class="card wide">
+        <h2>Top OpenAI disagreements</h2>
+        <p class='muted'>No items</p>
+      </div>
+
+      <div class="card">
+        <h2>Top Claude disagreements</h2>
+        <p class='muted'>No items</p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    This dashboard is generated from diagnostics.json and review_report.json.
+    It is never used for trading, READY decisions, or notifications.
+  </footer>
+</body>
+</html>
