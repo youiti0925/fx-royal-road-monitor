@@ -228,6 +228,42 @@ class JsonlVectorStore:
         chosen = eligible_idx[:top_k]
         return [(float(sims[i]), self._entries[i]) for i in chosen]
 
+    def search_visual_similar(
+        self,
+        clip_query_vector: np.ndarray | list[float],
+        *,
+        top_k: int = 5,
+        outcome_filter: tuple[str, ...] | None = ("WIN", "LOSE", "NEUTRAL_GOOD", "NEUTRAL_MISSED"),
+    ) -> list[tuple[float, CorpusEntry]]:
+        """Visual similarity search using CLIP embeddings.
+
+        Iterates only over entries that have a stored ``clip_vector``.
+        Returns the top-k entries by cosine similarity in 512-dim CLIP
+        space. CLIP captures chart pattern gestalt (double top,
+        ascending triangle, etc.) that the 272-dim numeric vector
+        cannot.
+        """
+        if not self._entries:
+            return []
+        q = np.asarray(clip_query_vector, dtype=np.float64)
+        q_norm = np.linalg.norm(q)
+        if q_norm == 0:
+            return []
+        scored: list[tuple[float, CorpusEntry]] = []
+        for entry in self._entries:
+            if entry.clip_vector is None:
+                continue
+            if outcome_filter is not None and entry.outcome.status not in outcome_filter:
+                continue
+            cv = np.asarray(entry.clip_vector, dtype=np.float64)
+            cv_norm = np.linalg.norm(cv)
+            if cv_norm == 0:
+                continue
+            sim = float((q @ cv) / (q_norm * cv_norm))
+            scored.append((sim, entry))
+        scored.sort(key=lambda t: t[0], reverse=True)
+        return scored[:top_k]
+
     def search_multi_mode(
         self,
         query_vector: np.ndarray | list[float],
@@ -236,6 +272,7 @@ class JsonlVectorStore:
         symbol: str | None = None,
         session: str | None = None,
         has_high_impact_event: bool | None = None,
+        clip_query_vector: np.ndarray | list[float] | None = None,
         now_utc: datetime | None = None,
     ) -> dict[str, list[tuple[float, CorpusEntry]]]:
         """Run the v6 multi-mode retrieval suite in one call.
@@ -280,6 +317,20 @@ class JsonlVectorStore:
             )
         else:
             results["same_fundamentals"] = []
+        if clip_query_vector is not None:
+            results["visual_similar"] = self.search_visual_similar(
+                clip_query_vector, top_k=top_k_per_mode,
+            )
+            results["visual_win_only"] = self.search_visual_similar(
+                clip_query_vector, top_k=top_k_per_mode, outcome_filter=("WIN",),
+            )
+            results["visual_lose_only"] = self.search_visual_similar(
+                clip_query_vector, top_k=top_k_per_mode, outcome_filter=("LOSE",),
+            )
+        else:
+            results["visual_similar"] = []
+            results["visual_win_only"] = []
+            results["visual_lose_only"] = []
         return results
 
 

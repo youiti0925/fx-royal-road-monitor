@@ -347,11 +347,14 @@ def _format_multi_retrieved(modes: dict[str, list[tuple[float, Any]]]) -> str:
     we tried that lens and found nothing.
     """
     labels = {
-        "generic": "汎用類似 (any outcome)",
-        "win_only": "成功事例のみ (outcome=WIN)",
-        "lose_only": "失敗事例のみ (outcome=LOSE) — 同じ轍を踏まないように",
+        "generic": "数値類似 (any outcome)",
+        "win_only": "数値類似 × 成功 (outcome=WIN)",
+        "lose_only": "数値類似 × 失敗 (outcome=LOSE) — 同じ轍を踏まないように",
         "same_htf_context": "同じセッション/HTF文脈",
         "same_fundamentals": "同じファンダ環境 (高インパクト指標の有無一致)",
+        "visual_similar": "視覚類似 (CLIP image embedding) — チャート形状ベース",
+        "visual_win_only": "視覚類似 × 成功 (CLIP × WIN)",
+        "visual_lose_only": "視覚類似 × 失敗 (CLIP × LOSE)",
     }
     out = ["## 過去類似事例 (5モード並走検索)"]
     any_present = False

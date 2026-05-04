@@ -57,6 +57,7 @@ def finalise_check(
         source="live_recorded",
         market_pack=pack,
         feature_vector=payload["feature_vector"],
+        clip_vector=payload.get("clip_vector"),
         judgement=spec,
         judgement_model=judgement_model,
         judgement_at_utc=datetime.now(timezone.utc),

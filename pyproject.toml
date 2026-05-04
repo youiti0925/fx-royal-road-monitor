@@ -14,6 +14,7 @@ dependencies = [
 [project.optional-dependencies]
 chart = ["matplotlib>=3.8", "pandas>=2.2"]
 market = ["yfinance>=0.2.40", "pandas>=2.2"]
+clip = ["open_clip_torch>=3.0", "torch>=2.0", "Pillow>=10.0"]
 dev = [
     "pytest>=8.0",
     "ruff>=0.5",

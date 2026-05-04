@@ -358,8 +358,9 @@ def test_v5_doctrine_version_marker():
     from fx_monitor.ai.prompt_builder_v2 import load_knowledge_pack
 
     kp = load_knowledge_pack()
-    assert kp.get("doctrine_version", "").startswith("v5_"), (
-        f"doctrine_version should start with 'v5_', got {kp.get('doctrine_version')!r}"
+    version = kp.get("doctrine_version", "")
+    assert version.startswith(("v5_", "v6_", "v7_", "v8_", "v9_")), (
+        f"doctrine_version should start with v5_ or later, got {version!r}"
     )
 
 

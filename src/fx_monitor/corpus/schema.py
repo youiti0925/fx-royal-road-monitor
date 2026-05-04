@@ -56,6 +56,7 @@ class CorpusEntry(BaseModel):
 
     market_pack: MarketAnalysisPackV2
     feature_vector: list[float]
+    clip_vector: list[float] | None = None  # v7: CLIP visual embedding
 
     judgement: AiDecisionScreenSpec
     judgement_model: str = "claude-code-via-subscription"

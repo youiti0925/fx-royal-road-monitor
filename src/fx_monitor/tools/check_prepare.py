@@ -100,12 +100,46 @@ def prepare_check(
 
     store = JsonlVectorStore(corpus_root(corpus_name))
     has_high_impact = any(e.impact == "HIGH" for e in pack.calendar_events_within_60min)
+
+    # v7: render the chart and embed via CLIP for visual similarity search.
+    clip_vec = None
+    chart_png_path = None
+    try:
+        from fx_monitor.live.clip_embedding import embed_image, is_available
+        from fx_monitor.render.entry_chart import render_entry_chart_png
+
+        if is_available():
+            from fx_monitor.corpus.schema import CorpusEntry, OutcomeLabel
+            from fx_monitor.ai.decision_screen_spec_schema import AiDecisionScreenSpec
+
+            chart_png_path = pending_judgement_path(str(uuid.uuid4()) + "_pre").with_suffix(".png")
+            ensure_parent(chart_png_path)
+            tmp_entry = CorpusEntry(
+                entry_id="tmp",
+                asof_utc=asof,
+                symbol=symbol,
+                timeframe=timeframe,
+                source="live_recorded",
+                market_pack=pack,
+                feature_vector=vector.tolist(),
+                judgement=AiDecisionScreenSpec(
+                    provider="claude", symbol=symbol, timeframe=timeframe,
+                ),
+                judgement_at_utc=asof,
+                outcome=OutcomeLabel(status="PENDING"),
+            )
+            render_entry_chart_png(tmp_entry, out_path=chart_png_path)
+            clip_vec = embed_image(chart_png_path).tolist()
+    except Exception:
+        clip_vec = None
+
     modes = store.search_multi_mode(
         vector,
         top_k_per_mode=max(top_k // 2, 3),
         symbol=symbol,
         session=pack.session,
         has_high_impact_event=has_high_impact,
+        clip_query_vector=clip_vec,
         now_utc=asof,
     )
     retrieved_legacy = modes["generic"]
@@ -124,6 +158,8 @@ def prepare_check(
         "corpus_name": corpus_name,
         "market_pack": pack.model_dump(mode="json"),
         "feature_vector": vector.tolist(),
+        "clip_vector": clip_vec,
+        "chart_png_path": str(chart_png_path) if chart_png_path else None,
         "retrieved_entry_ids": [e.entry_id for _, e in retrieved_legacy],
         "retrieval_mode_counts": {k: len(v) for k, v in modes.items()},
         "knowledge_pack_path": prompt.knowledge_pack_path,
