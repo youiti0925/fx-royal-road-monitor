@@ -174,6 +174,35 @@ OpenAI and Claude, plus rough pattern / pivot / zone stats. It is
 **offline analysis only** — it is not used for READY decisions,
 notifications, trading, or order execution.
 
+## Scheduled draft review artifacts
+
+`.github/workflows/monitor.yml` runs the observation-only draft review
+on a 5-minute schedule (and on `workflow_dispatch`). On every scheduled
+run it:
+
+1. loads market data (`FX_MONITOR_FEED=yahoo`)
+2. builds an observation-only draft payload from the OHLC
+3. optionally asks OpenAI / Claude to review it (only when the
+   corresponding repository secret is configured)
+4. writes `out/review_log.jsonl`
+5. generates `out/review_report.md` and `out/review_report.json`
+6. uploads them as a workflow artifact (`draft-review-<run_id>`,
+   14-day retention)
+
+Push / pull-request runs only execute `pytest`. The draft-review job
+is gated by `if: github.event_name == 'schedule' || github.event_name
+== 'workflow_dispatch'`.
+
+Safety contract (pinned by `tests/test_workflow_static.py`):
+
+- `DRY_RUN=true`
+- No READY notification from draft mode
+- No Discord / LINE dispatch
+- No OANDA
+- No live / paper trading
+- No order execution
+- No font / API-key files committed
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
