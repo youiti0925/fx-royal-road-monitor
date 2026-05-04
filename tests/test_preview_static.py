@@ -178,3 +178,36 @@ def test_readme_links_to_mvp1_preview():
     text = README.read_text(encoding="utf-8")
     assert "docs/mvp1_current_preview/index.html" in text
     assert "htmlpreview.github.io" in text
+
+
+def test_preview_shows_ai_execution_state():
+    html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
+    assert "AI生成状態" in html_text
+    assert "OpenAI" in html_text
+    assert "Claude" in html_text
+
+
+def test_safe_local_preview_does_not_claim_ai_generated_when_unknown():
+    """If either provider's spec is UNKNOWN (which is the committed
+    safe-local default), the index must NOT claim the preview is a
+    finished AI-generated decision screen.
+    """
+    html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
+    openai = json.loads(
+        (PREVIEW / "openai_decision_screen_spec.json").read_text(encoding="utf-8")
+    )
+    claude = json.loads(
+        (PREVIEW / "claude_decision_screen_spec.json").read_text(encoding="utf-8")
+    )
+    if (
+        openai.get("final_status") == "UNKNOWN"
+        or claude.get("final_status") == "UNKNOWN"
+    ):
+        assert "AI未実行" in html_text
+        assert "実際のAI生成王道判定画面ではありません" in html_text
+
+
+def test_preview_shows_build_mode():
+    """Index must record which build mode produced the preview."""
+    html_text = (PREVIEW / "index.html").read_text(encoding="utf-8")
+    assert "build_preview mode" in html_text

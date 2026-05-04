@@ -53,13 +53,18 @@ ARTIFACT_FILES = (
 )
 
 
-def _safe_env(csv_rel: str, work_rel: str) -> dict[str, str]:
+def _safe_env(csv_rel: str, work_rel: str, *, mode: str) -> dict[str, str]:
+    """Build the env passed to the run_once subprocess.
+
+    safe-local: API keys are stripped; reviewers self-disable.
+    ai-authored: API keys (and OPENAI_ENABLED / ANTHROPIC_ENABLED)
+                 flow through; build_preview's caller is responsible
+                 for setting them.
+    """
     env = {
         **os.environ,
         "DRY_RUN": "true",
         "AI_USE_MOCK": "false",
-        "OPENAI_ENABLED": "false",
-        "ANTHROPIC_ENABLED": "false",
         "FX_MONITOR_FEED": "csv",
         "FX_MONITOR_CSV_PATH": csv_rel,
         "FX_MONITOR_SYMBOL": "EURUSD=X",
@@ -71,9 +76,88 @@ def _safe_env(csv_rel: str, work_rel: str) -> dict[str, str]:
         "FX_MONITOR_DRAFT_CHART_PATH": f"{work_rel}/draft_chart.png",
     }
     env.pop("FX_MONITOR_FIXTURE_PATH", None)
-    env.pop("OPENAI_API_KEY", None)
-    env.pop("ANTHROPIC_API_KEY", None)
+
+    if mode == "safe-local":
+        # Strip secrets so the committed safe preview is reproducible
+        # and never depends on which developer's keys happen to be set.
+        env["OPENAI_ENABLED"] = "false"
+        env["ANTHROPIC_ENABLED"] = "false"
+        env.pop("OPENAI_API_KEY", None)
+        env.pop("ANTHROPIC_API_KEY", None)
+    else:
+        # ai-authored: trust the caller's env. Default ENABLED to true
+        # if the corresponding key is present so the operator does not
+        # have to set both vars.
+        if env.get("OPENAI_API_KEY") and not env.get("OPENAI_ENABLED"):
+            env["OPENAI_ENABLED"] = "true"
+        if env.get("ANTHROPIC_API_KEY") and not env.get("ANTHROPIC_ENABLED"):
+            env["ANTHROPIC_ENABLED"] = "true"
     return env
+
+
+def _validate_ai_authored_specs(
+    openai_spec: dict,
+    claude_spec: dict,
+) -> list[str]:
+    """Hard-fail conditions for ai-authored mode.
+
+    Returns a list of error tags. Empty list = the AI specs are
+    populated and safety-correct enough to publish as a user-facing
+    preview.
+    """
+    errors: list[str] = []
+    for name, spec in (("openai", openai_spec), ("claude", claude_spec)):
+        if (spec.get("final_status") or "UNKNOWN") == "UNKNOWN":
+            errors.append(f"{name}_spec_unknown")
+        if not spec.get("points"):
+            errors.append(f"{name}_points_empty")
+        if not spec.get("lines"):
+            errors.append(f"{name}_lines_empty")
+        if not spec.get("procedure_steps"):
+            errors.append(f"{name}_procedure_steps_empty")
+        if spec.get("used_for_ready") is not False:
+            errors.append(f"{name}_used_for_ready_not_false")
+        if spec.get("used_for_notification") is not False:
+            errors.append(f"{name}_used_for_notification_not_false")
+        if spec.get("used_for_trading") is not False:
+            errors.append(f"{name}_used_for_trading_not_false")
+    return errors
+
+
+def _ai_execution_state(
+    openai_spec: dict,
+    claude_spec: dict,
+) -> dict[str, Any]:
+    """Summarise per-provider execution state for the index page."""
+    def _provider(spec: dict) -> dict[str, Any]:
+        problems = list(spec.get("problems") or [])
+        not_run_reason = ""
+        for token in (
+            "openai_disabled",
+            "anthropic_disabled",
+            "openai_api_key_missing",
+            "anthropic_api_key_missing",
+            "openai_sdk_import_failed",
+            "anthropic_sdk_import_failed",
+        ):
+            if any(token in p for p in problems):
+                not_run_reason = token
+                break
+        executed = (spec.get("final_status") or "UNKNOWN") != "UNKNOWN"
+        return {
+            "executed": executed,
+            "final_status": spec.get("final_status") or "UNKNOWN",
+            "not_run_reason": not_run_reason,
+            "lines": len(spec.get("lines") or []),
+            "points": len(spec.get("points") or []),
+            "procedure_steps": len(spec.get("procedure_steps") or []),
+            "problems": problems[:5],
+        }
+
+    return {
+        "openai": _provider(openai_spec),
+        "claude": _provider(claude_spec),
+    }
 
 
 def _run(cmd: list[str], env: dict[str, str] | None = None, cwd: Path | None = None) -> None:
@@ -147,6 +231,9 @@ def _render_index_html(
     openai_spec: dict[str, Any],
     claude_spec: dict[str, Any],
     comparison: dict[str, Any],
+    *,
+    mode: str,
+    ai_state: dict[str, Any],
 ) -> str:
     diag = json.loads((out_dir / "diagnostics.json").read_text(encoding="utf-8"))
     summary = json.loads((out_dir / "review_report.json").read_text(encoding="utf-8"))
@@ -174,6 +261,39 @@ def _render_index_html(
         "安全: 観測専用 / READY通知不可 / 売買未使用"
         if safe
         else "安全フラグ要確認 / CHECK SAFETY FLAGS"
+    )
+
+    o_state = ai_state["openai"]
+    c_state = ai_state["claude"]
+    both_executed = o_state["executed"] and c_state["executed"]
+    ai_state_class = "ok" if both_executed else "warn"
+    ai_state_text = (
+        "AI生成状態: 実行済み"
+        if both_executed
+        else (
+            "AI生成状態: AI未実行 — 安全smoke用 / "
+            "実際のAI生成王道判定画面ではありません"
+        )
+    )
+
+    def _provider_status(name: str, s: dict[str, Any]) -> str:
+        if s["executed"]:
+            return (
+                f"{name}: 実行済み (lines={s['lines']} / "
+                f"points={s['points']} / steps={s['procedure_steps']} / "
+                f"final_status={s['final_status']})"
+            )
+        reason = s["not_run_reason"] or "AI未実行"
+        return f"{name}: 未実行 (理由: {reason})"
+
+    ai_lines = "<br>".join(
+        _esc(line)
+        for line in (
+            _provider_status("OpenAI", o_state),
+            _provider_status("Claude", c_state),
+            f"二者比較: {comparison.get('agreement', 'UNKNOWN')}",
+            f"build_preview mode: {mode}",
+        )
     )
 
     rows = "".join(
@@ -207,6 +327,7 @@ def _render_index_html(
        font-weight:700; font-size:15px; }}
     .banner.ok {{ background:#dcfce7; color:#166534; }}
     .banner.bad {{ background:#fee2e2; color:#991b1b; }}
+    .banner.warn {{ background:#fef3c7; color:#92400e; }}
     section {{ background:white; border:1px solid #dbe4f0;
        border-radius:14px; padding:18px; margin-bottom:18px;
        box-shadow:0 6px 20px rgba(15,23,42,.05); }}
@@ -234,6 +355,20 @@ def _render_index_html(
   </header>
   <main>
     <div class="banner {banner_class}">{_esc(banner_text)}</div>
+
+    <div class="banner {ai_state_class}">{_esc(ai_state_text)}</div>
+
+    <section>
+      <h2>AI生成状態</h2>
+      <p style="line-height:1.7;font-size:13px;margin:0">{ai_lines}</p>
+      <p class="muted" style="margin-top:8px">
+        OpenAI / Claude のいずれかが「未実行」の状態は、ユーザー確認用の
+        完成previewではありません。
+        実APIで生成し直すには <code>publish-mvp1-preview</code> workflow
+        を手動実行するか、ローカルで OPENAI_API_KEY / ANTHROPIC_API_KEY を
+        設定して <code>--mode ai-authored</code> で再生成してください。
+      </p>
+    </section>
 
     <section>
       <h2>AI生成 王道判定画面 (OpenAI + Claude が線を設計)</h2>
@@ -289,6 +424,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--csv", default=str(DEFAULT_CSV))
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT_DIR))
     parser.add_argument("--work-dir", default=str(DEFAULT_WORK_DIR))
+    parser.add_argument(
+        "--mode",
+        choices=["safe-local", "ai-authored"],
+        default="safe-local",
+        help=(
+            "safe-local: strip API keys; AI specs may be UNKNOWN; the "
+            "preview is marked 'AI未実行'. "
+            "ai-authored: keep API keys; require populated AI specs; "
+            "non-zero exit if any provider returned UNKNOWN / empty."
+        ),
+    )
     args = parser.parse_args(argv)
 
     csv_path = Path(args.csv).resolve()
@@ -306,7 +452,7 @@ def main(argv: list[str] | None = None) -> int:
         if p.exists():
             p.unlink()
 
-    env = _safe_env(csv_rel, work_rel)
+    env = _safe_env(csv_rel, work_rel, mode=args.mode)
 
     _run([sys.executable, "-m", "fx_monitor.app.run_once"], env=env, cwd=REPO_ROOT)
     _run(
@@ -417,8 +563,24 @@ def main(argv: list[str] | None = None) -> int:
         if p.exists():
             p.unlink()
 
-    index_html = _render_index_html(out_dir, openai_dump, claude_dump, comparison)
+    ai_state = _ai_execution_state(openai_dump, claude_dump)
+    index_html = _render_index_html(
+        out_dir,
+        openai_dump,
+        claude_dump,
+        comparison,
+        mode=args.mode,
+        ai_state=ai_state,
+    )
     (out_dir / "index.html").write_text(index_html, encoding="utf-8")
+
+    # ai-authored mode: empty / UNKNOWN / safety-flag-violating specs
+    # are a hard failure. The preview directory has already been
+    # written so an operator can see WHY it failed, but the process
+    # exits non-zero so CI fails loudly.
+    validation_errors: list[str] = []
+    if args.mode == "ai-authored":
+        validation_errors = _validate_ai_authored_specs(openai_dump, claude_dump)
 
     files = [
         "index.html",
@@ -434,11 +596,27 @@ def main(argv: list[str] | None = None) -> int:
         "review_report.json",
         "review_log.jsonl",
     ]
-    print(f"Preview written to: {out_dir}")
+    print(f"Preview written to: {out_dir} (mode={args.mode})")
     for name in files:
         p = out_dir / name
         size = p.stat().st_size if p.exists() else 0
         print(f"  {name:<38}: {size} B")
+    print(
+        "AI execution state: "
+        f"openai={'executed' if ai_state['openai']['executed'] else 'NOT RUN'} "
+        f"({ai_state['openai']['final_status']}), "
+        f"claude={'executed' if ai_state['claude']['executed'] else 'NOT RUN'} "
+        f"({ai_state['claude']['final_status']})"
+    )
+    if args.mode == "ai-authored" and validation_errors:
+        print("ai-authored validation failed:")
+        for tag in validation_errors:
+            print(f"  - {tag}")
+        print(
+            "Non-zero exit. The committed preview directory has been "
+            "written but it is NOT a user-facing AI-authored preview."
+        )
+        return 2
     return 0
 
 

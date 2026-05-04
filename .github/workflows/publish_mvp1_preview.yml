@@ -1,0 +1,74 @@
+name: publish-mvp1-preview
+
+# Manual trigger only. Requires repository secrets:
+#   OPENAI_API_KEY
+#   ANTHROPIC_API_KEY
+# Both AIs author their own AiDecisionScreenSpec; the renderer paints
+# only the AI-authored lines. The job fails if either provider returns
+# UNKNOWN / empty / a safety-flag violation, so a placeholder preview
+# can never be silently committed.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-ai-authored-preview:
+    runs-on: ubuntu-latest
+    env:
+      DRY_RUN: "true"
+      AI_USE_MOCK: "false"
+      OPENAI_ENABLED: "true"
+      ANTHROPIC_ENABLED: "true"
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      FX_MONITOR_FEED: "csv"
+      FX_MONITOR_CSV_PATH: "tests/fixtures/ohlc_preview_sample.csv"
+      FX_MONITOR_SYMBOL: "EURUSD=X"
+      FX_MONITOR_TIMEFRAME: "M5"
+      FX_MONITOR_REVIEW_DRAFT_WITH_AI: "true"
+      FX_MONITOR_RENDER_DRAFT_CHART: "true"
+      FX_MONITOR_DRAFT_CHART_PATH: "out/draft_chart.png"
+      FX_MONITOR_REVIEW_LOG_PATH: "out/review_log.jsonl"
+      FX_MONITOR_DIAGNOSTICS_PATH: "out/diagnostics.json"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system fonts (CJK)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install -U pip
+          pip install -e ".[dev,api,chart,notify]"
+
+      - name: Build AI-authored MVP1 preview
+        run: |
+          mkdir -p out
+          python -m fx_monitor.app.build_preview \
+            --out-dir docs/mvp1_current_preview \
+            --mode ai-authored
+
+      - name: Run tests
+        run: pytest
+
+      - name: Commit refreshed preview
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/mvp1_current_preview
+          if git diff --cached --quiet; then
+            echo "No preview changes to commit."
+          else
+            git commit -m "docs: refresh AI-authored MVP1 preview"
+            git push
+          fi

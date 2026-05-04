@@ -15,6 +15,7 @@
        font-weight:700; font-size:15px; }
     .banner.ok { background:#dcfce7; color:#166534; }
     .banner.bad { background:#fee2e2; color:#991b1b; }
+    .banner.warn { background:#fef3c7; color:#92400e; }
     section { background:white; border:1px solid #dbe4f0;
        border-radius:14px; padding:18px; margin-bottom:18px;
        box-shadow:0 6px 20px rgba(15,23,42,.05); }
@@ -42,6 +43,20 @@
   </header>
   <main>
     <div class="banner ok">安全: 観測専用 / READY通知不可 / 売買未使用</div>
+
+    <div class="banner warn">AI生成状態: AI未実行 — 安全smoke用 / 実際のAI生成王道判定画面ではありません</div>
+
+    <section>
+      <h2>AI生成状態</h2>
+      <p style="line-height:1.7;font-size:13px;margin:0">OpenAI: 未実行 (理由: openai_disabled)<br>Claude: 未実行 (理由: anthropic_disabled)<br>二者比較: UNKNOWN<br>build_preview mode: safe-local</p>
+      <p class="muted" style="margin-top:8px">
+        OpenAI / Claude のいずれかが「未実行」の状態は、ユーザー確認用の
+        完成previewではありません。
+        実APIで生成し直すには <code>publish-mvp1-preview</code> workflow
+        を手動実行するか、ローカルで OPENAI_API_KEY / ANTHROPIC_API_KEY を
+        設定して <code>--mode ai-authored</code> で再生成してください。
+      </p>
+    </section>
 
     <section>
       <h2>AI生成 王道判定画面 (OpenAI + Claude が線を設計)</h2>
