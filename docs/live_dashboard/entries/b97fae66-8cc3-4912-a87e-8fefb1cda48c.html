@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
-<meta charset="utf-8"><title>判定 0da1eb66</title>
+<meta charset="utf-8"><title>判定 b97fae66</title>
 <style>
 :root { color-scheme: light dark; }
 body {
@@ -77,7 +77,7 @@ details[open] summary { color: #60a5fa; }
 <div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
 
 <div class="grid">
-<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">0da1eb66-9813-4939-a2d8-4c8addfe1df2</div></div>
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">b97fae66-8cc3-4912-a87e-8fefb1cda48c</div></div>
 <div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-04-27T15:30:00+00:00</div></div>
 <div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
 <div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">SELL · WAIT_RETEST</div></div>
@@ -87,7 +87,7 @@ details[open] summary { color: #60a5fa; }
 <div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
 </div>
 
-<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="0da1eb66-9813-4939-a2d8-4c8addfe1df2.png" alt="entry chart for 0da1eb66-9813-4939-a2d8-4c8addfe1df2">
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="b97fae66-8cc3-4912-a87e-8fefb1cda48c.png" alt="entry chart for b97fae66-8cc3-4912-a87e-8fefb1cda48c">
 
 
 
@@ -230,7 +230,52 @@ details[open] summary { color: #60a5fa; }
       &quot;cautions&quot;: []
     }
   ],
-  &quot;zones&quot;: [],
+  &quot;zones&quot;: [
+    {
+      &quot;id&quot;: &quot;Z_FIB&quot;,
+      &quot;label&quot;: &quot;フィボ プライムゾーン (50-61.8%)&quot;,
+      &quot;kind&quot;: &quot;fibonacci_prime&quot;,
+      &quot;price_low&quot;: 1.1746,
+      &quot;price_high&quot;: 1.17488,
+      &quot;index_low&quot;: 32,
+      &quot;index_high&quot;: 120,
+      &quot;reason_ja&quot;: &quot;1.17578(右頭)→1.17343 下降のフィボ50-61.8%帯&quot;,
+      &quot;confidence&quot;: 0.55
+    },
+    {
+      &quot;id&quot;: &quot;Z_BU&quot;,
+      &quot;label&quot;: &quot;ビルドアップ蓄積&quot;,
+      &quot;kind&quot;: &quot;buildup&quot;,
+      &quot;price_low&quot;: 1.17398,
+      &quot;price_high&quot;: 1.17509,
+      &quot;index_low&quot;: 38,
+      &quot;index_high&quot;: 51,
+      &quot;reason_ja&quot;: &quot;ネック割れ前 12本レンジ蓄積 = breakout_3_signs ① 適合&quot;,
+      &quot;confidence&quot;: 0.7
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_UP&quot;,
+      &quot;label&quot;: &quot;火薬庫 (上)&quot;,
+      &quot;kind&quot;: &quot;stop_zone_upper&quot;,
+      &quot;price_low&quot;: 1.1752,
+      &quot;price_high&quot;: 1.176,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 120,
+      &quot;reason_ja&quot;: &quot;戻り高値 + ダブルトップ2山ぶんの売りSL集積帯&quot;,
+      &quot;confidence&quot;: 0.65
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_DN&quot;,
+      &quot;label&quot;: &quot;火薬庫 (下)&quot;,
+      &quot;kind&quot;: &quot;stop_zone_lower&quot;,
+      &quot;price_low&quot;: 1.172,
+      &quot;price_high&quot;: 1.17246,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 120,
+      &quot;reason_ja&quot;: &quot;メジャードムーブ目標+キリ番1.17200の利確/SL帯&quot;,
+      &quot;confidence&quot;: 0.6
+    }
+  ],
   &quot;procedure_steps&quot;: [
     {
       &quot;key&quot;: &quot;fundamental_environment_check&quot;,
@@ -1247,5 +1292,5 @@ details[open] summary { color: #60a5fa; }
   &quot;session&quot;: &quot;OVERLAP&quot;
 }</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.0, -0.47288227149227346, 0.0, 0.0, 0.0, -0.47288227149227346, 0.47288227149227346, 0.0, 0.0, -0.9457645429845469, 0.0, 0.0, 0.47329063269390753, -0.4724739102906394, 0.4724739102906394, 0.0, 0.47329063269390753, 0.0, 0.0, 0.0, 0.4724739102906394, 0.0, -0.4724739102906394, 0.0, 0.4724739102906394, -0.47288227149227346, 0.0, 0.0, 0.47288227149227346, -0.4720655490890053, -0.9457645429845469, 0.0, 0.0, -0.4720655490890053, 0.0, 0.0, 0.0, -0.9457645429845469, 0.9457645429845469, 0.0, 0.0, -0.47288227149227346, 0.0, 0.0, 0.47288227149227346, 0.0, -0.47288227149227346, 0.0, 0.4720655490890053, 0.0, -0.9449478205812788, 0.0, 0.0, -0.4724739102906394, 0.0, 0.0, 0.4720655490890053, 0.0, 0.0, 0.0, 0.9445394593796447, 0.0, -0.4724739102906394, 0.0, 0.0, -0.9449478205812788, 0.4724739102906394, 0.0, 0.0, -0.9449478205812788, 0.9449478205812788, 0.0, 0.0, -1.4186468144768203, 1.8915290859690939, 0.0, 0.0, -0.47329063269390753, 0.47329063269390753, 0.0, 0.0, -0.9469896265894492, 1.4202802592833568, 0.0, 1.4198718980817226, 0.0, -1.8935708919772642, 0.0, 0.0, -0.47288227149227346, 0.0, 0.0, 0.0, -0.47288227149227346, 0.0, 0.0, 0.946172904186181, 0.0, -0.946172904186181, 0.0, 0.0, 0.0, 0.47329063269390753, 0.0, 0.0, -0.47288227149227346, 0.47288227149227346, 0.0, 0.47329063269390753, 0.0, 0.0, 0.0, 1.4186468144768203, 0.0, -1.4186468144768203, 0.0, 0.0, -1.8915290859690939, 1.4186468144768203, 0.0, 0.47329063269390753, -0.47329063269390753, 0.47329063269390753, 0.0, 1.4198718980817226, 0.0, -0.47329063269390753, 0.0, 0.9469896265894492, -0.47329063269390753, 0.9465812653878151, 0.0, 0.47329063269390753, -0.47329063269390753, 0.0, 0.0, 0.47329063269390753, 0.0, -0.47329063269390753, 0.0, 0.47288227149227346, 0.0, -0.946172904186181, 0.0, 0.946172904186181, 0.0, 0.0, 0.0, 1.4186468144768203, 0.0, -1.4186468144768203, 0.0, 1.4174217308719181, 0.0, -1.4174217308719181, 0.0, 0.4724739102906394, 0.0, 0.0, 0.0, 0.4724739102906394, -0.4720655490890053, -0.4724739102906394, 0.0, 0.0, -0.4724739102906394, 0.4724739102906394, 0.0, 0.4724739102906394, 0.0, 0.0, 0.0, 0.0, -0.4724739102906394, 0.0, 0.0, 0.0, -0.9449478205812788, 0.4724739102906394, 0.0, 0.9445394593796447, 0.0, -0.4724739102906394, 0.0, 0.4724739102906394, 0.0, -0.4724739102906394, 0.0, 0.0, -0.4724739102906394, 0.4724739102906394, 0.0, 0.47288227149227346, -0.4720655490890053, 0.9445394593796447, 0.0, 0.0, -0.9457645429845469, 0.9457645429845469, 0.0, 0.0, -0.9457645429845469, 0.9457645429845469, 0.0, 2.363594635058099, 0.0, -2.363594635058099, 0.0, 0.9445394593796447, 0.0, -1.417013369670284, 0.0, 0.9441310981780106, 0.0, -0.9441310981780106, 0.0, 0.0, -0.4720655490890053, 0.4720655490890053, 0.0, 0.4720655490890053, 0.0, -0.4720655490890053, 0.0, 0.0, -0.9441310981780106, 0.9441310981780106, 0.0, 1.4161966472670158, -0.4712488266857371, -1.4161966472670158, 0.0, 0.4720655490890053, -0.4712488266857371, 0.0, 0.0, 0.9441310981780106, 0.0, 0.0, 0.0, -0.31666666666666665, 1.4161966472670158, -1.0, 1.0, -0.21666666666666667, 1.888262196356021, -1.0, 0.5, -0.15, 5.196804651995399, 1.0, 0.5, -0.13333333333333333, 5.196804651995399, 1.0, 0.5, 1.0, 0.0, 0.0, 8.034506642150674, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
 
-<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id 0da1eb66-9813-4939-a2d8-4c8addfe1df2 --note "..."</code></p>
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id b97fae66-8cc3-4912-a87e-8fefb1cda48c --note "..."</code></p>
 </body></html>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
-<meta charset="utf-8"><title>判定 e6917955</title>
+<meta charset="utf-8"><title>判定 be121694</title>
 <style>
 :root { color-scheme: light dark; }
 body {
@@ -77,7 +77,7 @@ details[open] summary { color: #60a5fa; }
 <div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
 
 <div class="grid">
-<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">e6917955-d9f9-4f1a-862b-4f7ba8fdad3a</div></div>
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">be121694-1948-42fb-8973-50f9c7aa666a</div></div>
 <div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-04-30T11:50:00+00:00</div></div>
 <div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
 <div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">BUY · WAIT_RETEST</div></div>
@@ -87,7 +87,7 @@ details[open] summary { color: #60a5fa; }
 <div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
 </div>
 
-<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="e6917955-d9f9-4f1a-862b-4f7ba8fdad3a.png" alt="entry chart for e6917955-d9f9-4f1a-862b-4f7ba8fdad3a">
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="be121694-1948-42fb-8973-50f9c7aa666a.png" alt="entry chart for be121694-1948-42fb-8973-50f9c7aa666a">
 
 <section class="postmortem severity-medium">
 <h3>後付け分析 (severity: medium / failure_mode: stop_hit)</h3>
@@ -113,7 +113,7 @@ details[open] summary { color: #60a5fa; }
 <table><thead><tr><th>id</th><th>label</th><th>kind</th><th>role</th><th>price</th><th>anchors</th><th>reason</th></tr></thead><tbody><tr><td>L1_FLIP</td><td>1.17000 レジサポ転換</td><td>support</td><td>entry_trigger</td><td>1.17000</td><td>P3</td><td class='reason'>旧レジ→新サポ, リテストで押し目買いトリガー</td></tr><tr><td>L2_INV</td><td>無効化ライン</td><td>invalidation</td><td>stop_reference</td><td>1.16930</td><td>P2</td><td class='reason'>HL 1.16980 割れ + V字底前低 SL集積帯下</td></tr><tr><td>L3_TGT</td><td>window高値再到達 TARGET</td><td>target</td><td>target_reference</td><td>1.17220</td><td>-</td><td class='reason'>window高値、メジャードムーブ等倍は1.17500</td></tr><tr><td>L4_TL</td><td>上昇斜めTL</td><td>trendline</td><td>dynamic_support</td><td>1.17000</td><td>P1,P2</td><td class='reason'>V字底→押し目HL→現在を結ぶ動的サポート</td></tr></tbody></table>
 
 <h2>AI が指したピボット (points)</h2>
-<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>V字底</td><td>major_low</td><td>830</td><td>1.16713</td><td class='reason'>window安値, 反転起点</td></tr><tr><td>P2</td><td>押し目HL</td><td>higher_low</td><td>865</td><td>1.16980</td><td class='reason'>1.17000 ブレイク前の最終押し目</td></tr><tr><td>P3</td><td>1.17000 レジ突破</td><td>breakout_point</td><td>870</td><td>1.17000</td><td class='reason'>HIGH cluster 4本のレジを実体クローズ上抜け</td></tr><tr><td>P4</td><td>現在HH候補</td><td>higher_high</td><td>879</td><td>1.17096</td><td class='reason'>押し目 HL 後の高値更新</td></tr></tbody></table>
+<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>V字底</td><td>major_low</td><td>10</td><td>1.16713</td><td class='reason'>window安値, 反転起点</td></tr><tr><td>P2</td><td>押し目HL</td><td>higher_low</td><td>45</td><td>1.16980</td><td class='reason'>1.17000 ブレイク前の最終押し目</td></tr><tr><td>P3</td><td>1.17000 レジ突破</td><td>breakout_point</td><td>50</td><td>1.17000</td><td class='reason'>HIGH cluster 4本のレジを実体クローズ上抜け</td></tr><tr><td>P4</td><td>現在HH候補</td><td>higher_high</td><td>59</td><td>1.17096</td><td class='reason'>押し目 HL 後の高値更新</td></tr></tbody></table>
 
 <h2>市場パック概要</h2>
 <pre>asof=2026-04-30T11:50:00+00:00 session=LONDON current=1.17096 atr_m5=0.00053 24h_range=[1.16713..1.17220] candles=60 pivots=25</pre>
@@ -138,7 +138,7 @@ details[open] summary { color: #60a5fa; }
       &quot;id&quot;: &quot;P1&quot;,
       &quot;label&quot;: &quot;V字底&quot;,
       &quot;role&quot;: &quot;major_low&quot;,
-      &quot;index&quot;: 830,
+      &quot;index&quot;: 10,
       &quot;timestamp&quot;: null,
       &quot;price&quot;: 1.16713,
       &quot;reason_ja&quot;: &quot;window安値, 反転起点&quot;
@@ -147,7 +147,7 @@ details[open] summary { color: #60a5fa; }
       &quot;id&quot;: &quot;P2&quot;,
       &quot;label&quot;: &quot;押し目HL&quot;,
       &quot;role&quot;: &quot;higher_low&quot;,
-      &quot;index&quot;: 865,
+      &quot;index&quot;: 45,
       &quot;timestamp&quot;: null,
       &quot;price&quot;: 1.1698,
       &quot;reason_ja&quot;: &quot;1.17000 ブレイク前の最終押し目&quot;
@@ -156,7 +156,7 @@ details[open] summary { color: #60a5fa; }
       &quot;id&quot;: &quot;P3&quot;,
       &quot;label&quot;: &quot;1.17000 レジ突破&quot;,
       &quot;role&quot;: &quot;breakout_point&quot;,
-      &quot;index&quot;: 870,
+      &quot;index&quot;: 50,
       &quot;timestamp&quot;: null,
       &quot;price&quot;: 1.17,
       &quot;reason_ja&quot;: &quot;HIGH cluster 4本のレジを実体クローズ上抜け&quot;
@@ -165,7 +165,7 @@ details[open] summary { color: #60a5fa; }
       &quot;id&quot;: &quot;P4&quot;,
       &quot;label&quot;: &quot;現在HH候補&quot;,
       &quot;role&quot;: &quot;higher_high&quot;,
-      &quot;index&quot;: 879,
+      &quot;index&quot;: 59,
       &quot;timestamp&quot;: null,
       &quot;price&quot;: 1.17096,
       &quot;reason_ja&quot;: &quot;押し目 HL 後の高値更新&quot;
@@ -227,9 +227,9 @@ details[open] summary { color: #60a5fa; }
       &quot;kind&quot;: &quot;trendline&quot;,
       &quot;role&quot;: &quot;dynamic_support&quot;,
       &quot;price&quot;: 1.17,
-      &quot;start_index&quot;: 830,
+      &quot;start_index&quot;: 10,
       &quot;start_price&quot;: 1.16713,
-      &quot;end_index&quot;: 879,
+      &quot;end_index&quot;: 59,
       &quot;end_price&quot;: 1.17,
       &quot;anchor_points&quot;: [
         &quot;P1&quot;,
@@ -240,7 +240,63 @@ details[open] summary { color: #60a5fa; }
       &quot;cautions&quot;: []
     }
   ],
-  &quot;zones&quot;: [],
+  &quot;zones&quot;: [
+    {
+      &quot;id&quot;: &quot;Z_FIB&quot;,
+      &quot;label&quot;: &quot;フィボ プライムゾーン (50-61.8%)&quot;,
+      &quot;kind&quot;: &quot;fibonacci_prime&quot;,
+      &quot;price_low&quot;: 1.16906,
+      &quot;price_high&quot;: 1.16967,
+      &quot;index_low&quot;: 45,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;1.16713→1.17220 上昇フィボ50-61.8%帯. 深押し1.16967到達なら本命lot&quot;,
+      &quot;confidence&quot;: 0.65
+    },
+    {
+      &quot;id&quot;: &quot;Z_BU&quot;,
+      &quot;label&quot;: &quot;1.17000ブレイク前ビルドアップ&quot;,
+      &quot;kind&quot;: &quot;buildup&quot;,
+      &quot;price_low&quot;: 1.1697,
+      &quot;price_high&quot;: 1.17,
+      &quot;index_low&quot;: 35,
+      &quot;index_high&quot;: 45,
+      &quot;reason_ja&quot;: &quot;高値切り上げ + 安値切り上げの10本収縮 = breakout_3_signs ① 適合&quot;,
+      &quot;confidence&quot;: 0.72
+    },
+    {
+      &quot;id&quot;: &quot;Z_FLIP&quot;,
+      &quot;label&quot;: &quot;レジサポ転換ゾーン&quot;,
+      &quot;kind&quot;: &quot;support&quot;,
+      &quot;price_low&quot;: 1.17,
+      &quot;price_high&quot;: 1.1702,
+      &quot;index_low&quot;: 50,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;旧レジ(タッチ4回)→新サポ. リテスト反発で押し目買い王道&quot;,
+      &quot;confidence&quot;: 0.75
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_UP&quot;,
+      &quot;label&quot;: &quot;火薬庫 (上) / D1レジ激突懸念&quot;,
+      &quot;kind&quot;: &quot;stop_zone_upper&quot;,
+      &quot;price_low&quot;: 1.1722,
+      &quot;price_high&quot;: 1.174,
+      &quot;index_low&quot;: 10,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;window高値+D1レジ可能性. htf_full_scan UNKNOWN で見えない壁の可能性 (outcome=LOSE 起因疑い)&quot;,
+      &quot;confidence&quot;: 0.55
+    },
+    {
+      &quot;id&quot;: &quot;Z_CONF&quot;,
+      &quot;label&quot;: &quot;トリプル根拠 confluence ゾーン&quot;,
+      &quot;kind&quot;: &quot;confluence&quot;,
+      &quot;price_low&quot;: 1.16967,
+      &quot;price_high&quot;: 1.1702,
+      &quot;index_low&quot;: 45,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;(a)フィボ50% (b)V字底+HH-HL反転 (c)1.17000レジサポ転換 = 3軸候補帯&quot;,
+      &quot;confidence&quot;: 0.65
+    }
+  ],
   &quot;procedure_steps&quot;: [
     {
       &quot;key&quot;: &quot;fundamental_environment_check&quot;,
@@ -1197,5 +1253,5 @@ details[open] summary { color: #60a5fa; }
   &quot;session&quot;: &quot;LONDON&quot;
 }</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.2556439939011245, -0.2554205288714907, 0.0, 0.0, 0.0, -0.5108410577429814, 0.766485051644106, 0.0, 0.0, -0.7669319817033736, 0.5115114528318829, 0.0, 0.0, -0.2558674589307584, 0.5115114528318829, 0.0, 0.2558674589307584, 0.0, 0.0, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.2558674589307584, 0.0, 0.0, 0.2556439939011245, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, 0.2556439939011245, 0.0, 0.5117349178615168, -0.2558674589307584, 0.2558674589307584, 0.0, 0.0, -1.2800076897426935, 1.5358751486734519, 0.0, 0.25653785401965995, -0.7693900970293459, 1.5383332639994243, 0.0, 1.282242340039032, 0.0, -1.025704486019372, 0.0, 0.7689431669700783, 0.0, -0.5126287779800521, 0.0, 0.25609092396039224, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.7682727718811767, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.0, 0.0, 0.0, -0.5117349178615168, -0.5121818479207845, 0.0, 0.0, -0.5115114528318829, -0.7676023767922752, 0.0, 0.2558674589307584, -0.2558674589307584, 0.2558674589307584, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -1.0232463706933996, 0.5117349178615168, 0.0, 0.0, -0.5117349178615168, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.0, -0.767825841821909, 0.25609092396039224, 0.0, 1.5378863339401565, 0.0, 0.25609092396039224, 0.0, 0.0, -0.5126287779800521, 0.7687197019404444, 0.0, 0.25631438899002607, -0.25631438899002607, 0.25631438899002607, 0.0, 0.0, -0.25653785401965995, 0.512852243009686, 0.0, 0.0, -0.5130757080393199, 0.5130757080393199, 0.0, 0.25653785401965995, 0.0, -0.25653785401965995, 0.0, 0.25653785401965995, -0.25653785401965995, -0.25653785401965995, 0.0, 0.0, -0.5130757080393199, 0.25653785401965995, 0.0, 1.025704486019372, 0.0, -1.025704486019372, 0.0, 0.0, -0.7691666319997121, 0.7691666319997121, 0.0, 0.0, -0.25653785401965995, 0.5130757080393199, 0.0, 0.25653785401965995, -1.0268218111675413, 0.7702839571478813, 0.0, 0.0, -0.7714012822960506, 1.7988934885524934, 0.0, 0.5139695681578553, -0.25698478407892766, -1.0283860663749782, 0.0, 0.0, -0.5139695681578553, 0.5139695681578553, 0.0, 0.0, -1.0279391363157107, 0.0, 0.0, 0.0, -1.0286095314046122, 0.7716247473256844, 0.0, 0.0, -0.7716247473256844, 0.2572082491085615, 0.0, 0.0, -0.2574317141381953, 0.772295142414586, 0.0, 1.8002342787302965, 0.0, -2.315097707006687, 0.0, 0.0, -1.2853708504539059, 1.0283860663749782, 0.0, 0.2572082491085615, -0.514416498217123, 0.0, 0.0, 0.0, -0.772295142414586, 1.286711640631709, 0.0, 0.0, -0.5150868933060245, 0.2576551791678292, 0.0, 0.2574317141381953, -0.514416498217123, -1.0299503215824153, 0.0, 0.0, -0.5150868933060245, 1.0299503215824153, 0.0, 0.0, -0.2574317141381953, -0.5150868933060245, 0.0, 0.2574317141381953, 0.0, 0.0, 0.0, 2.0581129229277595, 0.0, -1.8006812087895643, 0.0, -0.38333333333333336, -1.7977761634043241, 1.0, 0.5, -0.3333333333333333, -3.0800185034433563, -1.0, 0.5, -0.31666666666666665, -3.0800185034433563, -1.0, 0.5, -0.08333333333333333, 2.3157681020955887, 1.0, 0.5, 1.0, 0.0, 0.0, 9.489219018371811, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
 
-<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id e6917955-d9f9-4f1a-862b-4f7ba8fdad3a --note "..."</code></p>
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id be121694-1948-42fb-8973-50f9c7aa666a --note "..."</code></p>
 </body></html>

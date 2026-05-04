@@ -30,6 +30,29 @@ _CSS_LINE_OTHER = "#a78bfa"
 _CSS_PIVOT_HIGH = "#fbbf24"
 _CSS_PIVOT_LOW = "#06b6d4"
 _CSS_FUTURE = "#9ca3af"
+_CSS_ZONE_FIB = "#f59e0b"      # amber: fibonacci prime zone
+_CSS_ZONE_BUILDUP = "#a78bfa"  # violet: buildup consolidation
+_CSS_ZONE_STOP_UP = "#ef4444"  # red: upper stop-zone (火薬庫)
+_CSS_ZONE_STOP_DN = "#ef4444"
+_CSS_ZONE_CONF = "#22c55e"     # green: triple-confluence point
+_CSS_ZONE_GENERIC = "#64748b"  # slate: support/resistance/event/other
+
+
+def _zone_style(kind: str) -> tuple[str, float, str | None]:
+    """Return (color, alpha, hatch) for a zone kind."""
+    if kind == "fibonacci_prime":
+        return (_CSS_ZONE_FIB, 0.13, None)
+    if kind == "buildup":
+        return (_CSS_ZONE_BUILDUP, 0.16, "//")
+    if kind == "stop_zone_upper":
+        return (_CSS_ZONE_STOP_UP, 0.10, "xx")
+    if kind == "stop_zone_lower":
+        return (_CSS_ZONE_STOP_DN, 0.10, "xx")
+    if kind == "confluence":
+        return (_CSS_ZONE_CONF, 0.18, None)
+    if kind in ("support", "resistance"):
+        return (_CSS_ZONE_GENERIC, 0.10, None)
+    return (_CSS_ZONE_GENERIC, 0.08, None)
 
 
 def _line_color(kind: str) -> str:
@@ -138,10 +161,54 @@ def render_entry_chart_png(
     x_max = n_past + max(len(future_list), 1)
     ax_main.set_xlim(-1, x_max)
 
+    # ---- AI zones (fib prime / buildup / stop / confluence / generic) ----
+    # Drawn FIRST so lines and points layer on top.
+    for z in spec.zones:
+        if z.price_low is None or z.price_high is None:
+            continue
+        color, alpha, hatch = _zone_style(z.kind)
+        zx_lo = z.index_low if z.index_low is not None else 0
+        zx_hi = z.index_high if z.index_high is not None else x_max - 1
+        ax_main.add_patch(
+            plt.Rectangle(
+                (zx_lo, min(z.price_low, z.price_high)),
+                max(zx_hi - zx_lo, 0.5),
+                abs(z.price_high - z.price_low),
+                facecolor=color, edgecolor=color,
+                linewidth=0.8, alpha=alpha,
+                hatch=hatch, zorder=1,
+            )
+        )
+        # zone label at right edge of band, slightly outside
+        label_y = (z.price_low + z.price_high) / 2
+        ax_main.text(
+            zx_hi + 0.3, label_y,
+            f"{z.label}",
+            color=color, fontsize=7, va="center",
+            alpha=0.95,
+        )
+
     # ---- AI lines ----
     point_by_id = {p.id: p for p in spec.points}
     for line in spec.lines:
         col = _line_color(line.kind)
+        # Slanted line (trendline): use start_index/end_index/start_price/end_price.
+        sx = getattr(line, "start_index", None)
+        sx_p = getattr(line, "start_price", None)
+        ex = getattr(line, "end_index", None)
+        ex_p = getattr(line, "end_price", None)
+        if sx is not None and ex is not None and sx_p is not None and ex_p is not None:
+            ax_main.plot(
+                [sx, ex], [sx_p, ex_p],
+                color=col, linewidth=1.5, linestyle="--", alpha=0.9, zorder=4,
+            )
+            ax_main.text(
+                ex + 0.3, ex_p,
+                f"{line.label}",
+                color=col, fontsize=8, va="center",
+            )
+            continue
+        # Horizontal line at fixed price.
         if line.price is not None:
             x_lo = 0
             x_hi = x_max - 1
@@ -194,6 +261,22 @@ def render_entry_chart_png(
         f"{pack.symbol}  {pack.timeframe}  asof={pack.asof_utc.isoformat()}\n{title_status}",
         color=_CSS_TEXT, fontsize=11, loc="left",
     )
+
+    # Prominent pattern banner inside the chart so the doctrine label is unmissable.
+    # Place at left so it doesn't overlap with "判定時点 →" annotation on the right.
+    if spec.pattern_label_ja:
+        ax_main.text(
+            0.02, 0.97,
+            f"  {spec.pattern_label_ja}  ",
+            transform=ax_main.transAxes,
+            color=_CSS_TEXT, fontsize=10, ha="left", va="top",
+            bbox=dict(
+                boxstyle="round,pad=0.4",
+                facecolor=_CSS_PANEL, edgecolor=_CSS_LINE_NECK,
+                linewidth=1.2, alpha=0.92,
+            ),
+            zorder=10,
+        )
     ax_main.set_ylabel("price", color=_CSS_MUTED, fontsize=9)
 
     # ---- Wave skeleton (bottom) ----
