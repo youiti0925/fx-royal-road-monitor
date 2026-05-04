@@ -314,16 +314,14 @@ def _format_few_shot(kp: dict[str, Any]) -> str:
 
 
 def _format_retrieved(retrieved: list[tuple[float, Any]]) -> str:
-    """Format retrieved past cases.
+    """Format a single retrieval bucket.
 
-    Each item is a (similarity, CorpusEntry) tuple. We avoid importing
-    CorpusEntry here to keep this module decoupled; we just rely on the
-    duck-typed attributes we know exist.
+    Each item is a (similarity, CorpusEntry) tuple.
     """
     if not retrieved:
-        return "## 過去類似事例\n該当なし (cold start). 知識packだけを根拠に判定してください。"
+        return ""
 
-    lines = ["## 過去類似事例 (新しい順)"]
+    lines = []
     agg = {"WIN": 0, "LOSE": 0, "NEUTRAL_GOOD": 0, "NEUTRAL_MISSED": 0, "PENDING": 0}
     for i, (sim, entry) in enumerate(retrieved, 1):
         side = entry.judgement.side
@@ -333,28 +331,60 @@ def _format_retrieved(retrieved: list[tuple[float, Any]]) -> str:
         fav = outcome.max_favorable_pip if outcome.max_favorable_pip is not None else 0.0
         adv = outcome.max_adverse_pip if outcome.max_adverse_pip is not None else 0.0
         lines.append(
-            f"\nケース{i} [類似度 {sim:.2f}, asof={entry.asof_utc.date()}]:\n"
-            f"  当時の判定: side={side} status={fs}\n"
-            f"  実際の結果: {outcome.status} "
-            f"(favourable={fav:+.1f}pip, adverse={adv:+.1f}pip, "
-            f"observed_bars={outcome.bars_observed})"
+            f"  ケース{i} [類似度 {sim:.2f}, asof={entry.asof_utc.date()}]: "
+            f"side={side} {fs} → outcome={outcome.status} "
+            f"(fav={fav:+.1f}pip, adv={adv:+.1f}pip)"
         )
-    lines.append(f"\n集計: {agg}")
+    lines.append(f"  集計: {agg}")
     return "\n".join(lines)
+
+
+def _format_multi_retrieved(modes: dict[str, list[tuple[float, Any]]]) -> str:
+    """Format the v6 multi-mode retrieval output as labelled subsections.
+
+    ``modes`` is the dict returned by ``JsonlVectorStore.search_multi_mode``.
+    Empty buckets are still rendered (with a 'なし' note) so the AI knows
+    we tried that lens and found nothing.
+    """
+    labels = {
+        "generic": "汎用類似 (any outcome)",
+        "win_only": "成功事例のみ (outcome=WIN)",
+        "lose_only": "失敗事例のみ (outcome=LOSE) — 同じ轍を踏まないように",
+        "same_htf_context": "同じセッション/HTF文脈",
+        "same_fundamentals": "同じファンダ環境 (高インパクト指標の有無一致)",
+    }
+    out = ["## 過去類似事例 (5モード並走検索)"]
+    any_present = False
+    for key, label in labels.items():
+        bucket = modes.get(key) or []
+        out.append(f"\n### {label}")
+        if not bucket:
+            out.append("  該当なし。")
+            continue
+        any_present = True
+        out.append(_format_retrieved(bucket))
+    if not any_present:
+        out.append(
+            "\n注: 全モードで該当なし (cold start). 知識packと現在の数値事実だけを"
+            "根拠に判定してください。"
+        )
+    return "\n".join(out)
 
 
 def build_decision_prompt(
     pack: MarketAnalysisPackV2,
     *,
     retrieved: list[tuple[float, Any]] | None = None,
+    retrieval_modes: dict[str, list[tuple[float, Any]]] | None = None,
     knowledge_pack: dict[str, Any] | None = None,
     knowledge_pack_path: Path | str | None = None,
 ) -> BuiltPrompt:
     """Build a (system, user) prompt pair for the v2 AI judge.
 
-    ``retrieved`` is a list of (similarity, CorpusEntry) tuples from the
-    corpus. If empty / None we render an explicit cold-start hint so the
-    AI knows it must rely on the knowledge pack alone.
+    ``retrieved`` is the legacy single-bucket retrieval (kept for
+    backward compatibility). ``retrieval_modes`` is the v6 multi-mode
+    output from ``JsonlVectorStore.search_multi_mode`` and takes
+    precedence when supplied.
     """
     if knowledge_pack is None:
         knowledge_pack = load_knowledge_pack(knowledge_pack_path)
@@ -402,7 +432,16 @@ def build_decision_prompt(
     if few_shot:
         sections.append("\n" + few_shot)
 
-    sections.append("\n" + _format_retrieved(retrieved))
+    if retrieval_modes is not None:
+        sections.append("\n" + _format_multi_retrieved(retrieval_modes))
+    elif retrieved:
+        sections.append("\n## 過去類似事例 (新しい順)")
+        sections.append(_format_retrieved(retrieved))
+    else:
+        sections.append(
+            "\n## 過去類似事例\n該当なし (cold start). "
+            "知識packと現在の数値事実だけを根拠に判定してください。"
+        )
 
     sections.append(
         "\n## 出力指示\n"

@@ -154,6 +154,49 @@ def test_recency_weight_promotes_recent_entries(tmp_path: Path):
     assert results[0][1].entry_id == "new"
 
 
+def test_search_multi_mode_returns_all_buckets(tmp_path: Path):
+    store = JsonlVectorStore(tmp_path / "c11")
+    store.add(_entry("a", outcome_status="WIN"))
+    store.add(_entry("b", outcome_status="LOSE"))
+    store.add(_entry("c", outcome_status="NEUTRAL_GOOD"))
+
+    modes = store.search_multi_mode(
+        [1.0, 0.0, 0.0, 0.0],
+        top_k_per_mode=5,
+        session="OVERLAP",
+        has_high_impact_event=False,
+    )
+    assert "generic" in modes
+    assert "win_only" in modes
+    assert "lose_only" in modes
+    assert "same_htf_context" in modes
+    assert "same_fundamentals" in modes
+    win_ids = {e.entry_id for _, e in modes["win_only"]}
+    assert win_ids == {"a"}
+    lose_ids = {e.entry_id for _, e in modes["lose_only"]}
+    assert lose_ids == {"b"}
+
+
+def test_search_with_session_filter(tmp_path: Path):
+    store = JsonlVectorStore(tmp_path / "c12")
+    e1 = _entry("a", outcome_status="WIN")
+    # Override session via direct field: we mutate the validated model.
+    e1 = e1.model_copy(
+        update={"market_pack": e1.market_pack.model_copy(update={"session": "TOKYO"})}
+    )
+    e2 = _entry("b", outcome_status="WIN")
+    e2 = e2.model_copy(
+        update={"market_pack": e2.market_pack.model_copy(update={"session": "LONDON"})}
+    )
+    store.add(e1)
+    store.add(e2)
+    london_only = store.search_similar(
+        [1.0, 0.0, 0.0, 0.0], top_k=5, session_filter="LONDON"
+    )
+    ids = {e.entry_id for _, e in london_only}
+    assert ids == {"b"}
+
+
 def test_vector_file_rebuilt_when_out_of_sync(tmp_path: Path):
     root = tmp_path / "c10"
     s1 = JsonlVectorStore(root)

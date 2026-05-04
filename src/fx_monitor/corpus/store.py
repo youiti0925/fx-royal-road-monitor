@@ -153,6 +153,10 @@ class JsonlVectorStore:
         outcome_filter: tuple[str, ...] | None = ("WIN", "LOSE", "NEUTRAL_GOOD", "NEUTRAL_MISSED"),
         recency_weight: float = 0.0,
         now_utc: datetime | None = None,
+        session_filter: str | None = None,
+        symbol_filter: str | None = None,
+        side_filter: tuple[str, ...] | None = None,
+        has_high_impact_event: bool | None = None,
     ) -> list[tuple[float, CorpusEntry]]:
         """Return up to ``top_k`` (similarity, entry) pairs.
 
@@ -160,6 +164,10 @@ class JsonlVectorStore:
         entries by ``recency_weight``: a half-life-like multiplier where
         a bigger weight pulls older entries down. ``recency_weight=0``
         disables the boost (purely cosine ranking).
+
+        v6 adds metadata filters that compose with the cosine score so
+        the caller can ask for "similar AND outcome=WIN" or "similar AND
+        same session as now".
         """
         if self._vectors is None or len(self._entries) == 0:
             return []
@@ -169,7 +177,6 @@ class JsonlVectorStore:
             return []
 
         norms = np.linalg.norm(self._vectors, axis=1)
-        # Avoid division by zero on degenerate vectors (all-zero).
         safe_norms = np.where(norms == 0, 1.0, norms)
         sims = (self._vectors @ q) / (safe_norms * q_norm)
         sims = np.where(norms == 0, -1.0, sims)
@@ -188,13 +195,92 @@ class JsonlVectorStore:
         eligible_idx = list(range(len(self._entries)))
         if outcome_filter is not None:
             eligible_idx = [
-                i for i in eligible_idx if self._entries[i].outcome.status in outcome_filter
+                i for i in eligible_idx
+                if self._entries[i].outcome.status in outcome_filter
+            ]
+        if session_filter is not None:
+            eligible_idx = [
+                i for i in eligible_idx
+                if self._entries[i].market_pack.session == session_filter
+            ]
+        if symbol_filter is not None:
+            eligible_idx = [
+                i for i in eligible_idx
+                if self._entries[i].symbol == symbol_filter
+            ]
+        if side_filter is not None:
+            eligible_idx = [
+                i for i in eligible_idx
+                if self._entries[i].judgement.side in side_filter
+            ]
+        if has_high_impact_event is not None:
+            def _has_high(idx: int) -> bool:
+                evs = self._entries[idx].market_pack.calendar_events_within_60min
+                return any(e.impact == "HIGH" for e in evs)
+
+            eligible_idx = [
+                i for i in eligible_idx
+                if _has_high(i) == has_high_impact_event
             ]
         if not eligible_idx:
             return []
         eligible_idx.sort(key=lambda i: scores[i], reverse=True)
         chosen = eligible_idx[:top_k]
         return [(float(sims[i]), self._entries[i]) for i in chosen]
+
+    def search_multi_mode(
+        self,
+        query_vector: np.ndarray | list[float],
+        *,
+        top_k_per_mode: int = 5,
+        symbol: str | None = None,
+        session: str | None = None,
+        has_high_impact_event: bool | None = None,
+        now_utc: datetime | None = None,
+    ) -> dict[str, list[tuple[float, CorpusEntry]]]:
+        """Run the v6 multi-mode retrieval suite in one call.
+
+        Returns a dict with keys:
+
+        - ``generic``: classic cosine-similar entries (any outcome).
+        - ``win_only``: similar entries that ended in WIN.
+        - ``lose_only``: similar entries that ended in LOSE.
+        - ``same_htf_context``: similar entries with same session
+          (proxy for HTF/regime context until W1/D1 bias is encoded).
+        - ``same_fundamentals``: similar entries with the same
+          high-impact-event flag as the query.
+        """
+        common: dict = {
+            "top_k": top_k_per_mode,
+            "now_utc": now_utc,
+            "recency_weight": 0.5,
+        }
+        if symbol is not None:
+            common["symbol_filter"] = symbol
+
+        results: dict[str, list[tuple[float, CorpusEntry]]] = {}
+        results["generic"] = self.search_similar(query_vector, **common)
+        results["win_only"] = self.search_similar(
+            query_vector, outcome_filter=("WIN",), **common
+        )
+        results["lose_only"] = self.search_similar(
+            query_vector, outcome_filter=("LOSE",), **common
+        )
+        if session is not None:
+            results["same_htf_context"] = self.search_similar(
+                query_vector, session_filter=session, **common
+            )
+        else:
+            results["same_htf_context"] = []
+        if has_high_impact_event is not None:
+            results["same_fundamentals"] = self.search_similar(
+                query_vector,
+                has_high_impact_event=has_high_impact_event,
+                **common,
+            )
+        else:
+            results["same_fundamentals"] = []
+        return results
 
 
 __all__ = ["JsonlVectorStore"]

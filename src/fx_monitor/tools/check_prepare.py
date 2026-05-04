@@ -55,8 +55,14 @@ def prepare_check(
     top_k: int = 10,
     window_size: int = 60,
     asof_utc: datetime | None = None,
+    auto_fetch_calendar: bool = True,
 ) -> dict:
-    """Build pack + prompt and persist them. Returns metadata for the caller."""
+    """Build pack + prompt and persist them. Returns metadata for the caller.
+
+    ``auto_fetch_calendar`` (v6) — when True, refresh the Forex Factory
+    cache if stale and inject upcoming events into the pack. Falls back
+    to cached events if the network is unavailable.
+    """
     if len(candles) < window_size:
         raise ValueError(
             f"need at least {window_size} candles, got {len(candles)}"
@@ -65,6 +71,20 @@ def prepare_check(
     asof = asof_utc or window[-1].t
     atr_m5 = atr(window, period=14)
     pivots = detect_multi_scale_pivots(window, atr_m5=atr_m5)
+
+    calendar_events = []
+    if auto_fetch_calendar:
+        try:
+            from fx_monitor.live.calendar_service import events_within_window
+            from fx_monitor.offline.forex_factory_calendar import refresh_cache_if_stale
+
+            refresh_cache_if_stale(now_utc=asof if asof.tzinfo else None)
+            calendar_events = events_within_window(
+                symbol=symbol, asof_utc=asof, window_minutes=60
+            )
+        except Exception:
+            calendar_events = []
+
     pack = build_market_pack_v2(
         symbol=symbol,
         asof_utc=asof,
@@ -74,18 +94,23 @@ def prepare_check(
         high_24h=max(c.h for c in window),
         low_24h=min(c.l for c in window),
         current_price=window[-1].c,
+        calendar_events_within_60min=calendar_events,
     )
     vector = chart_pack_to_vector(pack)
 
     store = JsonlVectorStore(corpus_root(corpus_name))
-    retrieved = store.search_similar(
+    has_high_impact = any(e.impact == "HIGH" for e in pack.calendar_events_within_60min)
+    modes = store.search_multi_mode(
         vector,
-        top_k=top_k,
-        recency_weight=0.5,
+        top_k_per_mode=max(top_k // 2, 3),
+        symbol=symbol,
+        session=pack.session,
+        has_high_impact_event=has_high_impact,
         now_utc=asof,
     )
+    retrieved_legacy = modes["generic"]
 
-    prompt = build_decision_prompt(pack, retrieved=retrieved)
+    prompt = build_decision_prompt(pack, retrieval_modes=modes)
 
     entry_id = str(uuid.uuid4())
     pending_path = pending_judgement_path(entry_id)
@@ -99,7 +124,8 @@ def prepare_check(
         "corpus_name": corpus_name,
         "market_pack": pack.model_dump(mode="json"),
         "feature_vector": vector.tolist(),
-        "retrieved_entry_ids": [e.entry_id for _, e in retrieved],
+        "retrieved_entry_ids": [e.entry_id for _, e in retrieved_legacy],
+        "retrieval_mode_counts": {k: len(v) for k, v in modes.items()},
         "knowledge_pack_path": prompt.knowledge_pack_path,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
     }
@@ -117,7 +143,8 @@ def prepare_check(
         "entry_id": entry_id,
         "pending_path": str(pending_path),
         "prompt_path": str(prompt_md_path),
-        "retrieved_count": len(retrieved),
+        "retrieved_count": len(retrieved_legacy),
+        "retrieval_mode_counts": {k: len(v) for k, v in modes.items()},
     }
 
 
