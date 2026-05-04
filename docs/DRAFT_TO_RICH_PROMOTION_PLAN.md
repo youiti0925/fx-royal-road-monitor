@@ -224,6 +224,12 @@ Every line must include source and confidence:
 
 ## 5. Phase P3: Backtest-only candidate evaluation
 
+Status:
+
+```
+scaffold added
+```
+
 Purpose:
 
 Evaluate whether draft-derived structures match past known rich

@@ -1,0 +1,61 @@
+{
+  "schema_version": "rich_royal_road_draft_v1",
+  "source": "draft",
+  "observation_only": true,
+  "used_in_final_action": false,
+  "ready_eligible": false,
+  "pattern_levels_draft": {
+    "schema_version": "pattern_levels_draft_v1",
+    "source": "draft",
+    "observation_only": true,
+    "used_in_final_action": false,
+    "available": true,
+    "pattern_kind": "possible_double_top",
+    "side": "SELL",
+    "parts": {
+      "P1": {"index": 10, "price": 1.1050, "kind": "HIGH"},
+      "NL": {"index": 15, "price": 1.1000, "kind": "LOW"},
+      "P2": {"index": 20, "price": 1.1048, "kind": "HIGH"},
+      "BR": {"index": 25, "price": 1.0980, "kind": "LOW"}
+    },
+    "trigger_line_price": 1.1000,
+    "warnings": [],
+    "confidence": 0.35
+  },
+  "wave_derived_lines_draft": [
+    {"id": "WNL_D1", "role": "entry_confirmation_line", "label": "WNL", "price": 1.1000, "anchor_parts": ["NL"], "side": "SELL", "source": "draft", "observation_only": true, "used_in_final_action": false, "confidence": 0.35},
+    {"id": "WSL_D1", "role": "stop_candidate", "label": "WSL", "price": 1.1048, "anchor_parts": ["P2"], "side": "SELL", "source": "draft", "observation_only": true, "used_in_final_action": false, "confidence": 0.30},
+    {"id": "WTP_D1", "role": "target_candidate", "label": "WTP", "price": 1.0980, "anchor_parts": ["BR"], "side": "SELL", "source": "draft", "observation_only": true, "used_in_final_action": false, "confidence": 0.25}
+  ],
+  "structural_lines_draft": {
+    "schema_version": "structural_lines_draft_v1",
+    "source": "draft",
+    "observation_only": true,
+    "used_in_final_action": false,
+    "lines": [
+      {"id": "SNL_D1", "kind": "structural_neckline", "role": "entry_trigger", "price": 1.1000, "anchor_parts": ["NL"], "source": "draft"},
+      {"id": "SIL_D1", "kind": "structural_invalidation", "role": "stop_candidate", "price": 1.1048, "anchor_parts": ["P2"], "source": "draft"},
+      {"id": "STP_D1", "kind": "structural_target", "role": "target_candidate", "price": 1.0980, "anchor_parts": ["BR"], "source": "draft"},
+      {"id": "STL_D1", "kind": "structural_trendline", "role": "top_structure_line", "anchor_parts": ["P1", "P2"], "slope": -0.0001, "source": "draft"}
+    ],
+    "counts": {"total": 4, "structural_neckline": 1, "structural_invalidation": 1, "structural_target": 1, "structural_trendline": 1}
+  },
+  "support_resistance_v2_draft": {
+    "schema_version": "support_resistance_v2_draft_v1",
+    "source": "draft",
+    "observation_only": true,
+    "used_in_final_action": false,
+    "selected_level_zones_top5": [
+      {"id": "RZ1", "kind": "resistance", "price": 1.1048, "touch_count": 2}
+    ]
+  },
+  "trendline_context_draft": {
+    "schema_version": "trendline_context_draft_v1",
+    "source": "draft",
+    "observation_only": true,
+    "used_in_final_action": false,
+    "selected_trendlines_top3": [
+      {"id": "STL_D1", "kind": "structural_trendline", "anchor_parts": ["P1", "P2"], "slope": -0.0001}
+    ]
+  }
+}

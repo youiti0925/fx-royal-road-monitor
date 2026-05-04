@@ -1,0 +1,40 @@
+{
+  "symbol": "EURUSD=X",
+  "timeframe": "M5",
+  "pattern_levels": {
+    "available": true,
+    "side": "SELL",
+    "pattern_kind": "double_top",
+    "parts": {
+      "P1": {"index": 10, "price": 1.1052},
+      "NL": {"index": 15, "price": 1.1001},
+      "P2": {"index": 20, "price": 1.1049},
+      "BR": {"index": 25, "price": 1.0985}
+    }
+  },
+  "wave_derived_lines": [
+    {"id": "WNL1", "role": "entry_confirmation_line", "price": 1.1001},
+    {"id": "WSL1", "role": "stop_candidate", "price": 1.1049},
+    {"id": "WTP1", "role": "target_candidate", "price": 1.0985}
+  ],
+  "structural_lines": {
+    "schema_version": "structural_lines_v1",
+    "lines": [
+      {"id": "SNL1", "kind": "structural_neckline", "role": "entry_trigger", "price": 1.1001, "anchor_parts": ["NL"]},
+      {"id": "SIL1", "kind": "structural_invalidation", "role": "stop_candidate", "price": 1.1049, "anchor_parts": ["P2"]},
+      {"id": "STP1", "kind": "structural_target", "role": "target_candidate", "price": 1.0985, "anchor_parts": ["BR"]},
+      {"id": "STL1", "kind": "structural_trendline", "role": "top_structure_line", "anchor_parts": ["P1", "P2"], "numeric_alignment": "NEAR"}
+    ]
+  },
+  "support_resistance_v2": {
+    "selected_level_zones_top5": [
+      {"id": "R1", "price": 1.1001},
+      {"id": "R2", "price": 1.1050}
+    ]
+  },
+  "trendline_context": {
+    "selected_trendlines_top3": [
+      {"id": "T1", "slope": -0.00012}
+    ]
+  }
+}

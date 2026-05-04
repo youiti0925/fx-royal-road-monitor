@@ -169,6 +169,29 @@ or order execution. It exists solely so a human can inspect whether
 the draft P1/NL/P2/BR (or B1/NL/B2/BR), WNL_D1 / WSL_D1 / WTP_D1, and
 SNL_D1 / SIL_D1 / STP_D1 / STL_D1 lines look reasonable on the chart.
 
+### Rich draft compare scaffold (Phase P3)
+
+A small offline comparator scores how close a draft rich payload is to
+a captured reference royal-road payload:
+
+```bash
+python -m fx_monitor.app.rich_draft_compare \
+    --draft tests/fixtures/sample_rich_draft.json \
+    --reference tests/fixtures/sample_reference_payload.json \
+    --out out/rich_draft_compare.json
+```
+
+The report includes presence-style scores
+(`pattern_match` / `wave_line_presence` / `structural_line_presence` /
+`sr_presence` / `trendline_presence`), structural anchor-match counts,
+wave-role price gaps, plus `missing` / `mismatches` / `warnings`
+arrays. Every record carries `offline_analysis_only=true`,
+`used_for_ready=false`, `used_for_notification=false`.
+
+This is **scaffold only** — there is no live backtest sweep yet. The
+output is for offline study and is never consumed by the rule engine,
+notifier, or trading paths.
+
 ## Draft AI review mode
 
 Feed mode can optionally send the observation-only draft payload to
