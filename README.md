@@ -259,9 +259,10 @@ python -m fx_monitor.app.dashboard \
     --html out/dashboard.html
 ```
 
-For operating instructions, see:
+Planning documents:
 
 - [Scheduled Draft Review Runbook](docs/RUNBOOK_SCHEDULED_DRAFT_REVIEW.md)
+- [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
 
 ## ステータス
 

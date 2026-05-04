@@ -266,3 +266,7 @@ Do not enable Discord / LINE production notifications until:
 3. AI UNKNOWN reasons are understood
 4. missing / disagreement reports are reviewed
 5. draft-to-rich-payload promotion plan is explicitly approved
+
+For the required promotion path, see:
+
+- [Draft to Rich Payload Promotion Plan](DRAFT_TO_RICH_PROMOTION_PLAN.md)
