@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
-<meta charset="utf-8"><title>判定 f93d40fb</title>
+<meta charset="utf-8"><title>判定 e6917955</title>
 <style>
 :root { color-scheme: light dark; }
 body {
@@ -77,17 +77,17 @@ details[open] summary { color: #60a5fa; }
 <div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
 
 <div class="grid">
-<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">f93d40fb-1f7d-467f-956b-4fed5b2ff076</div></div>
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">e6917955-d9f9-4f1a-862b-4f7ba8fdad3a</div></div>
 <div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-04-30T11:50:00+00:00</div></div>
 <div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
 <div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">BUY · WAIT_RETEST</div></div>
 <div class="card"><div class="label">outcome</div><div class="value"><span class="badge badge-LOSE">LOSE</span></div></div>
 <div class="card"><div class="label">favourable / adverse</div><div class="value" style="font-size:1rem;">+28.9 / +21.9 pip</div></div>
 <div class="card"><div class="label">user dissent</div><div class="value" style="font-size:1rem;">No</div></div>
-<div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude</div></div>
+<div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
 </div>
 
-<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="f93d40fb-1f7d-467f-956b-4fed5b2ff076.png" alt="entry chart for f93d40fb-1f7d-467f-956b-4fed5b2ff076">
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="e6917955-d9f9-4f1a-862b-4f7ba8fdad3a.png" alt="entry chart for e6917955-d9f9-4f1a-862b-4f7ba8fdad3a">
 
 <section class="postmortem severity-medium">
 <h3>後付け分析 (severity: medium / failure_mode: stop_hit)</h3>
@@ -95,25 +95,25 @@ details[open] summary { color: #60a5fa; }
 <h4 class="meta">事実(60本後の price action)</h4>
 <ul><li>判定時点の価格: 1.17096</li><li>観察期間: 60本中 60本 (経過時間≈300分)</li><li>最高値到達: 1.17385 (+28.9 pip) at +40本目</li><li>最安値到達: 1.16877 (-21.9 pip) at +18本目</li><li>観察期末close: 1.17302 (+20.6 pip)</li></ul>
 <h4 class="meta">疑わしい procedure step</h4>
-<table><thead><tr><th>step</th><th>当時のstatus</th><th>所見</th></tr></thead><tbody><tr><td>environment</td><td><span class="badge badge-WAIT">WAIT</span></td><td>上位足の方向確認が不十分だった可能性 (UNKNOWN だった?)</td></tr><tr><td>htf_dow</td><td><span class="badge badge-PASS">PASS</span></td><td>上位足ダウとの整合チェックが甘かった可能性</td></tr><tr><td>wave_pattern</td><td><span class="badge badge-PASS">PASS</span></td><td>波形認定がフェイク(早すぎ)だった可能性</td></tr><tr><td>breakout</td><td><span class="badge badge-PASS">PASS</span></td><td>ブレイク確定の閾値が緩く、ヒゲ抜けを真と扱った可能性</td></tr></tbody></table>
+<table><thead><tr><th>step</th><th>当時のstatus</th><th>所見</th></tr></thead><tbody><tr><td>environment</td><td><span class="badge badge-UNKNOWN">UNKNOWN</span></td><td>上位足の方向確認が不十分だった可能性 (UNKNOWN だった?)</td></tr><tr><td>htf_dow</td><td><span class="badge badge-PASS">PASS</span></td><td>上位足ダウとの整合チェックが甘かった可能性</td></tr><tr><td>wave_pattern</td><td><span class="badge badge-PASS">PASS</span></td><td>波形認定がフェイク(早すぎ)だった可能性</td></tr><tr><td>breakout</td><td><span class="badge badge-PASS">PASS</span></td><td>ブレイク確定の閾値が緩く、ヒゲ抜けを真と扱った可能性</td></tr></tbody></table>
 <h4 class="meta">具体的な対策案</h4>
 <ul><li>上位足 (H1/H4) のピボットも数値事実 pack に追加し、上位足ダウとの整合を必須チェック化する</li><li>波形認定に「最低 N 本の連続 LH/HL」を要求するよう知識 pack を厳格化</li><li>ブレイク確定を「実体クローズ + 次足の方向継続」に変えてフェイクを除外</li><li>RR 2.0 未達のシナリオは AI 出力時点で final_status を HOLD に強制降格</li></ul>
 </section>
 
 
 <h2>AI が下した判定の物語</h2>
-<p>1.16713 から +50pip 上昇、現在 1.17096. 重要: 1.17000 に左方(idx 14-15, idx 35-36 の HIGH cluster) で計4本major HIGH = 強水平レジスタンス。今回ブレイク後に 1.17220 swing高値 (idx 54) まで到達、現在 push back 中。v7 doctrine **レジサポ転換 第2波** の典型: ①天井(1.17000)に2度抑えられる ②天井を力強く突破 ③これから 1.17000 が床に変わる(サポレジ転換)。押し目買いの本命エントリーゾーン。</p>
+<p>1.16713 から +50pip 上昇、現在 1.17096. 重要: 1.17000 に左方 (idx 845-848 + 865-866 の HIGH cluster) で 計4本major HIGH = 強水平レジスタンス. 今回ブレイク後 1.16980 押し目 → 1.17096 上昇継続 = HH-HL 確立. doctrine 適用: reversal_triple_motive 適合 (V字反転 + レジサポ転換 + 押し目買い候補). fibonacci_zone_doctrine: 1.16713→1.17220 のフィボでリテスト 1.17000 = 43.4% (プライムゾーン直前)、深押し 1.16967 (50%) なら本命 lot. RR 3.14 で王道基準2.0クリア = 高勝率設定. ただし outcome=LOSE 実績は htf_full_scan 不可で H4 が下降中だった疑い (mtf_alignment 違反リスク).</p>
 <p class="meta"><strong>パターンラベル:</strong> V字底→上昇 + 1.17000レジ突破 + リテスト押し目買い候補</p>
-<p class="meta"><strong>サマリ:</strong> レジサポ転換+第2波の本命押し目買い候補. RR2.5で王道クリア、本命ロット可</p>
+<p class="meta"><strong>サマリ:</strong> —</p>
 
 <h2>王道14手順チェック</h2>
-<div class="steps"><div class="num">01.</div><div class="key">environment <span class="meta">(environment)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">M5 のみ. 強上昇から H1 上昇トレンド可能性高</span></div><div class="num">02.</div><div class="key">htf_dow <span class="meta">(htf_dow)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">M5 ダウは上昇確定 (HH-HL)</span></div><div class="num">03.</div><div class="key">horizontal_levels <span class="meta">(horizontal_levels)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17220/1.17000(キーレジサポ)/1.16781 識別</span></div><div class="num">04.</div><div class="key">trendline <span class="meta">(trendline)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">P1→P3 上昇TL 引ける. 動的サポートとして機能</span></div><div class="num">05.</div><div class="key">wave_pattern <span class="meta">(wave_pattern)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">V字底 + ブレイク + 押し目段階. レジサポ転換 step3</span></div><div class="num">06.</div><div class="key">wave_lines <span class="meta">(wave_lines)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">サポレジ転換ライン + 無効化 + 目標 + 斜めTL 提示</span></div><div class="num">07.</div><div class="key">breakout <span class="meta">(breakout)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17000 既に上方ブレイク確定、ブレイク後の押し目段階</span></div><div class="num">08.</div><div class="key">retest <span class="meta">(retest)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">1.17000 リテスト中(現在1.17096で +9.6pip 上)</span></div><div class="num">09.</div><div class="key">confirmation_candle <span class="meta">(confirmation_candle)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">リテストでの反発確認足を待機</span></div><div class="num">10.</div><div class="key">entry_price <span class="meta">(entry_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17000-1.17020 で押し目反発確認後 BUY</span></div><div class="num">11.</div><div class="key">stop_price <span class="meta">(stop_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.16930 (直近swing LOW下)</span></div><div class="num">12.</div><div class="key">target_price <span class="meta">(target_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17220 (直近swing HIGH再到達)</span></div><div class="num">13.</div><div class="key">rr_check <span class="meta">(rr_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">リスク約8pip / リワード約20pip = RR 2.5. 王道2.0クリア</span></div><div class="num">14.</div><div class="key">event_clear <span class="meta">(event_clear)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">60min以内なし</span></div></div>
+<div class="steps"><div class="num">01.</div><div class="key">ファンダメンタル環境確認 <span class="meta">(fundamental_environment_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">London-NY overlap (UTC 11:50) = 最も流動性高い時間帯. EU PMI / 米 GDP 速報等の発表可能性ある時間帯だが供給データなし. +35pip 上昇は通常の H4 値幅で説明可能、ただしファンダ加速の可能性も否定不可.</span></div><div class="num">02.</div><div class="key">クライシスモード検出 <span class="meta">(crisis_mode_detection)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">ATR(14)≒3.0pip. 60本 range 50.6pip = 16.9×ATR で通常の強上昇. 段階的上昇 (V字底→押し目→上昇) でクライシス基準 (ATR×3 急変) 未満. 通常モード.</span></div><div class="num">03.</div><div class="key">介入リスク帯チェック <span class="meta">(intervention_zone_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">EUR/USD 介入帯対象外.</span></div><div class="num">04.</div><div class="key">口先介入スキャン <span class="meta">(verbal_intervention_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">London-NY overlap で要人発言頻度高い時間帯. データ未供給で UNKNOWN.</span></div><div class="num">05.</div><div class="key">上位足フルスキャン <span class="meta">(htf_full_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 単独. +50pip 上昇は H1 1-2本相当、H4 で見れば中型陽線. H4/D1 で上昇トレンド継続中なら下位足 BUY は王道、レンジ上端なら戻り売り罠の可能性. htf_supremacy 順守で UNKNOWN.</span></div><div class="num">06.</div><div class="key">環境認識 <span class="meta">(environment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">h4/d1 不明. M5 局所では強上昇 + 1.17000 ブレイク = 上昇トレンド転換候補だが 上位足整合確認できず.</span></div><div class="num">07.</div><div class="key">上位足ダウ <span class="meta">(htf_dow)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">M5 ダウ: 1.16713 LOW (V字底) → 1.16980 HL → 1.17096 HH 形成中 = HH-HL 上昇ダウ確立 (M5 スケール). 上位足整合は不明だが M5 範囲で PASS.</span></div><div class="num">08.</div><div class="key">上位足ライン位置チェック <span class="meta">(htf_lines_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">1.17000 キリ番が D1 ピボットか不明. 上方の D1 主要レジスタンス位置 (1.17200 / 1.17400) との 距離も確認できない. 上抜けても D1 レジに激突する余地あり.</span></div><div class="num">09.</div><div class="key">水平線(S/R) <span class="meta">(horizontal_levels)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">重要度4フィルター: 1.17000 タッチ4回 (idx 845-848 + 865-866 の HIGH cluster) + キリ番 + M5 引ける + 賞味期限残あり (今回が初ブレイク試行) = 強水平線. 1.16713 V字底 LOW (タッチ2-3回), 1.16980 押し目 HL, 1.17220 window 高値 = 上方目標.</span></div><div class="num">10.</div><div class="key">斜めトレンドライン <span class="meta">(trendline)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">上昇TL: 1.16713 V字底 → 1.16980 HL → 現在 1.17096 を結ぶ. 傾き約 +0.6pip/bar. 動的サポートとして retest 時に機能. リテストエントリーゾーン 1.17000-1.17020 が水平線+上昇TLのクロス位置.</span></div><div class="num">11.</div><div class="key">波形(チャートパターン) <span class="meta">(wave_pattern)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">V字底 + 1.17000 ブレイク + 押し目 1.16980 + 上昇継続 = reversal_triple_motive 適合候補 (V字反転 + レジサポ転換 + 押し目買い). 次の押し目が 1.17000 で反発すればレジサポ転換成立 = 王道反転パターン完成.</span></div><div class="num">12.</div><div class="key">波形ライン <span class="meta">(wave_lines)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">L1=1.17000 (旧レジ→新サポ転換ライン, リテストエントリー), L2=1.16930 (直近 swing LOW 下, STOP 参照), L3=1.17220 (window 高値再到達, TARGET), L4=上昇TL (V字底 → HL → 現在).</span></div><div class="num">13.</div><div class="key">フィボナッチ・プライムゾーン <span class="meta">(fibonacci_zone)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">上昇 1.16713→1.17220 (window 高値) のフィボリトレースメント: 50%=1.16967, 61.8%=1.16906, 78.6%=1.16826. 現在 1.17096 はゾーン上 (+18% から 0% 近辺). リテスト目標 1.17000 はフィボ 43.4% で プライムゾーン (50-61.8%) 直前. fibonacci_zone_doctrine: 1.16967 (50%) まで深く戻る押し目なら本命 lot, 1.17000 浅押しなら 1/3 lot.</span></div><div class="num">14.</div><div class="key">ビルドアップ確認 <span class="meta">(buildup_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17000 ブレイク前 (idx 855-865) で 1.16970-1.17000 帯の収縮 10本 = ビルドアップ. 高値切り上げ + 安値切り上げの上昇傾向あり. breakout_3_signs ① 適合.</span></div><div class="num">15.</div><div class="key">MA整合性 (グランビル) <span class="meta">(ma_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">MA 値未供給. 強上昇後の 1.17000 押し目 = 上向き SMA20 への上から接近 = グランビル① 押し目買い王道の可能性高い局面. 確認できれば PASS 昇格.</span></div><div class="num">16.</div><div class="key">指標適用環境 <span class="meta">(indicator_environment)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">明確上昇トレンド = MA band-walk + BB band-walk 優先. RSI 買われすぎは無視 (indicator_environment_filter). 高ボラ環境のため stop 幅は ATR×2 以上推奨.</span></div><div class="num">17.</div><div class="key">ダイバージェンス確認 <span class="meta">(divergence_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">上昇強調局面では bearish divergence (price HH, RSI LH) が出ていれば早期警戒. 実 outcome=LOSE のため事後的にダイバ示唆あった可能性. データなし.</span></div><div class="num">18.</div><div class="key">火薬庫位置推測 <span class="meta">(stop_zone_estimation)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">上方火薬庫: 1.17220 上 (window 高値更新 SL), 1.17400 (D1 レジ可能性) で連鎖. 下方火薬庫: 1.16980 下 (HL 割れ売り SL), 1.16930 下 (V字底前低 SL大), 1.16713 下 (V字底破壊 SL最大). リテスト 1.17000 で支えられない場合 1.16930 まで一気.</span></div><div class="num">19.</div><div class="key">ブレイク確定 <span class="meta">(breakout)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17000 を idx 870 帯で実体クローズ上抜け (実体 ATR×1.5 = 4.5pip). 次足継続上昇でフェイク除外. ビルドアップ前提 (10本収縮) 揃い、breakout_3_signs ✓.</span></div><div class="num">20.</div><div class="key">リテスト/第2波 <span class="meta">(retest_second_wave)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">現在 1.17096 で 1.17000 から +9.6pip 上方滞在. リテスト未到達. 1.17000-1.17020 帯への押し目反発 = 旧レジが新サポに転換成立確認待ち. 理想深度 ATR×0.3-1.0 = 1.0-3.0pip = 1.17000 タッチ後反発.</span></div><div class="num">21.</div><div class="key">確認足 <span class="meta">(confirmation_candle)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">ブレイク足は ATR×1.5 で確認足相当. リテスト後の bullish engulfing / pin bar / パワームーブ出現待ち. 1.17000 で上ヒゲのみで反落なら罠.</span></div><div class="num">22.</div><div class="key">MTF整合性 <span class="meta">(mtf_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 HH-HL ✓. H1/H4 不明. mtf_principle: 上位足上昇トレンドなら下位足押し目買い王道、下降中なら強カウンターで罠. outcome=LOSE 実績から H4 が下降中だった疑い.</span></div><div class="num">23.</div><div class="key">トリプル根拠カウント <span class="meta">(triple_confluence_count)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">(a) フィボ 50-61.8% = △ (リテスト 1.17000 = 43.4%、プライムゾーン直前で発火、深押し 1.16967 なら 50%到達) / (b) 反転パターン = ✓ (V字底 + HH-HL 確立) / (c) レジサポ転換 = △ (1.17000 リテスト確認待ち). 現状確実 1軸 + retest 後 3軸候補. WAIT.</span></div><div class="num">24.</div><div class="key">コンフルエンス5軸 <span class="meta">(confluence_count)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">(1)ダウ=HH-HL ✓ / (2)ライン=1.17000 + 上昇TL クロス ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=ブレイク+ビルドアップ ✓. 確実 3/5軸. MA確認で押し目買いグランビル①なら 4軸へ昇格.</span></div><div class="num">25.</div><div class="key">ENTRY価格 <span class="meta">(entry_price)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">観測上: 1.17000-1.17020 帯リテスト反発確認後 BUY. entry_strategy=&#x27;retest&#x27;. 深押し 1.16967 (フィボ50%) なら本命 lot, 1.17000 浅押しなら 1/3 lot.</span></div><div class="num">26.</div><div class="key">STOP価格 (インバリデーション) <span class="meta">(stop_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">観測上: 1.16930 (直近 swing LOW 下). invalidation_placement: HL 1.16980 を割って 1.16930 まで侵入 = HH-HL ダウ無効化 = 即損切り. フィボ 78.6%=1.16826 まで深押しは強制 stop.</span></div><div class="num">27.</div><div class="key">TARGET価格 <span class="meta">(target_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">観測上: 1.17220 (window 高値再到達). さらに上方は 1.17400 (D1 レジ候補) で部分利確検討. メジャードムーブ等倍は 1.17000+50pip = 1.17500.</span></div><div class="num">28.</div><div class="key">RRチェック <span class="meta">(rr_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">RR = (target-entry)/(entry-stop) = (1.17220-1.17000)/(1.17000-1.16930) = 22pip/7pip = 3.14. 王道基準 2.0 以上クリア. ロング王道設定. ただし outcome=LOSE 実績は H4 上位足ダウン疑いで HTF supremacy 違反のリスク顕在化.</span></div><div class="num">29.</div><div class="key">イベント確認 <span class="meta">(event_clear)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">London-NY overlap で発言/指標可能性高い時間帯. 60分以内の確認不能.</span></div></div>
 
 <h2>AI が引いた lines</h2>
-<table><thead><tr><th>id</th><th>label</th><th>kind</th><th>role</th><th>price</th><th>anchors</th><th>reason</th></tr></thead><tbody><tr><td>L1_FLIP</td><td>サポレジ転換ライン(1.17000)</td><td>support</td><td>entry_trigger</td><td>1.17000</td><td>P2,P3</td><td class='reason'>2度のレジ→ブレイク済み = step3 床に変わる本命押し目買いゾーン</td></tr><tr><td>L2_INV</td><td>無効化(底値割れ)</td><td>invalidation</td><td>stop_reference</td><td>1.16930</td><td>-</td><td class='reason'>直近 swing LOW 1.16932 の少し下、ここを実体下抜けで上昇シナリオ無効</td></tr><tr><td>L3_TGT</td><td>目標(高値再到達)</td><td>target</td><td>target_reference</td><td>1.17220</td><td>P4</td><td class='reason'>直近高値の再到達、メジャードムーブ的目標</td></tr><tr><td>L4_TL_UP</td><td>上昇斜めTL</td><td>trendline</td><td>dynamic_support</td><td>1.17000</td><td>P1,P3</td><td class='reason'>P1(底)→P3(突破点) を結ぶ上向き斜めTL、現在価格付近で動的サポート</td></tr></tbody></table>
+<table><thead><tr><th>id</th><th>label</th><th>kind</th><th>role</th><th>price</th><th>anchors</th><th>reason</th></tr></thead><tbody><tr><td>L1_FLIP</td><td>1.17000 レジサポ転換</td><td>support</td><td>entry_trigger</td><td>1.17000</td><td>P3</td><td class='reason'>旧レジ→新サポ, リテストで押し目買いトリガー</td></tr><tr><td>L2_INV</td><td>無効化ライン</td><td>invalidation</td><td>stop_reference</td><td>1.16930</td><td>P2</td><td class='reason'>HL 1.16980 割れ + V字底前低 SL集積帯下</td></tr><tr><td>L3_TGT</td><td>window高値再到達 TARGET</td><td>target</td><td>target_reference</td><td>1.17220</td><td>-</td><td class='reason'>window高値、メジャードムーブ等倍は1.17500</td></tr><tr><td>L4_TL</td><td>上昇斜めTL</td><td>trendline</td><td>dynamic_support</td><td>1.17000</td><td>P1,P2</td><td class='reason'>V字底→押し目HL→現在を結ぶ動的サポート</td></tr></tbody></table>
 
 <h2>AI が指したピボット (points)</h2>
-<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>V字底</td><td>capitulation_low</td><td>27</td><td>1.16781</td><td class='reason'>window 内 major LOW、上昇起点</td></tr><tr><td>P2</td><td>旧レジ HIGH(過去抑え1)</td><td>prior_resistance</td><td>14</td><td>1.17000</td><td class='reason'>2本連続major HIGH (idx 14-15)、1度目の抑え</td></tr><tr><td>P3</td><td>旧レジ HIGH(過去抑え2)</td><td>prior_resistance</td><td>35</td><td>1.17000</td><td class='reason'>2本連続major HIGH (idx 35-36)、2度目の抑え = サポレジ転換 step1完了</td></tr><tr><td>P4</td><td>ブレイク後の swing高値</td><td>recent_high</td><td>54</td><td>1.17220</td><td class='reason'>1.17000 突破後の高値、step2 力強い突破完了</td></tr></tbody></table>
+<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>V字底</td><td>major_low</td><td>830</td><td>1.16713</td><td class='reason'>window安値, 反転起点</td></tr><tr><td>P2</td><td>押し目HL</td><td>higher_low</td><td>865</td><td>1.16980</td><td class='reason'>1.17000 ブレイク前の最終押し目</td></tr><tr><td>P3</td><td>1.17000 レジ突破</td><td>breakout_point</td><td>870</td><td>1.17000</td><td class='reason'>HIGH cluster 4本のレジを実体クローズ上抜け</td></tr><tr><td>P4</td><td>現在HH候補</td><td>higher_high</td><td>879</td><td>1.17096</td><td class='reason'>押し目 HL 後の高値更新</td></tr></tbody></table>
 
 <h2>市場パック概要</h2>
 <pre>asof=2026-04-30T11:50:00+00:00 session=LONDON current=1.17096 atr_m5=0.00053 24h_range=[1.16713..1.17220] candles=60 pivots=25</pre>
@@ -128,53 +128,53 @@ details[open] summary { color: #60a5fa; }
   &quot;used_for_trading&quot;: false,
   &quot;symbol&quot;: &quot;EURUSD=X&quot;,
   &quot;timeframe&quot;: &quot;M5&quot;,
-  &quot;title_ja&quot;: &quot;EURUSD M5 - 強上昇トレンド + 1.17000 レジサポ転換待ち&quot;,
+  &quot;title_ja&quot;: &quot;EURUSD M5 — V字底 + 1.17000レジサポ転換 + リテスト押し目買い候補&quot;,
   &quot;side&quot;: &quot;BUY&quot;,
   &quot;final_status&quot;: &quot;WAIT_RETEST&quot;,
   &quot;pattern_label_ja&quot;: &quot;V字底→上昇 + 1.17000レジ突破 + リテスト押し目買い候補&quot;,
-  &quot;market_story_ja&quot;: &quot;1.16713 から +50pip 上昇、現在 1.17096. 重要: 1.17000 に左方(idx 14-15, idx 35-36 の HIGH cluster) で計4本major HIGH = 強水平レジスタンス。今回ブレイク後に 1.17220 swing高値 (idx 54) まで到達、現在 push back 中。v7 doctrine **レジサポ転換 第2波** の典型: ①天井(1.17000)に2度抑えられる ②天井を力強く突破 ③これから 1.17000 が床に変わる(サポレジ転換)。押し目買いの本命エントリーゾーン。&quot;,
+  &quot;market_story_ja&quot;: &quot;1.16713 から +50pip 上昇、現在 1.17096. 重要: 1.17000 に左方 (idx 845-848 + 865-866 の HIGH cluster) で 計4本major HIGH = 強水平レジスタンス. 今回ブレイク後 1.16980 押し目 → 1.17096 上昇継続 = HH-HL 確立. doctrine 適用: reversal_triple_motive 適合 (V字反転 + レジサポ転換 + 押し目買い候補). fibonacci_zone_doctrine: 1.16713→1.17220 のフィボでリテスト 1.17000 = 43.4% (プライムゾーン直前)、深押し 1.16967 (50%) なら本命 lot. RR 3.14 で王道基準2.0クリア = 高勝率設定. ただし outcome=LOSE 実績は htf_full_scan 不可で H4 が下降中だった疑い (mtf_alignment 違反リスク).&quot;,
   &quot;points&quot;: [
     {
       &quot;id&quot;: &quot;P1&quot;,
       &quot;label&quot;: &quot;V字底&quot;,
-      &quot;role&quot;: &quot;capitulation_low&quot;,
-      &quot;index&quot;: 27,
+      &quot;role&quot;: &quot;major_low&quot;,
+      &quot;index&quot;: 830,
       &quot;timestamp&quot;: null,
-      &quot;price&quot;: 1.16781,
-      &quot;reason_ja&quot;: &quot;window 内 major LOW、上昇起点&quot;
+      &quot;price&quot;: 1.16713,
+      &quot;reason_ja&quot;: &quot;window安値, 反転起点&quot;
     },
     {
       &quot;id&quot;: &quot;P2&quot;,
-      &quot;label&quot;: &quot;旧レジ HIGH(過去抑え1)&quot;,
-      &quot;role&quot;: &quot;prior_resistance&quot;,
-      &quot;index&quot;: 14,
+      &quot;label&quot;: &quot;押し目HL&quot;,
+      &quot;role&quot;: &quot;higher_low&quot;,
+      &quot;index&quot;: 865,
       &quot;timestamp&quot;: null,
-      &quot;price&quot;: 1.17,
-      &quot;reason_ja&quot;: &quot;2本連続major HIGH (idx 14-15)、1度目の抑え&quot;
+      &quot;price&quot;: 1.1698,
+      &quot;reason_ja&quot;: &quot;1.17000 ブレイク前の最終押し目&quot;
     },
     {
       &quot;id&quot;: &quot;P3&quot;,
-      &quot;label&quot;: &quot;旧レジ HIGH(過去抑え2)&quot;,
-      &quot;role&quot;: &quot;prior_resistance&quot;,
-      &quot;index&quot;: 35,
+      &quot;label&quot;: &quot;1.17000 レジ突破&quot;,
+      &quot;role&quot;: &quot;breakout_point&quot;,
+      &quot;index&quot;: 870,
       &quot;timestamp&quot;: null,
       &quot;price&quot;: 1.17,
-      &quot;reason_ja&quot;: &quot;2本連続major HIGH (idx 35-36)、2度目の抑え = サポレジ転換 step1完了&quot;
+      &quot;reason_ja&quot;: &quot;HIGH cluster 4本のレジを実体クローズ上抜け&quot;
     },
     {
       &quot;id&quot;: &quot;P4&quot;,
-      &quot;label&quot;: &quot;ブレイク後の swing高値&quot;,
-      &quot;role&quot;: &quot;recent_high&quot;,
-      &quot;index&quot;: 54,
+      &quot;label&quot;: &quot;現在HH候補&quot;,
+      &quot;role&quot;: &quot;higher_high&quot;,
+      &quot;index&quot;: 879,
       &quot;timestamp&quot;: null,
-      &quot;price&quot;: 1.1722,
-      &quot;reason_ja&quot;: &quot;1.17000 突破後の高値、step2 力強い突破完了&quot;
+      &quot;price&quot;: 1.17096,
+      &quot;reason_ja&quot;: &quot;押し目 HL 後の高値更新&quot;
     }
   ],
   &quot;lines&quot;: [
     {
       &quot;id&quot;: &quot;L1_FLIP&quot;,
-      &quot;label&quot;: &quot;サポレジ転換ライン(1.17000)&quot;,
+      &quot;label&quot;: &quot;1.17000 レジサポ転換&quot;,
       &quot;kind&quot;: &quot;support&quot;,
       &quot;role&quot;: &quot;entry_trigger&quot;,
       &quot;price&quot;: 1.17,
@@ -183,16 +183,15 @@ details[open] summary { color: #60a5fa; }
       &quot;end_index&quot;: null,
       &quot;end_price&quot;: null,
       &quot;anchor_points&quot;: [
-        &quot;P2&quot;,
         &quot;P3&quot;
       ],
       &quot;confidence&quot;: 0.8,
-      &quot;reason_ja&quot;: &quot;2度のレジ→ブレイク済み = step3 床に変わる本命押し目買いゾーン&quot;,
+      &quot;reason_ja&quot;: &quot;旧レジ→新サポ, リテストで押し目買いトリガー&quot;,
       &quot;cautions&quot;: []
     },
     {
       &quot;id&quot;: &quot;L2_INV&quot;,
-      &quot;label&quot;: &quot;無効化(底値割れ)&quot;,
+      &quot;label&quot;: &quot;無効化ライン&quot;,
       &quot;kind&quot;: &quot;invalidation&quot;,
       &quot;role&quot;: &quot;stop_reference&quot;,
       &quot;price&quot;: 1.1693,
@@ -200,14 +199,16 @@ details[open] summary { color: #60a5fa; }
       &quot;start_price&quot;: null,
       &quot;end_index&quot;: null,
       &quot;end_price&quot;: null,
-      &quot;anchor_points&quot;: [],
-      &quot;confidence&quot;: 0.7,
-      &quot;reason_ja&quot;: &quot;直近 swing LOW 1.16932 の少し下、ここを実体下抜けで上昇シナリオ無効&quot;,
+      &quot;anchor_points&quot;: [
+        &quot;P2&quot;
+      ],
+      &quot;confidence&quot;: 0.78,
+      &quot;reason_ja&quot;: &quot;HL 1.16980 割れ + V字底前低 SL集積帯下&quot;,
       &quot;cautions&quot;: []
     },
     {
       &quot;id&quot;: &quot;L3_TGT&quot;,
-      &quot;label&quot;: &quot;目標(高値再到達)&quot;,
+      &quot;label&quot;: &quot;window高値再到達 TARGET&quot;,
       &quot;kind&quot;: &quot;target&quot;,
       &quot;role&quot;: &quot;target_reference&quot;,
       &quot;price&quot;: 1.1722,
@@ -215,142 +216,281 @@ details[open] summary { color: #60a5fa; }
       &quot;start_price&quot;: null,
       &quot;end_index&quot;: null,
       &quot;end_price&quot;: null,
-      &quot;anchor_points&quot;: [
-        &quot;P4&quot;
-      ],
-      &quot;confidence&quot;: 0.65,
-      &quot;reason_ja&quot;: &quot;直近高値の再到達、メジャードムーブ的目標&quot;,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.6,
+      &quot;reason_ja&quot;: &quot;window高値、メジャードムーブ等倍は1.17500&quot;,
       &quot;cautions&quot;: []
     },
     {
-      &quot;id&quot;: &quot;L4_TL_UP&quot;,
+      &quot;id&quot;: &quot;L4_TL&quot;,
       &quot;label&quot;: &quot;上昇斜めTL&quot;,
       &quot;kind&quot;: &quot;trendline&quot;,
       &quot;role&quot;: &quot;dynamic_support&quot;,
       &quot;price&quot;: 1.17,
-      &quot;start_index&quot;: 27,
-      &quot;start_price&quot;: 1.16781,
-      &quot;end_index&quot;: 59,
-      &quot;end_price&quot;: 1.1705,
+      &quot;start_index&quot;: 830,
+      &quot;start_price&quot;: 1.16713,
+      &quot;end_index&quot;: 879,
+      &quot;end_price&quot;: 1.17,
       &quot;anchor_points&quot;: [
         &quot;P1&quot;,
-        &quot;P3&quot;
+        &quot;P2&quot;
       ],
       &quot;confidence&quot;: 0.6,
-      &quot;reason_ja&quot;: &quot;P1(底)→P3(突破点) を結ぶ上向き斜めTL、現在価格付近で動的サポート&quot;,
+      &quot;reason_ja&quot;: &quot;V字底→押し目HL→現在を結ぶ動的サポート&quot;,
       &quot;cautions&quot;: []
     }
   ],
   &quot;zones&quot;: [],
   &quot;procedure_steps&quot;: [
     {
-      &quot;key&quot;: &quot;environment&quot;,
-      &quot;label_ja&quot;: &quot;environment&quot;,
-      &quot;status&quot;: &quot;WAIT&quot;,
-      &quot;result_ja&quot;: &quot;M5 のみ. 強上昇から H1 上昇トレンド可能性高&quot;,
+      &quot;key&quot;: &quot;fundamental_environment_check&quot;,
+      &quot;label_ja&quot;: &quot;ファンダメンタル環境確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;London-NY overlap (UTC 11:50) = 最も流動性高い時間帯. EU PMI / 米 GDP 速報等の発表可能性ある時間帯だが供給データなし. +35pip 上昇は通常の H4 値幅で説明可能、ただしファンダ加速の可能性も否定不可.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;EU_PMI_release&quot;,
+        &quot;US_GDP_advance&quot;,
+        &quot;ECB_speaker&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;crisis_mode_detection&quot;,
+      &quot;label_ja&quot;: &quot;クライシスモード検出&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;ATR(14)≒3.0pip. 60本 range 50.6pip = 16.9×ATR で通常の強上昇. 段階的上昇 (V字底→押し目→上昇) でクライシス基準 (ATR×3 急変) 未満. 通常モード.&quot;,
       &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;intervention_zone_check&quot;,
+      &quot;label_ja&quot;: &quot;介入リスク帯チェック&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;EUR/USD 介入帯対象外.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;verbal_intervention_scan&quot;,
+      &quot;label_ja&quot;: &quot;口先介入スキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;London-NY overlap で要人発言頻度高い時間帯. データ未供給で UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;lagarde_speakers_morning&quot;,
+        &quot;powell_remarks&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_full_scan&quot;,
+      &quot;label_ja&quot;: &quot;上位足フルスキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 単独. +50pip 上昇は H1 1-2本相当、H4 で見れば中型陽線. H4/D1 で上昇トレンド継続中なら下位足 BUY は王道、レンジ上端なら戻り売り罠の可能性. htf_supremacy 順守で UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;W1_trend&quot;,
+        &quot;D1_trend&quot;,
+        &quot;H4_trend&quot;,
+        &quot;H1_trend&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;environment&quot;,
+      &quot;label_ja&quot;: &quot;環境認識&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;h4/d1 不明. M5 局所では強上昇 + 1.17000 ブレイク = 上昇トレンド転換候補だが 上位足整合確認できず.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_direction&quot;,
+        &quot;d1_direction&quot;
+      ]
     },
     {
       &quot;key&quot;: &quot;htf_dow&quot;,
-      &quot;label_ja&quot;: &quot;htf_dow&quot;,
+      &quot;label_ja&quot;: &quot;上位足ダウ&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;M5 ダウは上昇確定 (HH-HL)&quot;,
-      &quot;missing_or_waiting&quot;: []
+      &quot;result_ja&quot;: &quot;M5 ダウ: 1.16713 LOW (V字底) → 1.16980 HL → 1.17096 HH 形成中 = HH-HL 上昇ダウ確立 (M5 スケール). 上位足整合は不明だが M5 範囲で PASS.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_dow_match&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_lines_check&quot;,
+      &quot;label_ja&quot;: &quot;上位足ライン位置チェック&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;1.17000 キリ番が D1 ピボットか不明. 上方の D1 主要レジスタンス位置 (1.17200 / 1.17400) との 距離も確認できない. 上抜けても D1 レジに激突する余地あり.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;D1_resistance_above_1.17000&quot;
+      ]
     },
     {
       &quot;key&quot;: &quot;horizontal_levels&quot;,
-      &quot;label_ja&quot;: &quot;horizontal_levels&quot;,
+      &quot;label_ja&quot;: &quot;水平線(S/R)&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;1.17220/1.17000(キーレジサポ)/1.16781 識別&quot;,
+      &quot;result_ja&quot;: &quot;重要度4フィルター: 1.17000 タッチ4回 (idx 845-848 + 865-866 の HIGH cluster) + キリ番 + M5 引ける + 賞味期限残あり (今回が初ブレイク試行) = 強水平線. 1.16713 V字底 LOW (タッチ2-3回), 1.16980 押し目 HL, 1.17220 window 高値 = 上方目標.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;trendline&quot;,
-      &quot;label_ja&quot;: &quot;trendline&quot;,
+      &quot;label_ja&quot;: &quot;斜めトレンドライン&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;P1→P3 上昇TL 引ける. 動的サポートとして機能&quot;,
+      &quot;result_ja&quot;: &quot;上昇TL: 1.16713 V字底 → 1.16980 HL → 現在 1.17096 を結ぶ. 傾き約 +0.6pip/bar. 動的サポートとして retest 時に機能. リテストエントリーゾーン 1.17000-1.17020 が水平線+上昇TLのクロス位置.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;wave_pattern&quot;,
-      &quot;label_ja&quot;: &quot;wave_pattern&quot;,
+      &quot;label_ja&quot;: &quot;波形(チャートパターン)&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;V字底 + ブレイク + 押し目段階. レジサポ転換 step3&quot;,
+      &quot;result_ja&quot;: &quot;V字底 + 1.17000 ブレイク + 押し目 1.16980 + 上昇継続 = reversal_triple_motive 適合候補 (V字反転 + レジサポ転換 + 押し目買い). 次の押し目が 1.17000 で反発すればレジサポ転換成立 = 王道反転パターン完成.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;wave_lines&quot;,
-      &quot;label_ja&quot;: &quot;wave_lines&quot;,
+      &quot;label_ja&quot;: &quot;波形ライン&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;サポレジ転換ライン + 無効化 + 目標 + 斜めTL 提示&quot;,
+      &quot;result_ja&quot;: &quot;L1=1.17000 (旧レジ→新サポ転換ライン, リテストエントリー), L2=1.16930 (直近 swing LOW 下, STOP 参照), L3=1.17220 (window 高値再到達, TARGET), L4=上昇TL (V字底 → HL → 現在).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;fibonacci_zone&quot;,
+      &quot;label_ja&quot;: &quot;フィボナッチ・プライムゾーン&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;上昇 1.16713→1.17220 (window 高値) のフィボリトレースメント: 50%=1.16967, 61.8%=1.16906, 78.6%=1.16826. 現在 1.17096 はゾーン上 (+18% から 0% 近辺). リテスト目標 1.17000 はフィボ 43.4% で プライムゾーン (50-61.8%) 直前. fibonacci_zone_doctrine: 1.16967 (50%) まで深く戻る押し目なら本命 lot, 1.17000 浅押しなら 1/3 lot.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;buildup_check&quot;,
+      &quot;label_ja&quot;: &quot;ビルドアップ確認&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;1.17000 ブレイク前 (idx 855-865) で 1.16970-1.17000 帯の収縮 10本 = ビルドアップ. 高値切り上げ + 安値切り上げの上昇傾向あり. breakout_3_signs ① 適合.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;ma_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MA整合性 (グランビル)&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;MA 値未供給. 強上昇後の 1.17000 押し目 = 上向き SMA20 への上から接近 = グランビル① 押し目買い王道の可能性高い局面. 確認できれば PASS 昇格.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;m5_sma20&quot;,
+        &quot;m5_sma75&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;indicator_environment&quot;,
+      &quot;label_ja&quot;: &quot;指標適用環境&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;明確上昇トレンド = MA band-walk + BB band-walk 優先. RSI 買われすぎは無視 (indicator_environment_filter). 高ボラ環境のため stop 幅は ATR×2 以上推奨.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;divergence_check&quot;,
+      &quot;label_ja&quot;: &quot;ダイバージェンス確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;上昇強調局面では bearish divergence (price HH, RSI LH) が出ていれば早期警戒. 実 outcome=LOSE のため事後的にダイバ示唆あった可能性. データなし.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;m5_rsi14_at_idx_879&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;stop_zone_estimation&quot;,
+      &quot;label_ja&quot;: &quot;火薬庫位置推測&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;上方火薬庫: 1.17220 上 (window 高値更新 SL), 1.17400 (D1 レジ可能性) で連鎖. 下方火薬庫: 1.16980 下 (HL 割れ売り SL), 1.16930 下 (V字底前低 SL大), 1.16713 下 (V字底破壊 SL最大). リテスト 1.17000 で支えられない場合 1.16930 まで一気.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;breakout&quot;,
-      &quot;label_ja&quot;: &quot;breakout&quot;,
+      &quot;label_ja&quot;: &quot;ブレイク確定&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;1.17000 既に上方ブレイク確定、ブレイク後の押し目段階&quot;,
+      &quot;result_ja&quot;: &quot;1.17000 を idx 870 帯で実体クローズ上抜け (実体 ATR×1.5 = 4.5pip). 次足継続上昇でフェイク除外. ビルドアップ前提 (10本収縮) 揃い、breakout_3_signs ✓.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
-      &quot;key&quot;: &quot;retest&quot;,
-      &quot;label_ja&quot;: &quot;retest&quot;,
+      &quot;key&quot;: &quot;retest_second_wave&quot;,
+      &quot;label_ja&quot;: &quot;リテスト/第2波&quot;,
       &quot;status&quot;: &quot;WAIT&quot;,
-      &quot;result_ja&quot;: &quot;1.17000 リテスト中(現在1.17096で +9.6pip 上)&quot;,
-      &quot;missing_or_waiting&quot;: []
+      &quot;result_ja&quot;: &quot;現在 1.17096 で 1.17000 から +9.6pip 上方滞在. リテスト未到達. 1.17000-1.17020 帯への押し目反発 = 旧レジが新サポに転換成立確認待ち. 理想深度 ATR×0.3-1.0 = 1.0-3.0pip = 1.17000 タッチ後反発.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;pullback_to_1.17000&quot;
+      ]
     },
     {
       &quot;key&quot;: &quot;confirmation_candle&quot;,
-      &quot;label_ja&quot;: &quot;confirmation_candle&quot;,
+      &quot;label_ja&quot;: &quot;確認足&quot;,
       &quot;status&quot;: &quot;WAIT&quot;,
-      &quot;result_ja&quot;: &quot;リテストでの反発確認足を待機&quot;,
+      &quot;result_ja&quot;: &quot;ブレイク足は ATR×1.5 で確認足相当. リテスト後の bullish engulfing / pin bar / パワームーブ出現待ち. 1.17000 で上ヒゲのみで反落なら罠.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;bullish_engulfing_at_1.17000_retest&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;mtf_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MTF整合性&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 HH-HL ✓. H1/H4 不明. mtf_principle: 上位足上昇トレンドなら下位足押し目買い王道、下降中なら強カウンターで罠. outcome=LOSE 実績から H4 が下降中だった疑い.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h1_direction&quot;,
+        &quot;h4_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;triple_confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;トリプル根拠カウント&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;(a) フィボ 50-61.8% = △ (リテスト 1.17000 = 43.4%、プライムゾーン直前で発火、深押し 1.16967 なら 50%到達) / (b) 反転パターン = ✓ (V字底 + HH-HL 確立) / (c) レジサポ転換 = △ (1.17000 リテスト確認待ち). 現状確実 1軸 + retest 後 3軸候補. WAIT.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;pullback_to_50pct_zone&quot;,
+        &quot;resistance_flip_at_1.17000&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;コンフルエンス5軸&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;(1)ダウ=HH-HL ✓ / (2)ライン=1.17000 + 上昇TL クロス ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=ブレイク+ビルドアップ ✓. 確実 3/5軸. MA確認で押し目買いグランビル①なら 4軸へ昇格.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;entry_price&quot;,
-      &quot;label_ja&quot;: &quot;entry_price&quot;,
-      &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;1.17000-1.17020 で押し目反発確認後 BUY&quot;,
-      &quot;missing_or_waiting&quot;: []
+      &quot;label_ja&quot;: &quot;ENTRY価格&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.17000-1.17020 帯リテスト反発確認後 BUY. entry_strategy=&#x27;retest&#x27;. 深押し 1.16967 (フィボ50%) なら本命 lot, 1.17000 浅押しなら 1/3 lot.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;pullback_to_1.17000&quot;
+      ]
     },
     {
       &quot;key&quot;: &quot;stop_price&quot;,
-      &quot;label_ja&quot;: &quot;stop_price&quot;,
+      &quot;label_ja&quot;: &quot;STOP価格 (インバリデーション)&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;1.16930 (直近swing LOW下)&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.16930 (直近 swing LOW 下). invalidation_placement: HL 1.16980 を割って 1.16930 まで侵入 = HH-HL ダウ無効化 = 即損切り. フィボ 78.6%=1.16826 まで深押しは強制 stop.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;target_price&quot;,
-      &quot;label_ja&quot;: &quot;target_price&quot;,
+      &quot;label_ja&quot;: &quot;TARGET価格&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;1.17220 (直近swing HIGH再到達)&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.17220 (window 高値再到達). さらに上方は 1.17400 (D1 レジ候補) で部分利確検討. メジャードムーブ等倍は 1.17000+50pip = 1.17500.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;rr_check&quot;,
-      &quot;label_ja&quot;: &quot;rr_check&quot;,
+      &quot;label_ja&quot;: &quot;RRチェック&quot;,
       &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;リスク約8pip / リワード約20pip = RR 2.5. 王道2.0クリア&quot;,
+      &quot;result_ja&quot;: &quot;RR = (target-entry)/(entry-stop) = (1.17220-1.17000)/(1.17000-1.16930) = 22pip/7pip = 3.14. 王道基準 2.0 以上クリア. ロング王道設定. ただし outcome=LOSE 実績は H4 上位足ダウン疑いで HTF supremacy 違反のリスク顕在化.&quot;,
       &quot;missing_or_waiting&quot;: []
     },
     {
       &quot;key&quot;: &quot;event_clear&quot;,
-      &quot;label_ja&quot;: &quot;event_clear&quot;,
-      &quot;status&quot;: &quot;PASS&quot;,
-      &quot;result_ja&quot;: &quot;60min以内なし&quot;,
-      &quot;missing_or_waiting&quot;: []
+      &quot;label_ja&quot;: &quot;イベント確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;London-NY overlap で発言/指標可能性高い時間帯. 60分以内の確認不能.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;calendar_60min&quot;
+      ]
     }
   ],
-  &quot;entry_candidate_ja&quot;: &quot;本番ENTRY候補ではありません. 観測上: 1.17000-1.17020 でリテスト反発確認後 BUY&quot;,
+  &quot;entry_candidate_ja&quot;: &quot;本番ENTRY候補ではありません. 観測上: 1.17000-1.17020 帯リテスト反発確認後 BUY&quot;,
   &quot;stop_candidate_ja&quot;: &quot;本番STOP候補ではありません. 観測上: 1.16930 (直近swing LOW下)&quot;,
-  &quot;target_candidate_ja&quot;: &quot;本番TP候補ではありません. 観測上: 1.17220 (直近高値再到達)&quot;,
-  &quot;rr_comment_ja&quot;: &quot;RR 2.5 で王道基準クリア. レジサポ転換 + 押し目買い = 高勝率設定&quot;,
-  &quot;problems&quot;: [
-    &quot;上位足の H1/H4 確認なし&quot;
-  ],
+  &quot;target_candidate_ja&quot;: &quot;本番TP候補ではありません. 観測上: 1.17220 (window高値再到達)&quot;,
+  &quot;rr_comment_ja&quot;: &quot;RR 3.14 で王道基準クリア. レジサポ転換+押し目買い=高勝率設定. ただし outcome=LOSE 実績で H4 ダウン疑い、htf_full_scan 不可がリスク&quot;,
+  &quot;problems&quot;: [],
   &quot;required_fixes&quot;: [],
-  &quot;summary_ja&quot;: &quot;レジサポ転換+第2波の本命押し目買い候補. RR2.5で王道クリア、本命ロット可&quot;
+  &quot;summary_ja&quot;: &quot;&quot;
 }</pre></details><details><summary>raw: 数値事実 pack (MarketAnalysisPackV2 JSON, OHLC全件含む)</summary><pre>{
   &quot;schema_version&quot;: &quot;market_analysis_pack_v2&quot;,
   &quot;symbol&quot;: &quot;EURUSD=X&quot;,
@@ -1057,5 +1197,5 @@ details[open] summary { color: #60a5fa; }
   &quot;session&quot;: &quot;LONDON&quot;
 }</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.2556439939011245, -0.2554205288714907, 0.0, 0.0, 0.0, -0.5108410577429814, 0.766485051644106, 0.0, 0.0, -0.7669319817033736, 0.5115114528318829, 0.0, 0.0, -0.2558674589307584, 0.5115114528318829, 0.0, 0.2558674589307584, 0.0, 0.0, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.2558674589307584, 0.0, 0.0, 0.2556439939011245, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, 0.2556439939011245, 0.0, 0.5117349178615168, -0.2558674589307584, 0.2558674589307584, 0.0, 0.0, -1.2800076897426935, 1.5358751486734519, 0.0, 0.25653785401965995, -0.7693900970293459, 1.5383332639994243, 0.0, 1.282242340039032, 0.0, -1.025704486019372, 0.0, 0.7689431669700783, 0.0, -0.5126287779800521, 0.0, 0.25609092396039224, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.7682727718811767, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.0, 0.0, 0.0, -0.5117349178615168, -0.5121818479207845, 0.0, 0.0, -0.5115114528318829, -0.7676023767922752, 0.0, 0.2558674589307584, -0.2558674589307584, 0.2558674589307584, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -1.0232463706933996, 0.5117349178615168, 0.0, 0.0, -0.5117349178615168, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.0, -0.767825841821909, 0.25609092396039224, 0.0, 1.5378863339401565, 0.0, 0.25609092396039224, 0.0, 0.0, -0.5126287779800521, 0.7687197019404444, 0.0, 0.25631438899002607, -0.25631438899002607, 0.25631438899002607, 0.0, 0.0, -0.25653785401965995, 0.512852243009686, 0.0, 0.0, -0.5130757080393199, 0.5130757080393199, 0.0, 0.25653785401965995, 0.0, -0.25653785401965995, 0.0, 0.25653785401965995, -0.25653785401965995, -0.25653785401965995, 0.0, 0.0, -0.5130757080393199, 0.25653785401965995, 0.0, 1.025704486019372, 0.0, -1.025704486019372, 0.0, 0.0, -0.7691666319997121, 0.7691666319997121, 0.0, 0.0, -0.25653785401965995, 0.5130757080393199, 0.0, 0.25653785401965995, -1.0268218111675413, 0.7702839571478813, 0.0, 0.0, -0.7714012822960506, 1.7988934885524934, 0.0, 0.5139695681578553, -0.25698478407892766, -1.0283860663749782, 0.0, 0.0, -0.5139695681578553, 0.5139695681578553, 0.0, 0.0, -1.0279391363157107, 0.0, 0.0, 0.0, -1.0286095314046122, 0.7716247473256844, 0.0, 0.0, -0.7716247473256844, 0.2572082491085615, 0.0, 0.0, -0.2574317141381953, 0.772295142414586, 0.0, 1.8002342787302965, 0.0, -2.315097707006687, 0.0, 0.0, -1.2853708504539059, 1.0283860663749782, 0.0, 0.2572082491085615, -0.514416498217123, 0.0, 0.0, 0.0, -0.772295142414586, 1.286711640631709, 0.0, 0.0, -0.5150868933060245, 0.2576551791678292, 0.0, 0.2574317141381953, -0.514416498217123, -1.0299503215824153, 0.0, 0.0, -0.5150868933060245, 1.0299503215824153, 0.0, 0.0, -0.2574317141381953, -0.5150868933060245, 0.0, 0.2574317141381953, 0.0, 0.0, 0.0, 2.0581129229277595, 0.0, -1.8006812087895643, 0.0, -0.38333333333333336, -1.7977761634043241, 1.0, 0.5, -0.3333333333333333, -3.0800185034433563, -1.0, 0.5, -0.31666666666666665, -3.0800185034433563, -1.0, 0.5, -0.08333333333333333, 2.3157681020955887, 1.0, 0.5, 1.0, 0.0, 0.0, 9.489219018371811, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
 
-<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id f93d40fb-1f7d-467f-956b-4fed5b2ff076 --note "..."</code></p>
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id e6917955-d9f9-4f1a-862b-4f7ba8fdad3a --note "..."</code></p>
 </body></html>

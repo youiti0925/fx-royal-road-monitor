@@ -30,6 +30,7 @@ fx-monitor-update-outcomes = "fx_monitor.tools.update_outcomes:main"
 fx-monitor-flag-dissent = "fx_monitor.tools.flag_dissent:main"
 fx-monitor-monthly-report = "fx_monitor.tools.monthly_report:main"
 fx-monitor-dashboard = "fx_monitor.tools.dashboard:main"
+fx-monitor-dump-doctrine = "fx_monitor.tools.dump_doctrine:main"
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]
