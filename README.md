@@ -259,6 +259,10 @@ python -m fx_monitor.app.dashboard \
     --html out/dashboard.html
 ```
 
+For operating instructions, see:
+
+- [Scheduled Draft Review Runbook](docs/RUNBOOK_SCHEDULED_DRAFT_REVIEW.md)
+
 ## ステータス
 
 初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
