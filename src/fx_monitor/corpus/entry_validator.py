@@ -196,7 +196,7 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
     if pivots:
         atr_m5 = float(getattr(pack.atr, "m5_14", 0.0002) or 0.0002)
         atr_pip = atr_m5 * 10000.0
-        atr_tolerance = max(0.5, atr_pip * 0.4)
+        atr_tolerance = max(0.5, atr_pip * 0.6)
         for tl_kind in ("HIGH", "LOW"):
             top = detect_extreme_anchored_trendline(
                 pivots, kind=tl_kind,
