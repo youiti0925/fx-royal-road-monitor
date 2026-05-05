@@ -30,6 +30,10 @@ from pathlib import Path
 from typing import Any
 
 from fx_monitor.corpus.schema import CorpusEntry
+from fx_monitor.live.structure_detector import (
+    detect_channels,
+    enumerate_trendlines,
+)
 
 
 _KNOWLEDGE_PACK_PATH = (
@@ -182,6 +186,68 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
                 "Stops this tight collapse the markers visually and are "
                 "impractical to execute."
             )
+
+    # ----- F15: spec must reference the strongest code-detected trendline -----
+    # Aim: prevent the anchor 2 case where AI drew 2-touch TLs while a 5+
+    # touch HIGH cluster TL was sitting in the pivot data.
+    pivots = pack.pivots
+    if pivots:
+        for tl_kind in ("HIGH", "LOW"):
+            code_tls = enumerate_trendlines(
+                pivots, kind=tl_kind, min_touches=4, tolerance_pip=1.5,
+            )
+            if not code_tls:
+                continue
+            top = code_tls[0]
+            spec_slants = [
+                l for l in spec.lines
+                if l.kind == "trendline"
+                and getattr(l, "start_index", None) is not None
+                and getattr(l, "end_index", None) is not None
+            ]
+            slope_pip = lambda l: (
+                (l.end_price - l.start_price) / (l.end_index - l.start_index) * 10000
+                if (l.end_price is not None and l.start_price is not None
+                    and l.end_index != l.start_index) else None
+            )
+            matched = False
+            for l in spec_slants:
+                s = slope_pip(l)
+                if s is None:
+                    continue
+                if abs(s - top.slope_pip_per_bar) <= 0.3 and (
+                    abs(l.start_index - top.start_index) <= 5
+                    or abs(l.end_index - top.end_index) <= 5
+                ):
+                    matched = True
+                    break
+            if not matched:
+                errors.append(
+                    f"F15 missed strongest {tl_kind} trendline: "
+                    f"{top.touch_count} touches, slope {top.slope_pip_per_bar:+.2f}pip/bar, "
+                    f"idx {top.start_index}->{top.end_index} "
+                    f"({top.start_price:.5f}->{top.end_price:.5f}). "
+                    "AI spec did not include any matching slanted trendline."
+                )
+
+    # ----- F16: side != NEUTRAL must not coexist with a clear channel -----
+    # Aim: prevent the anchor 5 case where AI called BUY/WAIT_RETEST inside
+    # a rising channel (should have been NEUTRAL/WAIT_BREAKOUT).
+    if pivots and spec.side != "NEUTRAL":
+        channels = detect_channels(
+            pivots, min_touches_per_line=3,
+            parallel_tolerance_pip_per_bar=0.4,
+        )
+        if channels:
+            top_ch = channels[0]
+            if top_ch.upper.touch_count + top_ch.lower.touch_count >= 7:
+                errors.append(
+                    f"F16 directional side={spec.side} but a {top_ch.direction} "
+                    f"channel is detected (upper {top_ch.upper.touch_count}t / "
+                    f"lower {top_ch.lower.touch_count}t, slope diff "
+                    f"{top_ch.slope_diff_pip_per_bar:+.2f}pip/bar). "
+                    "Channel-internal touches require WAIT_BREAKOUT, not BUY/SELL."
+                )
 
     return errors
 
