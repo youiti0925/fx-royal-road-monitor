@@ -1,0 +1,63 @@
+name: Safety Lint
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  forbid_dangerous_identifiers:
+    name: Forbid broker / live-trading identifiers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Forbid broker / order / live-trading identifiers in src
+        run: |
+          set -e
+          # v4 adds oanda_open_order and order_book_api as additional explicit blocks:
+          # the doctrine treats OANDA Open Orders as a *concept* only; direct
+          # integration is permanently forbidden.
+          if grep -rn -E "(oanda|paper_broker|paper_trade|live_order|place_order|broker_api|execute_trade|oanda_open_order|order_book_api)" src/; then
+            echo "::error::Forbidden broker / live-trading identifier found in src/"
+            exit 1
+          fi
+          echo "OK: no broker / live-trading / order-book identifiers"
+
+      - name: Forbid notification dispatch in live/, tools/, corpus/
+        run: |
+          set -e
+          # 観測専用システムなので、live 系統から外部通知が呼ばれてはいけない.
+          # (notify/ モジュール自体は残るが、live 系統からの import は禁止.)
+          if [ -d src/fx_monitor/live ] || [ -d src/fx_monitor/tools ] || [ -d src/fx_monitor/corpus ]; then
+            if grep -rn -E "(send_to_(discord|line|slack|webhook)|dispatch_notification|notify\.dispatch)" \
+                src/fx_monitor/live/ src/fx_monitor/tools/ src/fx_monitor/corpus/ 2>/dev/null; then
+              echo "::error::Notification dispatch found in observation-only layers"
+              exit 1
+            fi
+          fi
+          echo "OK: no notification dispatch in observation-only layers"
+
+      - name: Forbid pollution keys in live/ layer
+        run: |
+          set -e
+          # live 系統のコードに、AI を引きずるコード派生中間判断キーが現れてはいけない.
+          if [ -d src/fx_monitor/live ]; then
+            if grep -rn -E "(pattern_kind|wave_derived_lines_draft|structural_lines_draft|trendline_context_draft|royal_road_procedure_checklist_draft)" \
+                src/fx_monitor/live/ 2>/dev/null; then
+              echo "::error::Pollution key (code-derived judgment) leaked into live/ layer"
+              exit 1
+            fi
+          fi
+          echo "OK: live/ layer free of pollution keys"
+
+      - name: Forbid READY-from-AI shortcuts
+        run: |
+          set -e
+          # AI 出力をそのまま READY 通知に変換するショートカットを禁止.
+          if grep -rn -E "(from_ai_to_ready|ai_decides_ready|ai_triggers_notification)" src/ 2>/dev/null; then
+            echo "::error::AI -> READY shortcut found"
+            exit 1
+          fi
+          echo "OK: no AI -> READY shortcut"

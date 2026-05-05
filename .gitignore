@@ -30,6 +30,10 @@ out/
 logs/
 *.log
 
+# v2 runtime data (corpus, archives, progress, prompts, dashboard)
+data/
+docs/live_dashboard/
+
 # Editor / OS
 .idea/
 .vscode/

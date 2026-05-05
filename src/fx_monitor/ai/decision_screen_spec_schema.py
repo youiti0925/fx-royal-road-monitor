@@ -33,7 +33,17 @@ LineKind = Literal[
     "event",
     "other",
 ]
-ZoneKind = Literal["support", "resistance", "event", "other"]
+ZoneKind = Literal[
+    "support",
+    "resistance",
+    "event",
+    "fibonacci_prime",
+    "buildup",
+    "stop_zone_upper",
+    "stop_zone_lower",
+    "confluence",
+    "other",
+]
 FinalStatus = Literal[
     "SUPPRESSED",
     "HOLD",
@@ -77,6 +87,8 @@ class ScreenZone(BaseModel):
     kind: ZoneKind
     price_low: float | None = None
     price_high: float | None = None
+    index_low: int | None = None
+    index_high: int | None = None
     reason_ja: str = ""
     confidence: float = 0.0
 

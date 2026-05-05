@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="utf-8"><title>判定 36020cc5</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+    font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+    margin: 0; padding: 1.5rem;
+    background: #0b1220; color: #e2e8f0; line-height: 1.5;
+}
+header { border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin-top: 1.6rem; font-size: 1.15rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.3rem; }
+h3 { margin-top: 1.2rem; font-size: 1rem; color: #cbd5e1; }
+.meta { color: #94a3b8; font-size: 0.9rem; }
+.grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: 1rem 0;
+}
+.card { background: #111a2c; border: 1px solid #1e293b; border-radius: 6px; padding: 1rem; }
+.card .label { color: #94a3b8; font-size: 0.85rem; }
+.card .value { font-size: 1.4rem; font-weight: 600; margin-top: 0.25rem; }
+.safety {
+    background: #422006; border-left: 4px solid #ea580c;
+    padding: 0.6rem 1rem; border-radius: 4px; margin: 1rem 0; font-size: 0.9rem;
+}
+.postmortem {
+    background: #1e1b3b; border-left: 4px solid #a78bfa;
+    padding: 0.8rem 1rem; border-radius: 4px; margin: 1rem 0;
+}
+.postmortem.severity-high { border-left-color: #ef4444; background: #2c1414; }
+.postmortem.severity-medium { border-left-color: #f59e0b; background: #2c1f0a; }
+.postmortem h3 { margin-top: 0; color: #c4b5fd; }
+.postmortem.severity-high h3 { color: #fca5a5; }
+.postmortem.severity-medium h3 { color: #fcd34d; }
+table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; text-align: left; vertical-align: top; }
+th { background: #111a2c; color: #94a3b8; font-weight: 500; }
+tr:hover td { background: #0f172a; }
+.badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+}
+.badge-WIN, .badge-PASS { background: #064e3b; color: #6ee7b7; }
+.badge-LOSE, .badge-BLOCK { background: #7f1d1d; color: #fca5a5; }
+.badge-NEUTRAL_GOOD, .badge-WAIT { background: #1e3a8a; color: #93c5fd; }
+.badge-NEUTRAL_MISSED, .badge-WARN { background: #713f12; color: #fcd34d; }
+.badge-PENDING, .badge-UNKNOWN { background: #334155; color: #cbd5e1; }
+.badge-DISSENT { background: #4c1d95; color: #c4b5fd; margin-left: 0.5rem; }
+.steps {
+    display: grid; gap: 0.4rem;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-size: 0.88rem;
+}
+.steps .num { color: #64748b; font-variant-numeric: tabular-nums; }
+.steps .key { color: #cbd5e1; min-width: 11rem; }
+.steps .reason { color: #94a3b8; }
+a { color: #60a5fa; text-decoration: none; }
+a:hover { text-decoration: underline; }
+pre {
+    background: #0f172a; padding: 1rem; border-radius: 6px;
+    overflow: auto; font-size: 0.82rem; max-height: 24rem;
+}
+details { margin: 0.6rem 0; }
+details summary { cursor: pointer; color: #93c5fd; font-size: 0.92rem; padding: 0.4rem 0; }
+details[open] summary { color: #60a5fa; }
+.chart-img { width: 100%; max-width: 100%; height: auto; border-radius: 6px; margin-top: 0.6rem; }
+</style>
+</head><body>
+<header>
+<h1>判定詳細</h1>
+<div class="meta"><a href="../index.html">← 一覧に戻る</a></div>
+</header>
+<div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
+
+<div class="grid">
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">36020cc5-f839-49ca-9ce2-946ac7e56866</div></div>
+<div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-05-01T04:55:00+00:00</div></div>
+<div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
+<div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">NEUTRAL · SUPPRESSED</div></div>
+<div class="card"><div class="label">outcome</div><div class="value"><span class="badge badge-WIN">WIN</span></div></div>
+<div class="card"><div class="label">favourable / adverse</div><div class="value" style="font-size:1rem;">+19.3 / -19.3 pip</div></div>
+<div class="card"><div class="label">user dissent</div><div class="value" style="font-size:1rem;">No</div></div>
+<div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
+</div>
+
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="36020cc5-f839-49ca-9ce2-946ac7e56866.png" alt="entry chart for 36020cc5-f839-49ca-9ce2-946ac7e56866">
+
+
+
+<h2>AI が下した判定の物語</h2>
+<p>ATR 1.3pip と極端な低ボラ. window range 12.4pip (9.5×ATR) で機械数値上は候補だが 実態は東京早朝のスクイーズ. HIGH cluster 1.17357→1.17385→1.17412 と緩やかに切り上げ + LOW 1.17288 ほぼ固定 = ascending triangle 形成途中. doctrine 適用: indicator_environment_filter で超低ボラ + 東京早朝最低流動性 = 全指標シグナル無効化, SUPPRESSED. buildup_check 適合 (10本以上収縮 + 高値切り上げ) のためブレイク発生時の信頼度高. 1.17400 キリ番直下のため D1 主要レジ可能性 (htf_lines_check UNKNOWN) でブレイク fakeout 警戒. ボラ拡大待ち、現状新規エントリー全面凍結.</p>
+<p class="meta"><strong>パターンラベル:</strong> 超低ボラ収縮 + 1.17302-1.17412 ascending triangle</p>
+<p class="meta"><strong>サマリ:</strong> —</p>
+
+<h2>王道14手順チェック</h2>
+<div class="steps"><div class="num">01.</div><div class="key">ファンダメンタル環境確認 <span class="meta">(fundamental_environment_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">東京早朝 (UTC 04:55) = NY close 後 + 東京 open 前の流動性最低時間帯. 経済指標発表ほぼゼロ、要人発言可能性低い. ファンダ静穏帯と仮定可能だが供給データなし.</span></div><div class="num">02.</div><div class="key">クライシスモード検出 <span class="meta">(crisis_mode_detection)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">ATR(14)=1.3pip と極端に低い. 60本 range 12.4pip = 9.5×ATR で表面上は中レンジだが 絶対値 12.4pip は極小. 急変動なし、通常モード (ただし indicator_environment_filter で suppress).</span></div><div class="num">03.</div><div class="key">介入リスク帯チェック <span class="meta">(intervention_zone_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">EUR/USD 介入帯対象外.</span></div><div class="num">04.</div><div class="key">口先介入スキャン <span class="meta">(verbal_intervention_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">東京早朝で要人発言可能性最低. データ未供給で UNKNOWN.</span></div><div class="num">05.</div><div class="key">上位足フルスキャン <span class="meta">(htf_full_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 単独. 12.4pip range は H4/D1 では極小蓄積点. 上位足ブレイク前蓄積か レンジ中央のヨコヨコか判定不能. htf_supremacy で UNKNOWN.</span></div><div class="num">06.</div><div class="key">環境認識 <span class="meta">(environment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">h4/d1 トレンド方向取得不能. M5 局所では超低ボラ三角持ち合いだが、上位足のレンジ局面か蓄積点か区別できないため UNKNOWN. 東京早朝の低流動性も判定信頼度を抑制する要因.</span></div><div class="num">07.</div><div class="key">上位足ダウ <span class="meta">(htf_dow)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 局所では HIGH cluster 1.17357→1.17385→1.17412 と緩やかな切り上げ + LOW 1.17288 fixed. 対称三角形 (ascending triangle 寄り). M5 範囲では微弱 HH-HL 寄りだが ATR×0.3 内の動きで判定保留.</span></div><div class="num">08.</div><div class="key">上位足ライン位置チェック <span class="meta">(htf_lines_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">1.17400 キリ番直下、D1 主要レジが直上の可能性. 1.17400 ブレイク試行が 見えない上位足の壁にぶつかる罠の余地あり.</span></div><div class="num">09.</div><div class="key">水平線(S/R) <span class="meta">(horizontal_levels)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">重要度4フィルター: 1.17302 タッチ4回 (下限固定), 1.17412 タッチ3回 (上限切り上げ中), 1.17288 (window 安値). キリ番 1.17400 接近. 賞味期限残あり (未ブレイク). 極小レンジだが線としては有効.</span></div><div class="num">10.</div><div class="key">斜めトレンドライン <span class="meta">(trendline)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">弱い上昇TL: 安値 1.17288 → 1.17302 (微切り上げ) を結ぶ底辺 + 高値 1.17357 → 1.17385 → 1.17412 を結ぶ上昇 TL = ascending triangle 形成途中. 傾き約 +0.06pip/bar (極弱). ボラティリティ低すぎて TL 信頼度は低.</span></div><div class="num">11.</div><div class="key">波形(チャートパターン) <span class="meta">(wave_pattern)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">上昇三角形 (ascending triangle) 候補: 上限横ばい + 下限切り上げ. 通常はブレイク方向上方優位だが 1.17400 キリ番抵抗で fakeout の可能性も. ブレイク方向確定後にパターン認定.</span></div><div class="num">12.</div><div class="key">波形ライン <span class="meta">(wave_lines)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">L1=1.17412 (三角形上辺、上方ブレイクトリガー), L2=1.17302 (下限、下方ブレイク = パターン無効), L3=上昇TL (微弱).</span></div><div class="num">13.</div><div class="key">フィボナッチ・プライムゾーン <span class="meta">(fibonacci_zone)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">明確トレンド未確立のためフィボ引けず. ブレイク後の起点を待つ.</span></div><div class="num">14.</div><div class="key">ビルドアップ確認 <span class="meta">(buildup_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.17302-1.17412 の収縮 多数本 (10本+) + 高値切り上げ = 典型的ビルドアップ. breakout_3_signs ① 適合. ブレイク発生時の信頼度高.</span></div><div class="num">15.</div><div class="key">MA整合性 (グランビル) <span class="meta">(ma_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">MA 値未供給. 極小ボラ環境では MA 水平推移、判定意味薄.</span></div><div class="num">16.</div><div class="key">指標適用環境 <span class="meta">(indicator_environment)</span></div><div><span class="badge badge-BLOCK">BLOCK</span> <span class="reason">現環境 = 超低ボラ三角持ち合い + 東京早朝最低流動性. indicator_environment_filter: BB band-walk も RSI 逆張りも MACD も無効化. ボラ拡大待ち. SUPPRESSED.</span></div><div class="num">17.</div><div class="key">ダイバージェンス確認 <span class="meta">(divergence_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">極小ボラ中はダイバ概念適用困難. データなし.</span></div><div class="num">18.</div><div class="key">火薬庫位置推測 <span class="meta">(stop_zone_estimation)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">上方火薬庫: 1.17412 上 (三角形上辺ブレイクSL), 1.17500 キリ番 (大). 下方火薬庫: 1.17302 下 (三角形下辺ブレイクSL), 1.17288 下 (window 安値更新SL). 三角形ブレイク後に両側ロスカット連鎖発火の可能性.</span></div><div class="num">19.</div><div class="key">ブレイク確定 <span class="meta">(breakout)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">1.17412 / 1.17302 のいずれもブレイク未発生. ATR 1.3pip = 実体抜け基準も極小 (0.4pip 必要). ブレイク確認後にボラ拡大込みで判断.</span></div><div class="num">20.</div><div class="key">リテスト/第2波 <span class="meta">(retest_second_wave)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">1.17412 / 1.17302 のブレイクが未発生のためリテスト/第2波の概念は適用前段階. ブレイク確認後に同価格帯への押し戻り反発でレジサポ転換成立を確認する流れ.</span></div><div class="num">21.</div><div class="key">確認足 <span class="meta">(confirmation_candle)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">極小ボラ中は ATR×1.0=1.3pip の実体足ですら出現困難. ボラ拡大が前提.</span></div><div class="num">22.</div><div class="key">MTF整合性 <span class="meta">(mtf_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">HTF 不明. ブレイク方向が H4 と整合するかで判定.</span></div><div class="num">23.</div><div class="key">トリプル根拠カウント <span class="meta">(triple_confluence_count)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">(a) フィボ = ✗ / (b) 反転パターン = △ (三角形収束中、明確反転未) / (c) レジサポ転換 = ✗ (ブレイク前). 0軸. ブレイク後再評価.</span></div><div class="num">24.</div><div class="key">コンフルエンス5軸 <span class="meta">(confluence_count)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">(1)ダウ=range / (2)ライン=三角収縮 ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=ビルドアップ ✓. 確実 2軸. ブレイクで軸数増.</span></div><div class="num">25.</div><div class="key">ENTRY価格 <span class="meta">(entry_price)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">観測上: 上方ブレイク 1.17412 + リテスト 1.17412 で BUY (target 1.17500+), 下方ブレイク 1.17302 + リテスト 1.17302 で SELL (target 1.17200-). ボラ拡大待ち、現状 SUPPRESSED.</span></div><div class="num">26.</div><div class="key">STOP価格 (インバリデーション) <span class="meta">(stop_price)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">ブレイク方向確定後. 反対側三角形端外側 (ATR×0.5).</span></div><div class="num">27.</div><div class="key">TARGET価格 <span class="meta">(target_price)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">三角形高さ 12.4pip 等倍延長. 上方=1.17412+12.4pip=1.17536 (キリ番1.17500手前). 下方=1.17302-12.4pip=1.17178.</span></div><div class="num">28.</div><div class="key">RRチェック <span class="meta">(rr_check)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">上方 RR = 12.4pip / 6pip = 2.07 (基準クリア). 下方 RR = 12.4pip / 6pip = 2.07. ただし極小ボラ環境で stop slippage リスク高、実用上 lot 1/3 推奨.</span></div><div class="num">29.</div><div class="key">イベント確認 <span class="meta">(event_clear)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">東京早朝で発表可能性低いが断定不可.</span></div></div>
+
+<h2>AI が引いた lines</h2>
+<table><thead><tr><th>id</th><th>label</th><th>kind</th><th>role</th><th>price</th><th>anchors</th><th>reason</th></tr></thead><tbody><tr><td>L1_UP</td><td>三角形上辺</td><td>resistance</td><td>breakout_trigger</td><td>1.17412</td><td>P1</td><td class='reason'>ascending triangle 上辺、ブレイク方向優位だがキリ番1.17400抵抗</td></tr><tr><td>L2_DN</td><td>三角形下辺</td><td>support</td><td>breakout_trigger</td><td>1.17302</td><td>P2</td><td class='reason'>下辺、割れたらパターン無効</td></tr><tr><td>L3_TL</td><td>弱い上昇TL</td><td>trendline</td><td>dynamic_support</td><td>1.17302</td><td>P3,P2</td><td class='reason'>底辺切り上げの弱い上昇TL</td></tr><tr><td>L4_ENTRY</td><td>観測ENTRY (上方BUY)</td><td>neckline</td><td>entry_trigger</td><td>1.17412</td><td>P1</td><td class='reason'>観測上: ascending triangle 上方ブレイク+リテスト後 BUY. SUPPRESSED で見送り</td></tr><tr><td>L5_STOP</td><td>観測STOP</td><td>invalidation</td><td>stop_reference</td><td>1.17302</td><td>P2</td><td class='reason'>三角形下辺を実体抜けたら無効化</td></tr><tr><td>L6_TGT</td><td>観測TARGET (12pip等倍)</td><td>target</td><td>target_reference</td><td>1.17536</td><td>-</td><td class='reason'>三角形高さ12.4pip等倍延長</td></tr><tr><td>L_AUTO_CH_UP_0</td><td>Channel上辺 (rising, 9t)</td><td>trendline</td><td>dynamic_resistance</td><td>1.17330</td><td>-</td><td class='reason'>code 検出 channel (rising) 上辺: 9 touches, slope +0.25pip/bar. 下辺と平行 (slope diff +0.22). channel 内タッチは directional 不可 = WAIT_BREAKOUT のみ.</td></tr></tbody></table>
+
+<h2>AI が指したピボット (points)</h2>
+<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>三角形上辺HIGH</td><td>major_high</td><td>58</td><td>1.17412</td><td class='reason'>切り上げ系列の最新高値, 上方ブレイクトリガー</td></tr><tr><td>P2</td><td>三角形下辺LOW</td><td>major_low</td><td>50</td><td>1.17302</td><td class='reason'>ほぼ固定の下限, 下方ブレイク= パターン無効</td></tr><tr><td>P3</td><td>window安値</td><td>low</td><td>25</td><td>1.17288</td><td class='reason'>下方延長目標</td></tr></tbody></table>
+
+<h2>市場パック概要</h2>
+<pre>asof=2026-05-01T04:55:00+00:00 session=TOKYO current=1.17316 atr_m5=0.00013 24h_range=[1.17288..1.17412] candles=60 pivots=34</pre>
+
+<h2>調査用: raw データ</h2>
+<details><summary>raw: AI 判定 (AiDecisionScreenSpec JSON)</summary><pre>{
+  &quot;schema_version&quot;: &quot;ai_decision_screen_spec_v1&quot;,
+  &quot;provider&quot;: &quot;claude&quot;,
+  &quot;observation_only&quot;: true,
+  &quot;used_for_ready&quot;: false,
+  &quot;used_for_notification&quot;: false,
+  &quot;used_for_trading&quot;: false,
+  &quot;symbol&quot;: &quot;EURUSD=X&quot;,
+  &quot;timeframe&quot;: &quot;M5&quot;,
+  &quot;title_ja&quot;: &quot;EURUSD M5 — 超低ボラ三角持ち合い / ボラ拡大待ち&quot;,
+  &quot;side&quot;: &quot;NEUTRAL&quot;,
+  &quot;final_status&quot;: &quot;SUPPRESSED&quot;,
+  &quot;pattern_label_ja&quot;: &quot;超低ボラ収縮 + 1.17302-1.17412 ascending triangle&quot;,
+  &quot;market_story_ja&quot;: &quot;ATR 1.3pip と極端な低ボラ. window range 12.4pip (9.5×ATR) で機械数値上は候補だが 実態は東京早朝のスクイーズ. HIGH cluster 1.17357→1.17385→1.17412 と緩やかに切り上げ + LOW 1.17288 ほぼ固定 = ascending triangle 形成途中. doctrine 適用: indicator_environment_filter で超低ボラ + 東京早朝最低流動性 = 全指標シグナル無効化, SUPPRESSED. buildup_check 適合 (10本以上収縮 + 高値切り上げ) のためブレイク発生時の信頼度高. 1.17400 キリ番直下のため D1 主要レジ可能性 (htf_lines_check UNKNOWN) でブレイク fakeout 警戒. ボラ拡大待ち、現状新規エントリー全面凍結.&quot;,
+  &quot;points&quot;: [
+    {
+      &quot;id&quot;: &quot;P1&quot;,
+      &quot;label&quot;: &quot;三角形上辺HIGH&quot;,
+      &quot;role&quot;: &quot;major_high&quot;,
+      &quot;index&quot;: 58,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.17412,
+      &quot;reason_ja&quot;: &quot;切り上げ系列の最新高値, 上方ブレイクトリガー&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P2&quot;,
+      &quot;label&quot;: &quot;三角形下辺LOW&quot;,
+      &quot;role&quot;: &quot;major_low&quot;,
+      &quot;index&quot;: 50,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.17302,
+      &quot;reason_ja&quot;: &quot;ほぼ固定の下限, 下方ブレイク= パターン無効&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P3&quot;,
+      &quot;label&quot;: &quot;window安値&quot;,
+      &quot;role&quot;: &quot;low&quot;,
+      &quot;index&quot;: 25,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.17288,
+      &quot;reason_ja&quot;: &quot;下方延長目標&quot;
+    }
+  ],
+  &quot;lines&quot;: [
+    {
+      &quot;id&quot;: &quot;L1_UP&quot;,
+      &quot;label&quot;: &quot;三角形上辺&quot;,
+      &quot;kind&quot;: &quot;resistance&quot;,
+      &quot;role&quot;: &quot;breakout_trigger&quot;,
+      &quot;price&quot;: 1.17412,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P1&quot;
+      ],
+      &quot;confidence&quot;: 0.55,
+      &quot;reason_ja&quot;: &quot;ascending triangle 上辺、ブレイク方向優位だがキリ番1.17400抵抗&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L2_DN&quot;,
+      &quot;label&quot;: &quot;三角形下辺&quot;,
+      &quot;kind&quot;: &quot;support&quot;,
+      &quot;role&quot;: &quot;breakout_trigger&quot;,
+      &quot;price&quot;: 1.17302,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P2&quot;
+      ],
+      &quot;confidence&quot;: 0.55,
+      &quot;reason_ja&quot;: &quot;下辺、割れたらパターン無効&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L3_TL&quot;,
+      &quot;label&quot;: &quot;弱い上昇TL&quot;,
+      &quot;kind&quot;: &quot;trendline&quot;,
+      &quot;role&quot;: &quot;dynamic_support&quot;,
+      &quot;price&quot;: 1.17302,
+      &quot;start_index&quot;: 25,
+      &quot;start_price&quot;: 1.17288,
+      &quot;end_index&quot;: 59,
+      &quot;end_price&quot;: 1.17302,
+      &quot;anchor_points&quot;: [
+        &quot;P3&quot;,
+        &quot;P2&quot;
+      ],
+      &quot;confidence&quot;: 0.4,
+      &quot;reason_ja&quot;: &quot;底辺切り上げの弱い上昇TL&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L4_ENTRY&quot;,
+      &quot;label&quot;: &quot;観測ENTRY (上方BUY)&quot;,
+      &quot;kind&quot;: &quot;neckline&quot;,
+      &quot;role&quot;: &quot;entry_trigger&quot;,
+      &quot;price&quot;: 1.17412,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P1&quot;
+      ],
+      &quot;confidence&quot;: 0.35,
+      &quot;reason_ja&quot;: &quot;観測上: ascending triangle 上方ブレイク+リテスト後 BUY. SUPPRESSED で見送り&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L5_STOP&quot;,
+      &quot;label&quot;: &quot;観測STOP&quot;,
+      &quot;kind&quot;: &quot;invalidation&quot;,
+      &quot;role&quot;: &quot;stop_reference&quot;,
+      &quot;price&quot;: 1.17302,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P2&quot;
+      ],
+      &quot;confidence&quot;: 0.35,
+      &quot;reason_ja&quot;: &quot;三角形下辺を実体抜けたら無効化&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L6_TGT&quot;,
+      &quot;label&quot;: &quot;観測TARGET (12pip等倍)&quot;,
+      &quot;kind&quot;: &quot;target&quot;,
+      &quot;role&quot;: &quot;target_reference&quot;,
+      &quot;price&quot;: 1.17536,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.3,
+      &quot;reason_ja&quot;: &quot;三角形高さ12.4pip等倍延長&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L_AUTO_CH_UP_0&quot;,
+      &quot;label&quot;: &quot;Channel上辺 (rising, 9t)&quot;,
+      &quot;kind&quot;: &quot;trendline&quot;,
+      &quot;role&quot;: &quot;dynamic_resistance&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;start_index&quot;: 7,
+      &quot;start_price&quot;: 1.1732958555221558,
+      &quot;end_index&quot;: 40,
+      &quot;end_price&quot;: 1.1741223335266113,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.85,
+      &quot;reason_ja&quot;: &quot;code 検出 channel (rising) 上辺: 9 touches, slope +0.25pip/bar. 下辺と平行 (slope diff +0.22). channel 内タッチは directional 不可 = WAIT_BREAKOUT のみ.&quot;,
+      &quot;cautions&quot;: []
+    }
+  ],
+  &quot;zones&quot;: [
+    {
+      &quot;id&quot;: &quot;Z_BU&quot;,
+      &quot;label&quot;: &quot;ascending triangle 蓄積&quot;,
+      &quot;kind&quot;: &quot;buildup&quot;,
+      &quot;price_low&quot;: 1.17302,
+      &quot;price_high&quot;: 1.17412,
+      &quot;index_low&quot;: 35,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;上限横ばい+下限切り上げ = 上昇三角形. 高値切り上げ系列 1.17357→1.17385→1.17412&quot;,
+      &quot;confidence&quot;: 0.7
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_UP&quot;,
+      &quot;label&quot;: &quot;火薬庫 (上) / D1レジ激突懸念&quot;,
+      &quot;kind&quot;: &quot;stop_zone_upper&quot;,
+      &quot;price_low&quot;: 1.17412,
+      &quot;price_high&quot;: 1.175,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;三角形上辺ブレイクSL+1.17500キリ番SL. htf_lines_check で D1 主要レジ可能性&quot;,
+      &quot;confidence&quot;: 0.55
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_DN&quot;,
+      &quot;label&quot;: &quot;火薬庫 (下)&quot;,
+      &quot;kind&quot;: &quot;stop_zone_lower&quot;,
+      &quot;price_low&quot;: 1.17288,
+      &quot;price_high&quot;: 1.17302,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;下辺ブレイク+windowLOW更新SL集積&quot;,
+      &quot;confidence&quot;: 0.5
+    }
+  ],
+  &quot;procedure_steps&quot;: [
+    {
+      &quot;key&quot;: &quot;fundamental_environment_check&quot;,
+      &quot;label_ja&quot;: &quot;ファンダメンタル環境確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;東京早朝 (UTC 04:55) = NY close 後 + 東京 open 前の流動性最低時間帯. 経済指標発表ほぼゼロ、要人発言可能性低い. ファンダ静穏帯と仮定可能だが供給データなし.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;macro_calendar_24h&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;crisis_mode_detection&quot;,
+      &quot;label_ja&quot;: &quot;クライシスモード検出&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;ATR(14)=1.3pip と極端に低い. 60本 range 12.4pip = 9.5×ATR で表面上は中レンジだが 絶対値 12.4pip は極小. 急変動なし、通常モード (ただし indicator_environment_filter で suppress).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;intervention_zone_check&quot;,
+      &quot;label_ja&quot;: &quot;介入リスク帯チェック&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;EUR/USD 介入帯対象外.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;verbal_intervention_scan&quot;,
+      &quot;label_ja&quot;: &quot;口先介入スキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;東京早朝で要人発言可能性最低. データ未供給で UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;htf_full_scan&quot;,
+      &quot;label_ja&quot;: &quot;上位足フルスキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 単独. 12.4pip range は H4/D1 では極小蓄積点. 上位足ブレイク前蓄積か レンジ中央のヨコヨコか判定不能. htf_supremacy で UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;W1_trend&quot;,
+        &quot;D1_trend&quot;,
+        &quot;H4_trend&quot;,
+        &quot;H1_trend&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;environment&quot;,
+      &quot;label_ja&quot;: &quot;環境認識&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;h4/d1 トレンド方向取得不能. M5 局所では超低ボラ三角持ち合いだが、上位足のレンジ局面か蓄積点か区別できないため UNKNOWN. 東京早朝の低流動性も判定信頼度を抑制する要因.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_direction&quot;,
+        &quot;d1_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_dow&quot;,
+      &quot;label_ja&quot;: &quot;上位足ダウ&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 局所では HIGH cluster 1.17357→1.17385→1.17412 と緩やかな切り上げ + LOW 1.17288 fixed. 対称三角形 (ascending triangle 寄り). M5 範囲では微弱 HH-HL 寄りだが ATR×0.3 内の動きで判定保留.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;htf_lines_check&quot;,
+      &quot;label_ja&quot;: &quot;上位足ライン位置チェック&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;1.17400 キリ番直下、D1 主要レジが直上の可能性. 1.17400 ブレイク試行が 見えない上位足の壁にぶつかる罠の余地あり.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;D1_resistance_at_1.17400&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;horizontal_levels&quot;,
+      &quot;label_ja&quot;: &quot;水平線(S/R)&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;重要度4フィルター: 1.17302 タッチ4回 (下限固定), 1.17412 タッチ3回 (上限切り上げ中), 1.17288 (window 安値). キリ番 1.17400 接近. 賞味期限残あり (未ブレイク). 極小レンジだが線としては有効.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;trendline&quot;,
+      &quot;label_ja&quot;: &quot;斜めトレンドライン&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;弱い上昇TL: 安値 1.17288 → 1.17302 (微切り上げ) を結ぶ底辺 + 高値 1.17357 → 1.17385 → 1.17412 を結ぶ上昇 TL = ascending triangle 形成途中. 傾き約 +0.06pip/bar (極弱). ボラティリティ低すぎて TL 信頼度は低.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;wave_pattern&quot;,
+      &quot;label_ja&quot;: &quot;波形(チャートパターン)&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;上昇三角形 (ascending triangle) 候補: 上限横ばい + 下限切り上げ. 通常はブレイク方向上方優位だが 1.17400 キリ番抵抗で fakeout の可能性も. ブレイク方向確定後にパターン認定.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;breakout_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;wave_lines&quot;,
+      &quot;label_ja&quot;: &quot;波形ライン&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;L1=1.17412 (三角形上辺、上方ブレイクトリガー), L2=1.17302 (下限、下方ブレイク = パターン無効), L3=上昇TL (微弱).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;fibonacci_zone&quot;,
+      &quot;label_ja&quot;: &quot;フィボナッチ・プライムゾーン&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;明確トレンド未確立のためフィボ引けず. ブレイク後の起点を待つ.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;clear_trend_post_breakout&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;buildup_check&quot;,
+      &quot;label_ja&quot;: &quot;ビルドアップ確認&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;1.17302-1.17412 の収縮 多数本 (10本+) + 高値切り上げ = 典型的ビルドアップ. breakout_3_signs ① 適合. ブレイク発生時の信頼度高.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;ma_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MA整合性 (グランビル)&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;MA 値未供給. 極小ボラ環境では MA 水平推移、判定意味薄.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;m5_sma20&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;indicator_environment&quot;,
+      &quot;label_ja&quot;: &quot;指標適用環境&quot;,
+      &quot;status&quot;: &quot;BLOCK&quot;,
+      &quot;result_ja&quot;: &quot;現環境 = 超低ボラ三角持ち合い + 東京早朝最低流動性. indicator_environment_filter: BB band-walk も RSI 逆張りも MACD も無効化. ボラ拡大待ち. SUPPRESSED.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;divergence_check&quot;,
+      &quot;label_ja&quot;: &quot;ダイバージェンス確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;極小ボラ中はダイバ概念適用困難. データなし.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;stop_zone_estimation&quot;,
+      &quot;label_ja&quot;: &quot;火薬庫位置推測&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;上方火薬庫: 1.17412 上 (三角形上辺ブレイクSL), 1.17500 キリ番 (大). 下方火薬庫: 1.17302 下 (三角形下辺ブレイクSL), 1.17288 下 (window 安値更新SL). 三角形ブレイク後に両側ロスカット連鎖発火の可能性.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;breakout&quot;,
+      &quot;label_ja&quot;: &quot;ブレイク確定&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;1.17412 / 1.17302 のいずれもブレイク未発生. ATR 1.3pip = 実体抜け基準も極小 (0.4pip 必要). ブレイク確認後にボラ拡大込みで判断.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;body_close_outside_triangle&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;retest_second_wave&quot;,
+      &quot;label_ja&quot;: &quot;リテスト/第2波&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;1.17412 / 1.17302 のブレイクが未発生のためリテスト/第2波の概念は適用前段階. ブレイク確認後に同価格帯への押し戻り反発でレジサポ転換成立を確認する流れ.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;wait_for_breakout&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;confirmation_candle&quot;,
+      &quot;label_ja&quot;: &quot;確認足&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;極小ボラ中は ATR×1.0=1.3pip の実体足ですら出現困難. ボラ拡大が前提.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;volatility_expansion&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;mtf_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MTF整合性&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;HTF 不明. ブレイク方向が H4 と整合するかで判定.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;triple_confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;トリプル根拠カウント&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;(a) フィボ = ✗ / (b) 反転パターン = △ (三角形収束中、明確反転未) / (c) レジサポ転換 = ✗ (ブレイク前). 0軸. ブレイク後再評価.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;breakout_first&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;コンフルエンス5軸&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;(1)ダウ=range / (2)ライン=三角収縮 ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=ビルドアップ ✓. 確実 2軸. ブレイクで軸数増.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;entry_price&quot;,
+      &quot;label_ja&quot;: &quot;ENTRY価格&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 上方ブレイク 1.17412 + リテスト 1.17412 で BUY (target 1.17500+), 下方ブレイク 1.17302 + リテスト 1.17302 で SELL (target 1.17200-). ボラ拡大待ち、現状 SUPPRESSED.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;breakout_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;stop_price&quot;,
+      &quot;label_ja&quot;: &quot;STOP価格 (インバリデーション)&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;ブレイク方向確定後. 反対側三角形端外側 (ATR×0.5).&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;breakout_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;target_price&quot;,
+      &quot;label_ja&quot;: &quot;TARGET価格&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;三角形高さ 12.4pip 等倍延長. 上方=1.17412+12.4pip=1.17536 (キリ番1.17500手前). 下方=1.17302-12.4pip=1.17178.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;breakout_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;rr_check&quot;,
+      &quot;label_ja&quot;: &quot;RRチェック&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;上方 RR = 12.4pip / 6pip = 2.07 (基準クリア). 下方 RR = 12.4pip / 6pip = 2.07. ただし極小ボラ環境で stop slippage リスク高、実用上 lot 1/3 推奨.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;event_clear&quot;,
+      &quot;label_ja&quot;: &quot;イベント確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;東京早朝で発表可能性低いが断定不可.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;calendar_60min&quot;
+      ]
+    }
+  ],
+  &quot;entry_candidate_ja&quot;: &quot;本番ENTRY候補ではありません. 観測上: 上方=1.17412リテスト後BUY、下方=1.17302リテスト後SELL、現状ボラ拡大待ちで見送り&quot;,
+  &quot;stop_candidate_ja&quot;: &quot;本番STOP候補ではありません. ブレイク方向確定後に反対側三角形端外側&quot;,
+  &quot;target_candidate_ja&quot;: &quot;本番TP候補ではありません. 三角形高さ12.4pip等倍延長&quot;,
+  &quot;rr_comment_ja&quot;: &quot;超低ボラ局面、ENTRY未確定. レンジ幅 12.4pip だがボラ拡大待ち. 上方下方とも RR 約2.07 で基準ギリギリだが slippage リスクで lot 1/3 推奨&quot;,
+  &quot;problems&quot;: [],
+  &quot;required_fixes&quot;: [],
+  &quot;summary_ja&quot;: &quot;&quot;
+}</pre></details><details><summary>raw: 数値事実 pack (MarketAnalysisPackV2 JSON, OHLC全件含む)</summary><pre>{
+  &quot;schema_version&quot;: &quot;market_analysis_pack_v2&quot;,
+  &quot;symbol&quot;: &quot;EURUSD=X&quot;,
+  &quot;timeframe&quot;: &quot;M5&quot;,
+  &quot;asof_utc&quot;: &quot;2026-05-01T04:55:00Z&quot;,
+  &quot;candles&quot;: [
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:00:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:05:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:10:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1728830337524414,
+      &quot;c&quot;: 1.1728830337524414,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:15:00Z&quot;,
+      &quot;o&quot;: 1.1728830337524414,
+      &quot;h&quot;: 1.1730204820632935,
+      &quot;l&quot;: 1.1728830337524414,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:20:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:25:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:30:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:35:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:40:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:45:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:50:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T00:55:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:00:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:05:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1728830337524414,
+      &quot;c&quot;: 1.1728830337524414,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:10:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:15:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:20:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:25:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.173433542251587,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:30:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:35:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.173433542251587,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:40:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.173433542251587,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:45:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:50:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T01:55:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.173433542251587,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:00:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:05:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:10:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:15:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:20:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:25:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:30:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:35:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:40:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:45:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:50:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T02:55:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:00:00Z&quot;,
+      &quot;o&quot;: 1.17384672164917,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:05:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:10:00Z&quot;,
+      &quot;o&quot;: 1.17384672164917,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.17384672164917,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:15:00Z&quot;,
+      &quot;o&quot;: 1.17384672164917,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.17384672164917,
+      &quot;c&quot;: 1.17384672164917,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:20:00Z&quot;,
+      &quot;o&quot;: 1.17384672164917,
+      &quot;h&quot;: 1.1741223335266113,
+      &quot;l&quot;: 1.17384672164917,
+      &quot;c&quot;: 1.1741223335266113,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:25:00Z&quot;,
+      &quot;o&quot;: 1.1739845275878906,
+      &quot;h&quot;: 1.1739845275878906,
+      &quot;l&quot;: 1.1739845275878906,
+      &quot;c&quot;: 1.1739845275878906,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:30:00Z&quot;,
+      &quot;o&quot;: 1.1739845275878906,
+      &quot;h&quot;: 1.1739845275878906,
+      &quot;l&quot;: 1.1739845275878906,
+      &quot;c&quot;: 1.1739845275878906,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:35:00Z&quot;,
+      &quot;o&quot;: 1.1739845275878906,
+      &quot;h&quot;: 1.1739845275878906,
+      &quot;l&quot;: 1.17384672164917,
+      &quot;c&quot;: 1.17384672164917,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:40:00Z&quot;,
+      &quot;o&quot;: 1.17384672164917,
+      &quot;h&quot;: 1.17384672164917,
+      &quot;l&quot;: 1.1737089157104492,
+      &quot;c&quot;: 1.1737089157104492,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:45:00Z&quot;,
+      &quot;o&quot;: 1.1737089157104492,
+      &quot;h&quot;: 1.1737089157104492,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:50:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.1735711097717285,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T03:55:00Z&quot;,
+      &quot;o&quot;: 1.1735711097717285,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.1735711097717285,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:00:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.173433542251587,
+      &quot;c&quot;: 1.173433542251587,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:05:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.1735711097717285,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:10:00Z&quot;,
+      &quot;o&quot;: 1.173433542251587,
+      &quot;h&quot;: 1.173433542251587,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:15:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1732958555221558,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:20:00Z&quot;,
+      &quot;o&quot;: 1.1732958555221558,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:25:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1732958555221558,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1732958555221558,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:30:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:35:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1731581687927246,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:40:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:45:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:50:00Z&quot;,
+      &quot;o&quot;: 1.1730204820632935,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1730204820632935,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-05-01T04:55:00Z&quot;,
+      &quot;o&quot;: 1.1731581687927246,
+      &quot;h&quot;: 1.1731581687927246,
+      &quot;l&quot;: 1.1730204820632935,
+      &quot;c&quot;: 1.1731581687927246,
+      &quot;v&quot;: 0.0
+    }
+  ],
+  &quot;pivots&quot;: [
+    {
+      &quot;index&quot;: 2,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:10:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 2,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:10:00+00:00&quot;,
+      &quot;price&quot;: 1.1728830337524414,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 3,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:15:00+00:00&quot;,
+      &quot;price&quot;: 1.1728830337524414,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 6,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 7,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 8,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:40:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 9,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:45:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 11,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T00:55:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 13,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:05:00+00:00&quot;,
+      &quot;price&quot;: 1.1728830337524414,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 16,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:20:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 18,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 19,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 20,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:40:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 23,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T01:55:00+00:00&quot;,
+      &quot;price&quot;: 1.173433542251587,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 24,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:00:00+00:00&quot;,
+      &quot;price&quot;: 1.173433542251587,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 26,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:10:00+00:00&quot;,
+      &quot;price&quot;: 1.17384672164917,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 27,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:15:00+00:00&quot;,
+      &quot;price&quot;: 1.17384672164917,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 28,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:20:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 31,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1737089157104492,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 32,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:40:00+00:00&quot;,
+      &quot;price&quot;: 1.1737089157104492,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 34,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T02:50:00+00:00&quot;,
+      &quot;price&quot;: 1.173433542251587,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 36,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T03:00:00+00:00&quot;,
+      &quot;price&quot;: 1.17384672164917,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 37,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T03:05:00+00:00&quot;,
+      &quot;price&quot;: 1.17384672164917,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 38,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T03:10:00+00:00&quot;,
+      &quot;price&quot;: 1.1737089157104492,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 40,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T03:20:00+00:00&quot;,
+      &quot;price&quot;: 1.1741223335266113,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 43,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T03:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1739845275878906,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 48,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:00:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 49,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:05:00+00:00&quot;,
+      &quot;price&quot;: 1.1735711097717285,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 49,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:05:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 53,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:25:00+00:00&quot;,
+      &quot;price&quot;: 1.1732958555221558,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 53,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:25:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 54,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 56,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:40:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 57,
+      &quot;timestamp_utc&quot;: &quot;2026-05-01T04:45:00+00:00&quot;,
+      &quot;price&quot;: 1.1730204820632935,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    }
+  ],
+  &quot;atr&quot;: {
+    &quot;m5_14&quot;: 0.0001334690982012229,
+    &quot;h1_14&quot;: null,
+    &quot;h4_14&quot;: null
+  },
+  &quot;recent_range&quot;: {
+    &quot;high_24h&quot;: 1.1741223335266113,
+    &quot;low_24h&quot;: 1.1728830337524414,
+    &quot;high_1w&quot;: null,
+    &quot;low_1w&quot;: null
+  },
+  &quot;calendar_events_within_60min&quot;: [],
+  &quot;current_price&quot;: 1.1731581687927246,
+  &quot;current_spread&quot;: null,
+  &quot;session&quot;: &quot;TOKYO&quot;,
+  &quot;indicators&quot;: {
+    &quot;ma&quot;: {
+      &quot;sma20&quot;: 1.1734404563903809,
+      &quot;sma75&quot;: null,
+      &quot;ema200&quot;: null
+    },
+    &quot;bb&quot;: {
+      &quot;middle&quot;: 1.1734404563903809,
+      &quot;upper&quot;: 1.174100788111487,
+      &quot;lower&quot;: 1.1727801246692746,
+      &quot;width_pip&quot;: 13.206634422124885,
+      &quot;width_atr_ratio&quot;: 9.89490046768285
+    },
+    &quot;rsi14&quot;: 41.02341338290666,
+    &quot;macd&quot;: {
+      &quot;macd&quot;: -0.00014078825320473776,
+      &quot;signal&quot;: -0.00010057947975871642,
+      &quot;histogram&quot;: -4.020877344602133e-05
+    },
+    &quot;fib&quot;: {
+      &quot;anchor_high&quot;: 1.1741223335266113,
+      &quot;anchor_low&quot;: 1.1728830337524414,
+      &quot;direction&quot;: &quot;up&quot;,
+      &quot;fib_236&quot;: 1.1738298587799072,
+      &quot;fib_382&quot;: 1.1736489210128784,
+      &quot;fib_500&quot;: 1.1735026836395264,
+      &quot;fib_618&quot;: 1.1733564462661743,
+      &quot;fib_786&quot;: 1.1731482439041139
+    },
+    &quot;round_numbers_nearby&quot;: [
+      1.17,
+      1.175,
+      1.18
+    ]
+  }
+}</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0930138532289346, 0.0, -3.0930138532289346, 0.0, 0.0, -1.0298137374452676, 1.0298137374452676, 0.0, 0.0, -1.0316000578918334, 1.0316000578918334, 0.0, 0.0, -1.0316000578918334, 0.0, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 1.0316000578918334, 0.0, 1.0316000578918334, 0.0, 0.0, -1.0316000578918334, 1.0316000578918334, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0316000578918334, 0.0, 0.0, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 2.061413795337101, 0.0, -1.0298137374452676, 0.0, 0.0, -1.0316000578918334, 2.061413795337101, 0.0, 2.063200115783667, 0.0, -1.0316000578918334, 0.0, 0.0, -2.063200115783667, 2.063200115783667, 0.0, 1.0316000578918334, 0.0, 0.0, 0.0, 0.0, -2.062306955560384, 2.062306955560384, 0.0, 1.0307068976685505, 0.0, -1.0307068976685505, 0.0, 1.0307068976685505, 0.0, 0.0, 0.0, 0.0, -1.0307068976685505, 1.0307068976685505, 0.0, 0.0, -1.0307068976685505, 0.0, 0.0, 1.0307068976685505, 0.0, -1.0307068976685505, 0.0, 0.0, -1.0307068976685505, 1.0307068976685505, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0324932181151165, -1.0324932181151165, 1.0324932181151165, 0.0, 1.0324932181151165, 0.0, 0.0, 0.0, 0.0, -1.0324932181151165, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0324932181151165, 0.0, -1.0324932181151165, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0307068976685505, 0.0, 0.0, 0.0, -1.0324932181151165, 1.0324932181151165, 0.0, 1.0324932181151165, 0.0, 0.0, 0.0, 1.0324932181151165, 0.0, 0.0, 0.0, 0.0, -1.0324932181151165, 1.0324932181151165, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -2.064986436230233, 2.064986436230233, 0.0, 0.0, 0.0, -1.0324932181151165, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0324932181151165, 0.0, -1.0324932181151165, 0.0, 1.0324932181151165, 0.0, -1.0324932181151165, 0.0, 1.0324932181151165, 0.0, -1.0324932181151165, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0307068976685505, 0.0, 0.0, 1.0307068976685505, 0.0, -1.0307068976685505, 0.0, 2.062306955560384, 0.0, -1.0316000578918334, 0.0, 1.0316000578918334, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 0.0, -2.063200115783667, 1.0316000578918334, 0.0, 0.0, -1.0316000578918334, -1.0316000578918334, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 0.0, -1.0316000578918334, 1.0316000578918334, 0.0, 1.0316000578918334, 0.0, -1.0316000578918334, 0.0, 0.0, -1.0316000578918334, 1.0316000578918334, 0.0, -0.4166666666666667, 2.063200115783667, -1.0, 1.0, -0.31666666666666665, 7.223879885912684, 1.0, 1.0, -0.1, -1.0316000578918334, -1.0, 0.5, -0.08333333333333333, -1.0316000578918334, -1.0, 0.5, 1.0, 0.0, 0.0, 9.285293681249785, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
+
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id 36020cc5-f839-49ca-9ce2-946ac7e56866 --note "..."</code></p>
+</body></html>

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="utf-8"><title>判定 25257b16</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+    font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+    margin: 0; padding: 1.5rem;
+    background: #0b1220; color: #e2e8f0; line-height: 1.5;
+}
+header { border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin-top: 1.6rem; font-size: 1.15rem; border-bottom: 1px solid #1e293b; padding-bottom: 0.3rem; }
+h3 { margin-top: 1.2rem; font-size: 1rem; color: #cbd5e1; }
+.meta { color: #94a3b8; font-size: 0.9rem; }
+.grid {
+    display: grid; gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: 1rem 0;
+}
+.card { background: #111a2c; border: 1px solid #1e293b; border-radius: 6px; padding: 1rem; }
+.card .label { color: #94a3b8; font-size: 0.85rem; }
+.card .value { font-size: 1.4rem; font-weight: 600; margin-top: 0.25rem; }
+.safety {
+    background: #422006; border-left: 4px solid #ea580c;
+    padding: 0.6rem 1rem; border-radius: 4px; margin: 1rem 0; font-size: 0.9rem;
+}
+.postmortem {
+    background: #1e1b3b; border-left: 4px solid #a78bfa;
+    padding: 0.8rem 1rem; border-radius: 4px; margin: 1rem 0;
+}
+.postmortem.severity-high { border-left-color: #ef4444; background: #2c1414; }
+.postmortem.severity-medium { border-left-color: #f59e0b; background: #2c1f0a; }
+.postmortem h3 { margin-top: 0; color: #c4b5fd; }
+.postmortem.severity-high h3 { color: #fca5a5; }
+.postmortem.severity-medium h3 { color: #fcd34d; }
+table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+th, td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #1e293b; text-align: left; vertical-align: top; }
+th { background: #111a2c; color: #94a3b8; font-weight: 500; }
+tr:hover td { background: #0f172a; }
+.badge {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+}
+.badge-WIN, .badge-PASS { background: #064e3b; color: #6ee7b7; }
+.badge-LOSE, .badge-BLOCK { background: #7f1d1d; color: #fca5a5; }
+.badge-NEUTRAL_GOOD, .badge-WAIT { background: #1e3a8a; color: #93c5fd; }
+.badge-NEUTRAL_MISSED, .badge-WARN { background: #713f12; color: #fcd34d; }
+.badge-PENDING, .badge-UNKNOWN { background: #334155; color: #cbd5e1; }
+.badge-DISSENT { background: #4c1d95; color: #c4b5fd; margin-left: 0.5rem; }
+.steps {
+    display: grid; gap: 0.4rem;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    margin-top: 0.6rem;
+    font-size: 0.88rem;
+}
+.steps .num { color: #64748b; font-variant-numeric: tabular-nums; }
+.steps .key { color: #cbd5e1; min-width: 11rem; }
+.steps .reason { color: #94a3b8; }
+a { color: #60a5fa; text-decoration: none; }
+a:hover { text-decoration: underline; }
+pre {
+    background: #0f172a; padding: 1rem; border-radius: 6px;
+    overflow: auto; font-size: 0.82rem; max-height: 24rem;
+}
+details { margin: 0.6rem 0; }
+details summary { cursor: pointer; color: #93c5fd; font-size: 0.92rem; padding: 0.4rem 0; }
+details[open] summary { color: #60a5fa; }
+.chart-img { width: 100%; max-width: 100%; height: auto; border-radius: 6px; margin-top: 0.6rem; }
+</style>
+</head><body>
+<header>
+<h1>判定詳細</h1>
+<div class="meta"><a href="../index.html">← 一覧に戻る</a></div>
+</header>
+<div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
+
+<div class="grid">
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">25257b16-60d9-49cd-a709-a10cd5ab32fe</div></div>
+<div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-04-29T18:45:00+00:00</div></div>
+<div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
+<div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">NEUTRAL · WAIT_BREAKOUT</div></div>
+<div class="card"><div class="label">outcome</div><div class="value"><span class="badge badge-NEUTRAL_MISSED">NEUTRAL_MISSED</span></div></div>
+<div class="card"><div class="label">favourable / adverse</div><div class="value" style="font-size:1rem;">+19.1 / -19.1 pip</div></div>
+<div class="card"><div class="label">user dissent</div><div class="value" style="font-size:1rem;">No</div></div>
+<div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
+</div>
+
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="25257b16-60d9-49cd-a709-a10cd5ab32fe.png" alt="entry chart for 25257b16-60d9-49cd-a709-a10cd5ab32fe">
+
+<section class="postmortem severity-medium">
+<h3>後付け分析 (severity: medium / failure_mode: moved_against_wait)</h3>
+<p><strong>NEUTRAL 待機中に想定方向へ走り抜けた (待ちが慎重すぎて初動を逃した)</strong></p>
+<h4 class="meta">事実(60本後の price action)</h4>
+<ul><li>判定時点の価格: 1.16700</li><li>観察期間: 60本中 60本 (経過時間≈300分)</li><li>最高値到達: 1.16891 (+19.1 pip) at +59本目</li><li>最安値到達: 1.16700 (+0.0 pip) at +1本目</li><li>観察期末close: 1.16891 (+19.1 pip)</li></ul>
+<h4 class="meta">疑わしい procedure step</h4>
+<table><thead><tr><th>step</th><th>当時のstatus</th><th>所見</th></tr></thead><tbody><tr><td>breakout</td><td><span class="badge badge-PASS">PASS</span></td><td>ブレイク確定基準が厳しすぎて待ちすぎた</td></tr><tr><td>confirmation_candle</td><td><span class="badge badge-WAIT">WAIT</span></td><td>確認足の閾値(ATR×?)が大きすぎた</td></tr><tr><td>entry_price</td><td><span class="badge badge-WAIT">WAIT</span></td><td>ENTRYトリガーが具体化されておらず即応できなかった</td></tr></tbody></table>
+<h4 class="meta">具体的な対策案</h4>
+<ul><li>「波形が未確定だが上位足ダウと方向一致する場合は WAIT_TRIGGER を許可」を知識 pack に追記</li><li>確認足の判定をリアルタイム化(現在の足が ATR×0.7 でも暫定的にカウントを許可)</li><li>リテストを必須にせず、トレンド継続パターンも別 final_status で表現可能にする</li><li>ENTRY価格を WAIT 段階でも具体的に提示するようプロンプトで強制</li></ul>
+</section>
+
+
+<h2>AI が下した判定の物語</h2>
+<p>5時間前 1.17082 major HIGH からの強下降. major LOW 1.16850 (3バー連続) → 戻り高値 1.16932 major HIGH (LH 確定) → 1.16754 swing LOW 更新 → 現在 1.16700 で LL 更新後. 完璧な LH-LL 下降ダウ. doctrine 適用: triple_confluence_doctrine 適合候補 — フィボ50-61.8% (1.16932 LH=フィボ60.7% プライムゾーン上端で抑制) ✓ + 反転パターン (LH確定後 swing LOW 更新) ✓ + レジサポ転換 (1.16932 リテスト確認待ち) △. buildup_check ✓ (LL 更新前 5本収縮). breakout_3_signs 揃う. RR 8.06 で王道基準2.0大幅クリアだが、outcome=LOSE 実績は htf_lines_check 不可 (1.16700 D1 サポート可能性) で 見えない上位足の壁への激突疑い. htf_supremacy 違反のリスク顕在化.</p>
+<p class="meta"><strong>パターンラベル:</strong> LH-LL 階段状下降 + 直近 swing LOW 1.16754 を更に割った直後</p>
+<p class="meta"><strong>サマリ:</strong> —</p>
+
+<h2>王道14手順チェック</h2>
+<div class="steps"><div class="num">01.</div><div class="key">ファンダメンタル環境確認 <span class="meta">(fundamental_environment_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">NY 後場 (UTC 18:45). 米国指標発表後の時間帯で発表後60分超過、ただし FOMC 議事要旨や FRB 関係者発言の可能性あり. 供給データ範囲では UNKNOWN.</span></div><div class="num">02.</div><div class="key">クライシスモード検出 <span class="meta">(crisis_mode_detection)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">ATR(14)≒3.5pip. 60本 range 41pip = 11.7×ATR で正常下降トレンド. 急変動なし、5時間かけた段階的下落 = テクニカル主導. 通常モード維持.</span></div><div class="num">03.</div><div class="key">介入リスク帯チェック <span class="meta">(intervention_zone_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">EUR/USD 介入帯対象外.</span></div><div class="num">04.</div><div class="key">口先介入スキャン <span class="meta">(verbal_intervention_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">NY後場の Fed 関係者発言データ未供給. 連続下落の起因確認できず.</span></div><div class="num">05.</div><div class="key">上位足フルスキャン <span class="meta">(htf_full_scan)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 単独. 41pip 下落は H4 1本相当でかなり大きく、H4/D1 で見ると 明確な下降トレンド継続中の可能性高. 上位足整合確認不能で UNKNOWN.</span></div><div class="num">06.</div><div class="key">環境認識 <span class="meta">(environment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">h4/d1 不明. M5 局所では明確下降だが上位足が逆方向ならカウンタートレンドとなり 戻り売りの優位性が下がる.</span></div><div class="num">07.</div><div class="key">上位足ダウ <span class="meta">(htf_dow)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">M5 ダウ: 1.17082 HIGH → 1.16850 LOW → 1.16932 LH → 1.16754 LL → 現在 1.16700 で LL 更新後. 完璧な LH-LL 下降ダウ確立. h4 ダウ未確認のため HTF 整合は UNKNOWN だが M5 ダウとしては PASS.</span></div><div class="num">08.</div><div class="key">上位足ライン位置チェック <span class="meta">(htf_lines_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">1.16700 が D1/W1 のサポートか確認不能. キリ番 1.16500 まで残り 20pip = ATR×6 で射程内. 下方の D1 サポートに激突する余地あり.</span></div><div class="num">09.</div><div class="key">水平線(S/R) <span class="meta">(horizontal_levels)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">重要度4フィルター: 1.17082 (前日 HIGH cluster, タッチ4回, 賞味期限残あり), 1.16932 (戻り高値 LH 確定), 1.16850 (中継 LOW), 1.16754 (直近 swing LOW = 直前ブレイク中). 全て M5 引ける + 3点以上の触点 + キリ番接近 1.16700/1.16500.</span></div><div class="num">10.</div><div class="key">斜めトレンドライン <span class="meta">(trendline)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">下降TL: 1.17082(idx 615相当) → 1.16932(idx 660相当) → 現在 1.16700(idx 674) を結ぶ. 傾き約 -0.5pip/bar. 5時間以上有効、最新タッチ idx 660 で経過時間短い = 強有効. 水平線+下降TLのクロス位置 1.16920-1.16935 がリテストエントリーゾーン.</span></div><div class="num">11.</div><div class="key">波形(チャートパターン) <span class="meta">(wave_pattern)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">完璧な LH-LL 下降ダウ. パターン名: 階段状下降 (Stair-step downtrend). 1.16850→1.16932(LH)→1.16754(LL更新) の3点で LH-LL 確立. 次の戻り高値で 1.16932 を割らずに反落なら 5wave Elliott 下降の 3rd-wave 候補.</span></div><div class="num">12.</div><div class="key">波形ライン <span class="meta">(wave_lines)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">L1=1.16932 (戻り高値LH, リテストエントリーライン), L2=1.16967 (LH直上, STOP), L3=1.16650 (LL等倍延長 TARGET, 1.16754-1.16850=10.4pip 下抜け延長), L4=下降TL (P1→P3).</span></div><div class="num">13.</div><div class="key">フィボナッチ・プライムゾーン <span class="meta">(fibonacci_zone)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">下降 1.17082→1.16700 のフィボリトレースメント: 50%=1.16891, 61.8%=1.16936, 78.6%=1.16998. 戻り 1.16932 (LH) は フィボ 60.7% = プライムゾーン (50-61.8%) 上端で抑制 ✓. fibonacci_zone_doctrine 適合: ゾーン到達後に反落 = 戻り売り根拠.</span></div><div class="num">14.</div><div class="key">ビルドアップ確認 <span class="meta">(buildup_check)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.16754 LL 更新前 (idx 668-672) で 1.16780-1.16850 の収縮 5本 = エネルギー蓄積観察. 高値切り下げ傾向あり. breakout_3_signs ① ビルドアップ前提 ✓.</span></div><div class="num">15.</div><div class="key">MA整合性 (グランビル) <span class="meta">(ma_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">MA 値未供給. 強下降中なら下向き MA に上から接近 = グランビル③ 戻り売り王道. 1.16932 LH 位置が SMA20 と一致するなら MA 整合 PASS の可能性高.</span></div><div class="num">16.</div><div class="key">指標適用環境 <span class="meta">(indicator_environment)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">明確下降トレンド = MA band-walk + BB band-walk 優先. RSI 売られすぎ警告は出ていても entry 根拠としては無視 (indicator_environment_filter).</span></div><div class="num">17.</div><div class="key">ダイバージェンス確認 <span class="meta">(divergence_check)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">強下降末期では bullish divergence (price LL, RSI HL) が出やすい局面. 出現していれば早期警戒シグナルだが entry 根拠としては不足. データなし.</span></div><div class="num">18.</div><div class="key">火薬庫位置推測 <span class="meta">(stop_zone_estimation)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">上方火薬庫: 1.16967 上 (LH作りの売りSL), 1.17082 上 (HIGH更新SL大). 下方火薬庫: 1.16700 キリ番下 (買いSL+新規売りSL大), 1.16500 キリ番 (大). 1.16650 (TARGET 等倍位置) で利確注文密集予想.</span></div><div class="num">19.</div><div class="key">ブレイク確定 <span class="meta">(breakout)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">1.16754 swing LOW を idx 670-672 帯で実体クローズ抜け. ATR×0.3=1.0pip 超の実体. 次足継続下降 (フェイク除外). breakout_3_signs 揃う.</span></div><div class="num">20.</div><div class="key">リテスト/第2波 <span class="meta">(retest_second_wave)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">現在 1.16700 で 1.16754 から -5.4pip 下方滞在. リテスト目標 1.16932 LH 復帰、もしくは 1.16920-1.16935 帯 (フィボ 60-62% = プライムゾーン上端) で反落. 理想深度 ATR×0.3〜1.0 = 1.0〜3.5pip = 1.16920-1.16967 帯.</span></div><div class="num">21.</div><div class="key">確認足 <span class="meta">(confirmation_candle)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">ブレイク足 idx 670 は ATR×1.0 程度で確認足相当だが、リテスト後の ピンバー/包み足/パワームーブ出現待ち. 逆方向長ヒゲなら entry 見送り.</span></div><div class="num">22.</div><div class="key">MTF整合性 <span class="meta">(mtf_alignment)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">M5 LH-LL ✓ but H4/H1 不明. mtf_principle: 上位足が下降なら戻り売り王道、上昇トレンド中なら強カウンターで罠の可能性. 確認不能で信頼度抑制.</span></div><div class="num">23.</div><div class="key">トリプル根拠カウント <span class="meta">(triple_confluence_count)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">(a) フィボ 50-61.8% = ✓ (1.16932 LH = フィボ 60.7%, プライムゾーン上端) / (b) 反転パターン = ✓ (LH 確定後の swing LOW 更新) / (c) レジサポ転換 = △ (1.16932 LH リテストでレジサポ転換確認待ち). 確実 2軸 + retest 後 3軸候補. triple_confluence_doctrine 適合候補.</span></div><div class="num">24.</div><div class="key">コンフルエンス5軸 <span class="meta">(confluence_count)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">(1)ダウ=LH-LL ✓ / (2)ライン=水平S/R+下降TL クロス ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=swing LOW ブレイク ✓. 確実 3/5軸. MA/オシ確認できれば 5/5 候補.</span></div><div class="num">25.</div><div class="key">ENTRY価格 <span class="meta">(entry_price)</span></div><div><span class="badge badge-WAIT">WAIT</span> <span class="reason">観測上: 1.16920-1.16935 帯 (LH リテスト + フィボ 60-62% プライムゾーン) で反発確認後 SELL. entry_strategy=&#x27;retest&#x27;. フィボ 50-61.8% 帯 = 本命 lot. ただし RR 制約 (下記) で実取引なら lot 1/3 推奨.</span></div><div class="num">26.</div><div class="key">STOP価格 (インバリデーション) <span class="meta">(stop_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">観測上: 1.16967 (LH直上 +1pip). invalidation_placement: LH を実体超えた時点で LH-LL ダウ無効化 = 即損切り. フィボ 78.6%=1.16998 を上抜けたら強制 stop.</span></div><div class="num">27.</div><div class="key">TARGET価格 <span class="meta">(target_price)</span></div><div><span class="badge badge-PASS">PASS</span> <span class="reason">観測上: 1.16650 (LL 1.16754 から等倍延長 = 1.16754-10.4pip = 1.16650). 途中の 1.16700 キリ番で部分利確検討. 1.16500 はさらに下方目標 (確率低).</span></div><div class="num">28.</div><div class="key">RRチェック <span class="meta">(rr_check)</span></div><div><span class="badge badge-BLOCK">BLOCK</span> <span class="reason">RR = (entry-target)/(stop-entry) = (1.16932-1.16650)/(1.16967-1.16932) = 28.2pip/3.5pip = 8.06. stop幅 3.5pip = ATR×1.0 で実用域 + 王道基準2.0 大幅クリア. ※ただし outcome=LOSE 実績で 見えない上位足ライン (1.16700 D1 サポート可能性) への激突疑い、要事後分析.</span></div><div class="num">29.</div><div class="key">イベント確認 <span class="meta">(event_clear)</span></div><div><span class="badge badge-UNKNOWN">UNKNOWN</span> <span class="reason">NY後場、Fed 関係者発言可能性あり. 60分以内の高インパクト指標確認不能.</span></div></div>
+
+<h2>AI が引いた lines</h2>
+<table><thead><tr><th>id</th><th>label</th><th>kind</th><th>role</th><th>price</th><th>anchors</th><th>reason</th></tr></thead><tbody><tr><td>L1_LH</td><td>戻り高値LH</td><td>resistance</td><td>entry_trigger</td><td>1.16932</td><td>P3</td><td class='reason'>LH リテスト位置, フィボ60.7%, レジサポ転換候補</td></tr><tr><td>L2_INV</td><td>無効化ライン</td><td>invalidation</td><td>stop_reference</td><td>1.16967</td><td>P3</td><td class='reason'>LH 1.16932 + ATR×1.0 (3.5pip) = 1.16967. ATR×0.5 では薄く slippage 即失効</td></tr><tr><td>L3_TGT</td><td>LL等倍延長 TARGET</td><td>target</td><td>target_reference</td><td>1.16650</td><td>-</td><td class='reason'>1.16754-10.4pip 等倍延長</td></tr><tr><td>L4_TL</td><td>下降斜めTL</td><td>trendline</td><td>dynamic_resistance</td><td>1.16700</td><td>P1,P3</td><td class='reason'>P1→P3 連結、最新タッチ短時間で強有効</td></tr><tr><td>L_AUTO_CH_UP_0</td><td>Channel上辺 (falling, 3t)</td><td>trendline</td><td>dynamic_resistance</td><td>1.17055</td><td>-</td><td class='reason'>code 検出 channel (falling) 上辺: 3 touches, slope -0.35pip/bar. 下辺と平行 (slope diff -0.12). channel 内タッチは directional 不可 = WAIT_BREAKOUT のみ.</td></tr><tr><td>L_AUTO_LOW_0</td><td>LOW7t下降TL</td><td>trendline</td><td>dynamic_support</td><td>1.16932</td><td>-</td><td class='reason'>code 検出: LOW 7 touches, slope -0.81pip/bar, idx 30-&gt;52. AI 探索漏れ防止のため structure_detector が auto-inject.</td></tr></tbody></table>
+
+<h2>AI が指したピボット (points)</h2>
+<table><thead><tr><th>id</th><th>label</th><th>role</th><th>index</th><th>price</th><th>reason</th></tr></thead><tbody><tr><td>P1</td><td>起点 major HIGH</td><td>major_high</td><td>0</td><td>1.17082</td><td class='reason'>5h前の起点高値</td></tr><tr><td>P2</td><td>中継LOW</td><td>major_low</td><td>20</td><td>1.16850</td><td class='reason'>3バー連続major LOW</td></tr><tr><td>P3</td><td>戻り高値LH</td><td>lower_high</td><td>40</td><td>1.16932</td><td class='reason'>フィボ60.7% プライムゾーン上端で抑制</td></tr><tr><td>P4</td><td>swing LOW更新</td><td>swing_low</td><td>55</td><td>1.16754</td><td class='reason'>LL 更新点, ブレイク確定</td></tr><tr><td>P5</td><td>LL ブレイク</td><td>breakout_point</td><td>56</td><td>1.16730</td><td class='reason'>1.16754 swing LOW を実体クローズ下抜け、breakout_3_signs 揃う</td></tr></tbody></table>
+
+<h2>市場パック概要</h2>
+<pre>asof=2026-04-29T18:45:00+00:00 session=NY current=1.16700 atr_m5=0.00050 24h_range=[1.16673..1.17082] candles=60 pivots=27</pre>
+
+<h2>調査用: raw データ</h2>
+<details><summary>raw: AI 判定 (AiDecisionScreenSpec JSON)</summary><pre>{
+  &quot;schema_version&quot;: &quot;ai_decision_screen_spec_v1&quot;,
+  &quot;provider&quot;: &quot;claude&quot;,
+  &quot;observation_only&quot;: true,
+  &quot;used_for_ready&quot;: false,
+  &quot;used_for_notification&quot;: false,
+  &quot;used_for_trading&quot;: false,
+  &quot;symbol&quot;: &quot;EURUSD=X&quot;,
+  &quot;timeframe&quot;: &quot;M5&quot;,
+  &quot;title_ja&quot;: &quot;EURUSD M5 — LH-LL 完璧下降ダウ + swing LOW 1.16754 ブレイク / リテスト待ち&quot;,
+  &quot;side&quot;: &quot;NEUTRAL&quot;,
+  &quot;final_status&quot;: &quot;WAIT_BREAKOUT&quot;,
+  &quot;pattern_label_ja&quot;: &quot;LH-LL 階段状下降 + 直近 swing LOW 1.16754 を更に割った直後&quot;,
+  &quot;market_story_ja&quot;: &quot;5時間前 1.17082 major HIGH からの強下降. major LOW 1.16850 (3バー連続) → 戻り高値 1.16932 major HIGH (LH 確定) → 1.16754 swing LOW 更新 → 現在 1.16700 で LL 更新後. 完璧な LH-LL 下降ダウ. doctrine 適用: triple_confluence_doctrine 適合候補 — フィボ50-61.8% (1.16932 LH=フィボ60.7% プライムゾーン上端で抑制) ✓ + 反転パターン (LH確定後 swing LOW 更新) ✓ + レジサポ転換 (1.16932 リテスト確認待ち) △. buildup_check ✓ (LL 更新前 5本収縮). breakout_3_signs 揃う. RR 8.06 で王道基準2.0大幅クリアだが、outcome=LOSE 実績は htf_lines_check 不可 (1.16700 D1 サポート可能性) で 見えない上位足の壁への激突疑い. htf_supremacy 違反のリスク顕在化.&quot;,
+  &quot;points&quot;: [
+    {
+      &quot;id&quot;: &quot;P1&quot;,
+      &quot;label&quot;: &quot;起点 major HIGH&quot;,
+      &quot;role&quot;: &quot;major_high&quot;,
+      &quot;index&quot;: 0,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.17082,
+      &quot;reason_ja&quot;: &quot;5h前の起点高値&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P2&quot;,
+      &quot;label&quot;: &quot;中継LOW&quot;,
+      &quot;role&quot;: &quot;major_low&quot;,
+      &quot;index&quot;: 20,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.1685,
+      &quot;reason_ja&quot;: &quot;3バー連続major LOW&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P3&quot;,
+      &quot;label&quot;: &quot;戻り高値LH&quot;,
+      &quot;role&quot;: &quot;lower_high&quot;,
+      &quot;index&quot;: 40,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.16932,
+      &quot;reason_ja&quot;: &quot;フィボ60.7% プライムゾーン上端で抑制&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P4&quot;,
+      &quot;label&quot;: &quot;swing LOW更新&quot;,
+      &quot;role&quot;: &quot;swing_low&quot;,
+      &quot;index&quot;: 55,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.16754,
+      &quot;reason_ja&quot;: &quot;LL 更新点, ブレイク確定&quot;
+    },
+    {
+      &quot;id&quot;: &quot;P5&quot;,
+      &quot;label&quot;: &quot;LL ブレイク&quot;,
+      &quot;role&quot;: &quot;breakout_point&quot;,
+      &quot;index&quot;: 56,
+      &quot;timestamp&quot;: null,
+      &quot;price&quot;: 1.1673,
+      &quot;reason_ja&quot;: &quot;1.16754 swing LOW を実体クローズ下抜け、breakout_3_signs 揃う&quot;
+    }
+  ],
+  &quot;lines&quot;: [
+    {
+      &quot;id&quot;: &quot;L1_LH&quot;,
+      &quot;label&quot;: &quot;戻り高値LH&quot;,
+      &quot;kind&quot;: &quot;resistance&quot;,
+      &quot;role&quot;: &quot;entry_trigger&quot;,
+      &quot;price&quot;: 1.16932,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P3&quot;
+      ],
+      &quot;confidence&quot;: 0.78,
+      &quot;reason_ja&quot;: &quot;LH リテスト位置, フィボ60.7%, レジサポ転換候補&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L2_INV&quot;,
+      &quot;label&quot;: &quot;無効化ライン&quot;,
+      &quot;kind&quot;: &quot;invalidation&quot;,
+      &quot;role&quot;: &quot;stop_reference&quot;,
+      &quot;price&quot;: 1.16967,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [
+        &quot;P3&quot;
+      ],
+      &quot;confidence&quot;: 0.8,
+      &quot;reason_ja&quot;: &quot;LH 1.16932 + ATR×1.0 (3.5pip) = 1.16967. ATR×0.5 では薄く slippage 即失効&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L3_TGT&quot;,
+      &quot;label&quot;: &quot;LL等倍延長 TARGET&quot;,
+      &quot;kind&quot;: &quot;target&quot;,
+      &quot;role&quot;: &quot;target_reference&quot;,
+      &quot;price&quot;: 1.1665,
+      &quot;start_index&quot;: null,
+      &quot;start_price&quot;: null,
+      &quot;end_index&quot;: null,
+      &quot;end_price&quot;: null,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.55,
+      &quot;reason_ja&quot;: &quot;1.16754-10.4pip 等倍延長&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L4_TL&quot;,
+      &quot;label&quot;: &quot;下降斜めTL&quot;,
+      &quot;kind&quot;: &quot;trendline&quot;,
+      &quot;role&quot;: &quot;dynamic_resistance&quot;,
+      &quot;price&quot;: 1.167,
+      &quot;start_index&quot;: 0,
+      &quot;start_price&quot;: 1.17082,
+      &quot;end_index&quot;: 59,
+      &quot;end_price&quot;: 1.167,
+      &quot;anchor_points&quot;: [
+        &quot;P1&quot;,
+        &quot;P3&quot;
+      ],
+      &quot;confidence&quot;: 0.65,
+      &quot;reason_ja&quot;: &quot;P1→P3 連結、最新タッチ短時間で強有効&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L_AUTO_CH_UP_0&quot;,
+      &quot;label&quot;: &quot;Channel上辺 (falling, 3t)&quot;,
+      &quot;kind&quot;: &quot;trendline&quot;,
+      &quot;role&quot;: &quot;dynamic_resistance&quot;,
+      &quot;price&quot;: 1.170548915863037,
+      &quot;start_index&quot;: 13,
+      &quot;start_price&quot;: 1.170548915863037,
+      &quot;end_index&quot;: 48,
+      &quot;end_price&quot;: 1.1693171262741089,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.62,
+      &quot;reason_ja&quot;: &quot;code 検出 channel (falling) 上辺: 3 touches, slope -0.35pip/bar. 下辺と平行 (slope diff -0.12). channel 内タッチは directional 不可 = WAIT_BREAKOUT のみ.&quot;,
+      &quot;cautions&quot;: []
+    },
+    {
+      &quot;id&quot;: &quot;L_AUTO_LOW_0&quot;,
+      &quot;label&quot;: &quot;LOW7t下降TL&quot;,
+      &quot;kind&quot;: &quot;trendline&quot;,
+      &quot;role&quot;: &quot;dynamic_support&quot;,
+      &quot;price&quot;: 1.1693171262741089,
+      &quot;start_index&quot;: 30,
+      &quot;start_price&quot;: 1.1693171262741089,
+      &quot;end_index&quot;: 52,
+      &quot;end_price&quot;: 1.1675423383712769,
+      &quot;anchor_points&quot;: [],
+      &quot;confidence&quot;: 0.78,
+      &quot;reason_ja&quot;: &quot;code 検出: LOW 7 touches, slope -0.81pip/bar, idx 30-&gt;52. AI 探索漏れ防止のため structure_detector が auto-inject.&quot;,
+      &quot;cautions&quot;: []
+    }
+  ],
+  &quot;zones&quot;: [
+    {
+      &quot;id&quot;: &quot;Z_FIB&quot;,
+      &quot;label&quot;: &quot;フィボ プライムゾーン (50-61.8%)&quot;,
+      &quot;kind&quot;: &quot;fibonacci_prime&quot;,
+      &quot;price_low&quot;: 1.16891,
+      &quot;price_high&quot;: 1.16936,
+      &quot;index_low&quot;: 40,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;1.17082→1.16700 下降フィボ50-61.8%帯. LH 1.16932は60.7%上端で抑制&quot;,
+      &quot;confidence&quot;: 0.78
+    },
+    {
+      &quot;id&quot;: &quot;Z_BU&quot;,
+      &quot;label&quot;: &quot;LL更新前ビルドアップ&quot;,
+      &quot;kind&quot;: &quot;buildup&quot;,
+      &quot;price_low&quot;: 1.1678,
+      &quot;price_high&quot;: 1.1685,
+      &quot;index_low&quot;: 53,
+      &quot;index_high&quot;: 57,
+      &quot;reason_ja&quot;: &quot;1.16754 LL更新前 5本収縮 + 高値切り下げ = breakout_3_signs ① 適合&quot;,
+      &quot;confidence&quot;: 0.65
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_UP&quot;,
+      &quot;label&quot;: &quot;火薬庫 (上)&quot;,
+      &quot;kind&quot;: &quot;stop_zone_upper&quot;,
+      &quot;price_low&quot;: 1.1694,
+      &quot;price_high&quot;: 1.17082,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;LH作りの売りSL + HIGH 1.17082 更新SL集積&quot;,
+      &quot;confidence&quot;: 0.7
+    },
+    {
+      &quot;id&quot;: &quot;Z_STOP_DN&quot;,
+      &quot;label&quot;: &quot;火薬庫 (下) / D1サポート激突懸念&quot;,
+      &quot;kind&quot;: &quot;stop_zone_lower&quot;,
+      &quot;price_low&quot;: 1.165,
+      &quot;price_high&quot;: 1.167,
+      &quot;index_low&quot;: 0,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;1.16700/1.16500 キリ番下のSL集積帯. htf_lines_check UNKNOWN で D1 壁の可能性 (outcome=LOSE 起因疑い)&quot;,
+      &quot;confidence&quot;: 0.65
+    },
+    {
+      &quot;id&quot;: &quot;Z_CONF&quot;,
+      &quot;label&quot;: &quot;トリプル根拠 confluence ゾーン&quot;,
+      &quot;kind&quot;: &quot;confluence&quot;,
+      &quot;price_low&quot;: 1.1692,
+      &quot;price_high&quot;: 1.1694,
+      &quot;index_low&quot;: 40,
+      &quot;index_high&quot;: 119,
+      &quot;reason_ja&quot;: &quot;(a)フィボ60.7% (b)LH-LL 反転パターン (c)レジサポ転換待ち = 3軸交点候補&quot;,
+      &quot;confidence&quot;: 0.6
+    }
+  ],
+  &quot;procedure_steps&quot;: [
+    {
+      &quot;key&quot;: &quot;fundamental_environment_check&quot;,
+      &quot;label_ja&quot;: &quot;ファンダメンタル環境確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;NY 後場 (UTC 18:45). 米国指標発表後の時間帯で発表後60分超過、ただし FOMC 議事要旨や FRB 関係者発言の可能性あり. 供給データ範囲では UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;FOMC_minutes&quot;,
+        &quot;Fed_speakers_after_close&quot;,
+        &quot;treasury_auction_results&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;crisis_mode_detection&quot;,
+      &quot;label_ja&quot;: &quot;クライシスモード検出&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;ATR(14)≒3.5pip. 60本 range 41pip = 11.7×ATR で正常下降トレンド. 急変動なし、5時間かけた段階的下落 = テクニカル主導. 通常モード維持.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;intervention_zone_check&quot;,
+      &quot;label_ja&quot;: &quot;介入リスク帯チェック&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;EUR/USD 介入帯対象外.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;verbal_intervention_scan&quot;,
+      &quot;label_ja&quot;: &quot;口先介入スキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;NY後場の Fed 関係者発言データ未供給. 連続下落の起因確認できず.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;fed_speaker_quote_check&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_full_scan&quot;,
+      &quot;label_ja&quot;: &quot;上位足フルスキャン&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 単独. 41pip 下落は H4 1本相当でかなり大きく、H4/D1 で見ると 明確な下降トレンド継続中の可能性高. 上位足整合確認不能で UNKNOWN.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;W1_trend&quot;,
+        &quot;D1_trend&quot;,
+        &quot;H4_trend&quot;,
+        &quot;H1_trend&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;environment&quot;,
+      &quot;label_ja&quot;: &quot;環境認識&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;h4/d1 不明. M5 局所では明確下降だが上位足が逆方向ならカウンタートレンドとなり 戻り売りの優位性が下がる.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_direction&quot;,
+        &quot;d1_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_dow&quot;,
+      &quot;label_ja&quot;: &quot;上位足ダウ&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;M5 ダウ: 1.17082 HIGH → 1.16850 LOW → 1.16932 LH → 1.16754 LL → 現在 1.16700 で LL 更新後. 完璧な LH-LL 下降ダウ確立. h4 ダウ未確認のため HTF 整合は UNKNOWN だが M5 ダウとしては PASS.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h4_dow_match&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;htf_lines_check&quot;,
+      &quot;label_ja&quot;: &quot;上位足ライン位置チェック&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;1.16700 が D1/W1 のサポートか確認不能. キリ番 1.16500 まで残り 20pip = ATR×6 で射程内. 下方の D1 サポートに激突する余地あり.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;D1_support_at_1.16500_or_1.16700&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;horizontal_levels&quot;,
+      &quot;label_ja&quot;: &quot;水平線(S/R)&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;重要度4フィルター: 1.17082 (前日 HIGH cluster, タッチ4回, 賞味期限残あり), 1.16932 (戻り高値 LH 確定), 1.16850 (中継 LOW), 1.16754 (直近 swing LOW = 直前ブレイク中). 全て M5 引ける + 3点以上の触点 + キリ番接近 1.16700/1.16500.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;trendline&quot;,
+      &quot;label_ja&quot;: &quot;斜めトレンドライン&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;下降TL: 1.17082(idx 615相当) → 1.16932(idx 660相当) → 現在 1.16700(idx 674) を結ぶ. 傾き約 -0.5pip/bar. 5時間以上有効、最新タッチ idx 660 で経過時間短い = 強有効. 水平線+下降TLのクロス位置 1.16920-1.16935 がリテストエントリーゾーン.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;wave_pattern&quot;,
+      &quot;label_ja&quot;: &quot;波形(チャートパターン)&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;完璧な LH-LL 下降ダウ. パターン名: 階段状下降 (Stair-step downtrend). 1.16850→1.16932(LH)→1.16754(LL更新) の3点で LH-LL 確立. 次の戻り高値で 1.16932 を割らずに反落なら 5wave Elliott 下降の 3rd-wave 候補.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;wave_lines&quot;,
+      &quot;label_ja&quot;: &quot;波形ライン&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;L1=1.16932 (戻り高値LH, リテストエントリーライン), L2=1.16967 (LH直上, STOP), L3=1.16650 (LL等倍延長 TARGET, 1.16754-1.16850=10.4pip 下抜け延長), L4=下降TL (P1→P3).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;fibonacci_zone&quot;,
+      &quot;label_ja&quot;: &quot;フィボナッチ・プライムゾーン&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;下降 1.17082→1.16700 のフィボリトレースメント: 50%=1.16891, 61.8%=1.16936, 78.6%=1.16998. 戻り 1.16932 (LH) は フィボ 60.7% = プライムゾーン (50-61.8%) 上端で抑制 ✓. fibonacci_zone_doctrine 適合: ゾーン到達後に反落 = 戻り売り根拠.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;buildup_check&quot;,
+      &quot;label_ja&quot;: &quot;ビルドアップ確認&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;1.16754 LL 更新前 (idx 668-672) で 1.16780-1.16850 の収縮 5本 = エネルギー蓄積観察. 高値切り下げ傾向あり. breakout_3_signs ① ビルドアップ前提 ✓.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;ma_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MA整合性 (グランビル)&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;MA 値未供給. 強下降中なら下向き MA に上から接近 = グランビル③ 戻り売り王道. 1.16932 LH 位置が SMA20 と一致するなら MA 整合 PASS の可能性高.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;m5_sma20&quot;,
+        &quot;m5_sma75&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;indicator_environment&quot;,
+      &quot;label_ja&quot;: &quot;指標適用環境&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;明確下降トレンド = MA band-walk + BB band-walk 優先. RSI 売られすぎ警告は出ていても entry 根拠としては無視 (indicator_environment_filter).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;divergence_check&quot;,
+      &quot;label_ja&quot;: &quot;ダイバージェンス確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;強下降末期では bullish divergence (price LL, RSI HL) が出やすい局面. 出現していれば早期警戒シグナルだが entry 根拠としては不足. データなし.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;m5_rsi14_at_idx_674&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;stop_zone_estimation&quot;,
+      &quot;label_ja&quot;: &quot;火薬庫位置推測&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;上方火薬庫: 1.16967 上 (LH作りの売りSL), 1.17082 上 (HIGH更新SL大). 下方火薬庫: 1.16700 キリ番下 (買いSL+新規売りSL大), 1.16500 キリ番 (大). 1.16650 (TARGET 等倍位置) で利確注文密集予想.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;breakout&quot;,
+      &quot;label_ja&quot;: &quot;ブレイク確定&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;1.16754 swing LOW を idx 670-672 帯で実体クローズ抜け. ATR×0.3=1.0pip 超の実体. 次足継続下降 (フェイク除外). breakout_3_signs 揃う.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;retest_second_wave&quot;,
+      &quot;label_ja&quot;: &quot;リテスト/第2波&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;現在 1.16700 で 1.16754 から -5.4pip 下方滞在. リテスト目標 1.16932 LH 復帰、もしくは 1.16920-1.16935 帯 (フィボ 60-62% = プライムゾーン上端) で反落. 理想深度 ATR×0.3〜1.0 = 1.0〜3.5pip = 1.16920-1.16967 帯.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;retest_to_LH_1.16932&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;confirmation_candle&quot;,
+      &quot;label_ja&quot;: &quot;確認足&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;ブレイク足 idx 670 は ATR×1.0 程度で確認足相当だが、リテスト後の ピンバー/包み足/パワームーブ出現待ち. 逆方向長ヒゲなら entry 見送り.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;bearish_engulfing_at_LH_retest&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;mtf_alignment&quot;,
+      &quot;label_ja&quot;: &quot;MTF整合性&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;M5 LH-LL ✓ but H4/H1 不明. mtf_principle: 上位足が下降なら戻り売り王道、上昇トレンド中なら強カウンターで罠の可能性. 確認不能で信頼度抑制.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;h1_direction&quot;,
+        &quot;h4_direction&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;triple_confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;トリプル根拠カウント&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;(a) フィボ 50-61.8% = ✓ (1.16932 LH = フィボ 60.7%, プライムゾーン上端) / (b) 反転パターン = ✓ (LH 確定後の swing LOW 更新) / (c) レジサポ転換 = △ (1.16932 LH リテストでレジサポ転換確認待ち). 確実 2軸 + retest 後 3軸候補. triple_confluence_doctrine 適合候補.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;resistance_flip_confirmation_at_1.16932&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;confluence_count&quot;,
+      &quot;label_ja&quot;: &quot;コンフルエンス5軸&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;(1)ダウ=LH-LL ✓ / (2)ライン=水平S/R+下降TL クロス ✓ / (3)MA=不明 / (4)オシ=不明 / (5)PA=swing LOW ブレイク ✓. 確実 3/5軸. MA/オシ確認できれば 5/5 候補.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;entry_price&quot;,
+      &quot;label_ja&quot;: &quot;ENTRY価格&quot;,
+      &quot;status&quot;: &quot;WAIT&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.16920-1.16935 帯 (LH リテスト + フィボ 60-62% プライムゾーン) で反発確認後 SELL. entry_strategy=&#x27;retest&#x27;. フィボ 50-61.8% 帯 = 本命 lot. ただし RR 制約 (下記) で実取引なら lot 1/3 推奨.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;price_returns_to_1.16920_to_1.16935&quot;
+      ]
+    },
+    {
+      &quot;key&quot;: &quot;stop_price&quot;,
+      &quot;label_ja&quot;: &quot;STOP価格 (インバリデーション)&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.16967 (LH直上 +1pip). invalidation_placement: LH を実体超えた時点で LH-LL ダウ無効化 = 即損切り. フィボ 78.6%=1.16998 を上抜けたら強制 stop.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;target_price&quot;,
+      &quot;label_ja&quot;: &quot;TARGET価格&quot;,
+      &quot;status&quot;: &quot;PASS&quot;,
+      &quot;result_ja&quot;: &quot;観測上: 1.16650 (LL 1.16754 から等倍延長 = 1.16754-10.4pip = 1.16650). 途中の 1.16700 キリ番で部分利確検討. 1.16500 はさらに下方目標 (確率低).&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;rr_check&quot;,
+      &quot;label_ja&quot;: &quot;RRチェック&quot;,
+      &quot;status&quot;: &quot;BLOCK&quot;,
+      &quot;result_ja&quot;: &quot;RR = (entry-target)/(stop-entry) = (1.16932-1.16650)/(1.16967-1.16932) = 28.2pip/3.5pip = 8.06. stop幅 3.5pip = ATR×1.0 で実用域 + 王道基準2.0 大幅クリア. ※ただし outcome=LOSE 実績で 見えない上位足ライン (1.16700 D1 サポート可能性) への激突疑い、要事後分析.&quot;,
+      &quot;missing_or_waiting&quot;: []
+    },
+    {
+      &quot;key&quot;: &quot;event_clear&quot;,
+      &quot;label_ja&quot;: &quot;イベント確認&quot;,
+      &quot;status&quot;: &quot;UNKNOWN&quot;,
+      &quot;result_ja&quot;: &quot;NY後場、Fed 関係者発言可能性あり. 60分以内の高インパクト指標確認不能.&quot;,
+      &quot;missing_or_waiting&quot;: [
+        &quot;calendar_60min&quot;,
+        &quot;fed_speakers_at_19_00&quot;
+      ]
+    }
+  ],
+  &quot;entry_candidate_ja&quot;: &quot;本番ENTRY候補ではありません. 観測上: 1.16920-1.16935 帯 (LHリテスト+フィボ60-62%プライムゾーン) で反発確認後 SELL&quot;,
+  &quot;stop_candidate_ja&quot;: &quot;本番STOP候補ではありません. 観測上: 1.16967 (LH 1.16932 + ATR×1.0=3.5pip)&quot;,
+  &quot;target_candidate_ja&quot;: &quot;本番TP候補ではありません. 観測上: 1.16650 (LL等倍延長)&quot;,
+  &quot;rr_comment_ja&quot;: &quot;RR 8.06 で王道基準2.0大幅クリア. ただし outcome=LOSE 実績 = htf_lines_check 不可で 1.16700 D1 サポート激突疑い、htf_supremacy 違反リスク顕在化&quot;,
+  &quot;problems&quot;: [],
+  &quot;required_fixes&quot;: [],
+  &quot;summary_ja&quot;: &quot;&quot;
+}</pre></details><details><summary>raw: 数値事実 pack (MarketAnalysisPackV2 JSON, OHLC全件含む)</summary><pre>{
+  &quot;schema_version&quot;: &quot;market_analysis_pack_v2&quot;,
+  &quot;symbol&quot;: &quot;EURUSD=X&quot;,
+  &quot;timeframe&quot;: &quot;M5&quot;,
+  &quot;asof_utc&quot;: &quot;2026-04-29T18:45:00Z&quot;,
+  &quot;candles&quot;: [
+    {
+      &quot;t&quot;: &quot;2026-04-29T13:50:00Z&quot;,
+      &quot;o&quot;: 1.1691803932189941,
+      &quot;h&quot;: 1.1691803932189941,
+      &quot;l&quot;: 1.1689070463180542,
+      &quot;c&quot;: 1.1691803932189941,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T13:55:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.1693171262741089,
+      &quot;l&quot;: 1.1690436601638794,
+      &quot;c&quot;: 1.1691803932189941,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:00:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.1693171262741089,
+      &quot;l&quot;: 1.168770432472229,
+      &quot;c&quot;: 1.168770432472229,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:05:00Z&quot;,
+      &quot;o&quot;: 1.1689070463180542,
+      &quot;h&quot;: 1.1689070463180542,
+      &quot;l&quot;: 1.1689070463180542,
+      &quot;c&quot;: 1.1689070463180542,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:10:00Z&quot;,
+      &quot;o&quot;: 1.1690436601638794,
+      &quot;h&quot;: 1.1691803932189941,
+      &quot;l&quot;: 1.1690436601638794,
+      &quot;c&quot;: 1.1690436601638794,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:15:00Z&quot;,
+      &quot;o&quot;: 1.1691803932189941,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1691803932189941,
+      &quot;c&quot;: 1.1695905923843384,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:20:00Z&quot;,
+      &quot;o&quot;: 1.1695905923843384,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.1695905923843384,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:25:00Z&quot;,
+      &quot;o&quot;: 1.1697274446487427,
+      &quot;h&quot;: 1.1697274446487427,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.1694538593292236,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:30:00Z&quot;,
+      &quot;o&quot;: 1.1694538593292236,
+      &quot;h&quot;: 1.169864296913147,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.169864296913147,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:35:00Z&quot;,
+      &quot;o&quot;: 1.1697274446487427,
+      &quot;h&quot;: 1.169864296913147,
+      &quot;l&quot;: 1.1697274446487427,
+      &quot;c&quot;: 1.1697274446487427,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:40:00Z&quot;,
+      &quot;o&quot;: 1.1695905923843384,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.1695905923843384,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:45:00Z&quot;,
+      &quot;o&quot;: 1.1694538593292236,
+      &quot;h&quot;: 1.1694538593292236,
+      &quot;l&quot;: 1.1691803932189941,
+      &quot;c&quot;: 1.1694538593292236,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:50:00Z&quot;,
+      &quot;o&quot;: 1.1695905923843384,
+      &quot;h&quot;: 1.1704120635986328,
+      &quot;l&quot;: 1.1695905923843384,
+      &quot;c&quot;: 1.1704120635986328,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T14:55:00Z&quot;,
+      &quot;o&quot;: 1.170548915863037,
+      &quot;h&quot;: 1.170548915863037,
+      &quot;l&quot;: 1.1702749729156494,
+      &quot;c&quot;: 1.170548915863037,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:00:00Z&quot;,
+      &quot;o&quot;: 1.1704120635986328,
+      &quot;h&quot;: 1.1704120635986328,
+      &quot;l&quot;: 1.1701380014419556,
+      &quot;c&quot;: 1.1701380014419556,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:05:00Z&quot;,
+      &quot;o&quot;: 1.1702749729156494,
+      &quot;h&quot;: 1.170548915863037,
+      &quot;l&quot;: 1.1701380014419556,
+      &quot;c&quot;: 1.1701380014419556,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:10:00Z&quot;,
+      &quot;o&quot;: 1.1701380014419556,
+      &quot;h&quot;: 1.1701380014419556,
+      &quot;l&quot;: 1.1700011491775513,
+      &quot;c&quot;: 1.1700011491775513,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:15:00Z&quot;,
+      &quot;o&quot;: 1.169864296913147,
+      &quot;h&quot;: 1.1701380014419556,
+      &quot;l&quot;: 1.169864296913147,
+      &quot;c&quot;: 1.1700011491775513,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:20:00Z&quot;,
+      &quot;o&quot;: 1.1700011491775513,
+      &quot;h&quot;: 1.1700011491775513,
+      &quot;l&quot;: 1.169864296913147,
+      &quot;c&quot;: 1.1700011491775513,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:25:00Z&quot;,
+      &quot;o&quot;: 1.169864296913147,
+      &quot;h&quot;: 1.169864296913147,
+      &quot;l&quot;: 1.1695905923843384,
+      &quot;c&quot;: 1.1695905923843384,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:30:00Z&quot;,
+      &quot;o&quot;: 1.1697274446487427,
+      &quot;h&quot;: 1.1700011491775513,
+      &quot;l&quot;: 1.1697274446487427,
+      &quot;c&quot;: 1.169864296913147,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:35:00Z&quot;,
+      &quot;o&quot;: 1.1700011491775513,
+      &quot;h&quot;: 1.1701380014419556,
+      &quot;l&quot;: 1.169864296913147,
+      &quot;c&quot;: 1.169864296913147,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:40:00Z&quot;,
+      &quot;o&quot;: 1.1702749729156494,
+      &quot;h&quot;: 1.1702749729156494,
+      &quot;l&quot;: 1.1701380014419556,
+      &quot;c&quot;: 1.1702749729156494,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:45:00Z&quot;,
+      &quot;o&quot;: 1.1704120635986328,
+      &quot;h&quot;: 1.170548915863037,
+      &quot;l&quot;: 1.1704120635986328,
+      &quot;c&quot;: 1.170548915863037,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:50:00Z&quot;,
+      &quot;o&quot;: 1.1706860065460205,
+      &quot;h&quot;: 1.170823097229004,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.1694538593292236,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T15:55:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.169864296913147,
+      &quot;l&quot;: 1.1693171262741089,
+      &quot;c&quot;: 1.169864296913147,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:00:00Z&quot;,
+      &quot;o&quot;: 1.169864296913147,
+      &quot;h&quot;: 1.1701380014419556,
+      &quot;l&quot;: 1.169864296913147,
+      &quot;c&quot;: 1.1700011491775513,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:05:00Z&quot;,
+      &quot;o&quot;: 1.169864296913147,
+      &quot;h&quot;: 1.1700011491775513,
+      &quot;l&quot;: 1.1697274446487427,
+      &quot;c&quot;: 1.1700011491775513,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:10:00Z&quot;,
+      &quot;o&quot;: 1.1700011491775513,
+      &quot;h&quot;: 1.1700011491775513,
+      &quot;l&quot;: 1.1695905923843384,
+      &quot;c&quot;: 1.1695905923843384,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:15:00Z&quot;,
+      &quot;o&quot;: 1.1695905923843384,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1694538593292236,
+      &quot;c&quot;: 1.1694538593292236,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:20:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1693171262741089,
+      &quot;c&quot;: 1.1694538593292236,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:25:00Z&quot;,
+      &quot;o&quot;: 1.1697274446487427,
+      &quot;h&quot;: 1.169864296913147,
+      &quot;l&quot;: 1.1697274446487427,
+      &quot;c&quot;: 1.1697274446487427,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:30:00Z&quot;,
+      &quot;o&quot;: 1.1695905923843384,
+      &quot;h&quot;: 1.1695905923843384,
+      &quot;l&quot;: 1.1693171262741089,
+      &quot;c&quot;: 1.1693171262741089,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:35:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.1693171262741089,
+      &quot;l&quot;: 1.1691803932189941,
+      &quot;c&quot;: 1.1693171262741089,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:40:00Z&quot;,
+      &quot;o&quot;: 1.1693171262741089,
+      &quot;h&quot;: 1.1693171262741089,
+      &quot;l&quot;: 1.1690436601638794,
+      &quot;c&quot;: 1.1690436601638794,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:45:00Z&quot;,
+      &quot;o&quot;: 1.1690436601638794,
+      &quot;h&quot;: 1.1690436601638794,
+      &quot;l&quot;: 1.168770432472229,
+      &quot;c&quot;: 1.1689070463180542,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:50:00Z&quot;,
+      &quot;o&quot;: 1.1689070463180542,
+      &quot;h&quot;: 1.1690436601638794,
+      &quot;l&quot;: 1.1689070463180542,
+      &quot;c&quot;: 1.1689070463180542,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T16:55:00Z&quot;,
+      &quot;o&quot;: 1.1689070463180542,
+      &quot;h&quot;: 1.1690436601638794,
+      &quot;l&quot;: 1.168770432472229,
+      &quot;c&quot;: 1.168770432472229,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:00:00Z&quot;,
+      &quot;o&quot;: 1.168770432472229,
+      &quot;h&quot;: 1.1689070463180542,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1684973239898682,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:05:00Z&quot;,
+      &quot;o&quot;: 1.1686338186264038,
+      &quot;h&quot;: 1.1686338186264038,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1684973239898682,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:10:00Z&quot;,
+      &quot;o&quot;: 1.1684973239898682,
+      &quot;h&quot;: 1.1684973239898682,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1684973239898682,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:15:00Z&quot;,
+      &quot;o&quot;: 1.1684973239898682,
+      &quot;h&quot;: 1.1686338186264038,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1686338186264038,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:20:00Z&quot;,
+      &quot;o&quot;: 1.168770432472229,
+      &quot;h&quot;: 1.168770432472229,
+      &quot;l&quot;: 1.1686338186264038,
+      &quot;c&quot;: 1.168770432472229,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:25:00Z&quot;,
+      &quot;o&quot;: 1.168770432472229,
+      &quot;h&quot;: 1.168770432472229,
+      &quot;l&quot;: 1.1686338186264038,
+      &quot;c&quot;: 1.168770432472229,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:30:00Z&quot;,
+      &quot;o&quot;: 1.1686338186264038,
+      &quot;h&quot;: 1.1689070463180542,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1689070463180542,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:35:00Z&quot;,
+      &quot;o&quot;: 1.168770432472229,
+      &quot;h&quot;: 1.168770432472229,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.1684973239898682,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:40:00Z&quot;,
+      &quot;o&quot;: 1.1684973239898682,
+      &quot;h&quot;: 1.168770432472229,
+      &quot;l&quot;: 1.1684973239898682,
+      &quot;c&quot;: 1.168770432472229,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:45:00Z&quot;,
+      &quot;o&quot;: 1.168770432472229,
+      &quot;h&quot;: 1.1691803932189941,
+      &quot;l&quot;: 1.168770432472229,
+      &quot;c&quot;: 1.1691803932189941,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:50:00Z&quot;,
+      &quot;o&quot;: 1.1690436601638794,
+      &quot;h&quot;: 1.1693171262741089,
+      &quot;l&quot;: 1.1690436601638794,
+      &quot;c&quot;: 1.1690436601638794,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T17:55:00Z&quot;,
+      &quot;o&quot;: 1.1690436601638794,
+      &quot;h&quot;: 1.1691803932189941,
+      &quot;l&quot;: 1.1690436601638794,
+      &quot;c&quot;: 1.1691803932189941,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:00:00Z&quot;,
+      &quot;o&quot;: 1.1680878400802612,
+      &quot;h&quot;: 1.1689070463180542,
+      &quot;l&quot;: 1.1680878400802612,
+      &quot;c&quot;: 1.1686338186264038,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:05:00Z&quot;,
+      &quot;o&quot;: 1.1683608293533325,
+      &quot;h&quot;: 1.1684973239898682,
+      &quot;l&quot;: 1.1678149700164795,
+      &quot;c&quot;: 1.1678149700164795,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:10:00Z&quot;,
+      &quot;o&quot;: 1.1676785945892334,
+      &quot;h&quot;: 1.1679514646530151,
+      &quot;l&quot;: 1.1675423383712769,
+      &quot;c&quot;: 1.1679514646530151,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:15:00Z&quot;,
+      &quot;o&quot;: 1.1679514646530151,
+      &quot;h&quot;: 1.1686338186264038,
+      &quot;l&quot;: 1.1679514646530151,
+      &quot;c&quot;: 1.1686338186264038,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:20:00Z&quot;,
+      &quot;o&quot;: 1.1686338186264038,
+      &quot;h&quot;: 1.168770432472229,
+      &quot;l&quot;: 1.1682243347167969,
+      &quot;c&quot;: 1.1682243347167969,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:25:00Z&quot;,
+      &quot;o&quot;: 1.1683608293533325,
+      &quot;h&quot;: 1.1684973239898682,
+      &quot;l&quot;: 1.1679514646530151,
+      &quot;c&quot;: 1.1679514646530151,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:30:00Z&quot;,
+      &quot;o&quot;: 1.1678149700164795,
+      &quot;h&quot;: 1.1680878400802612,
+      &quot;l&quot;: 1.1675423383712769,
+      &quot;c&quot;: 1.1675423383712769,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:35:00Z&quot;,
+      &quot;o&quot;: 1.1679514646530151,
+      &quot;h&quot;: 1.1684973239898682,
+      &quot;l&quot;: 1.1675423383712769,
+      &quot;c&quot;: 1.1679514646530151,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:40:00Z&quot;,
+      &quot;o&quot;: 1.1675423383712769,
+      &quot;h&quot;: 1.1675423383712769,
+      &quot;l&quot;: 1.1668611764907837,
+      &quot;c&quot;: 1.1668611764907837,
+      &quot;v&quot;: 0.0
+    },
+    {
+      &quot;t&quot;: &quot;2026-04-29T18:45:00Z&quot;,
+      &quot;o&quot;: 1.1667250394821167,
+      &quot;h&quot;: 1.1671334505081177,
+      &quot;l&quot;: 1.1667250394821167,
+      &quot;c&quot;: 1.1669973134994507,
+      &quot;v&quot;: 0.0
+    }
+  ],
+  &quot;pivots&quot;: [
+    {
+      &quot;index&quot;: 2,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:00:00+00:00&quot;,
+      &quot;price&quot;: 1.1693171262741089,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 2,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:00:00+00:00&quot;,
+      &quot;price&quot;: 1.168770432472229,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 8,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:30:00+00:00&quot;,
+      &quot;price&quot;: 1.169864296913147,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 8,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1694538593292236,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 9,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:35:00+00:00&quot;,
+      &quot;price&quot;: 1.169864296913147,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 11,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:45:00+00:00&quot;,
+      &quot;price&quot;: 1.1691803932189941,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 13,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T14:55:00+00:00&quot;,
+      &quot;price&quot;: 1.170548915863037,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 15,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T15:05:00+00:00&quot;,
+      &quot;price&quot;: 1.170548915863037,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 19,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T15:25:00+00:00&quot;,
+      &quot;price&quot;: 1.1695905923843384,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 24,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T15:50:00+00:00&quot;,
+      &quot;price&quot;: 1.170823097229004,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 25,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T15:55:00+00:00&quot;,
+      &quot;price&quot;: 1.1693171262741089,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 30,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T16:20:00+00:00&quot;,
+      &quot;price&quot;: 1.1693171262741089,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 31,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T16:25:00+00:00&quot;,
+      &quot;price&quot;: 1.169864296913147,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 35,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T16:45:00+00:00&quot;,
+      &quot;price&quot;: 1.168770432472229,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 37,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T16:55:00+00:00&quot;,
+      &quot;price&quot;: 1.1690436601638794,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 38,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:00:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 39,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:05:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 40,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:10:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 41,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:15:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 44,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1689070463180542,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 44,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:30:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 45,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 46,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:40:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 48,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T17:50:00+00:00&quot;,
+      &quot;price&quot;: 1.1693171262741089,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;major&quot;,
+      &quot;strength&quot;: 20
+    },
+    {
+      &quot;index&quot;: 52,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T18:10:00+00:00&quot;,
+      &quot;price&quot;: 1.1675423383712769,
+      &quot;kind&quot;: &quot;LOW&quot;,
+      &quot;scale&quot;: &quot;swing&quot;,
+      &quot;strength&quot;: 10
+    },
+    {
+      &quot;index&quot;: 54,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T18:20:00+00:00&quot;,
+      &quot;price&quot;: 1.168770432472229,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    },
+    {
+      &quot;index&quot;: 57,
+      &quot;timestamp_utc&quot;: &quot;2026-04-29T18:35:00+00:00&quot;,
+      &quot;price&quot;: 1.1684973239898682,
+      &quot;kind&quot;: &quot;HIGH&quot;,
+      &quot;scale&quot;: &quot;micro&quot;,
+      &quot;strength&quot;: 4
+    }
+  ],
+  &quot;atr&quot;: {
+    &quot;m5_14&quot;: 0.0005023091351270308,
+    &quot;h1_14&quot;: null,
+    &quot;h4_14&quot;: null
+  },
+  &quot;recent_range&quot;: {
+    &quot;high_24h&quot;: 1.170823097229004,
+    &quot;low_24h&quot;: 1.1667250394821167,
+    &quot;high_1w&quot;: null,
+    &quot;low_1w&quot;: null
+  },
+  &quot;calendar_events_within_60min&quot;: [],
+  &quot;current_price&quot;: 1.1669973134994507,
+  &quot;current_spread&quot;: null,
+  &quot;session&quot;: &quot;NY&quot;,
+  &quot;indicators&quot;: {
+    &quot;ma&quot;: {
+      &quot;sma20&quot;: 1.1683406710624695,
+      &quot;sma75&quot;: null,
+      &quot;ema200&quot;: null
+    },
+    &quot;bb&quot;: {
+      &quot;middle&quot;: 1.1683406710624695,
+      &quot;upper&quot;: 1.1696415478448985,
+      &quot;lower&quot;: 1.1670397942800406,
+      &quot;width_pip&quot;: 26.017535648579226,
+      &quot;width_atr_ratio&quot;: 5.179586399916768
+    },
+    &quot;rsi14&quot;: 34.64760052698277,
+    &quot;macd&quot;: {
+      &quot;macd&quot;: -0.00048672162861840285,
+      &quot;signal&quot;: -0.0003483916878928088,
+      &quot;histogram&quot;: -0.00013832994072559407
+    },
+    &quot;fib&quot;: {
+      &quot;anchor_high&quot;: 1.170823097229004,
+      &quot;anchor_low&quot;: 1.1667250394821167,
+      &quot;direction&quot;: &quot;down&quot;,
+      &quot;fib_236&quot;: 1.167692181110382,
+      &quot;fib_382&quot;: 1.1682904975414277,
+      &quot;fib_500&quot;: 1.1687740683555603,
+      &quot;fib_618&quot;: 1.169257639169693,
+      &quot;fib_786&quot;: 1.1699461128711701
+    },
+    &quot;round_numbers_nearby&quot;: [
+      1.16,
+      1.165,
+      1.17
+    ]
+  }
+}</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.0, -0.5441806286696612, 0.0, 0.0, 0.27220897561452306, -0.27220897561452306, 0.0, 0.0, 1.0883612573393224, 0.0, -0.8161522817247993, 0.0, 0.0, 0.0, 0.2719716530551381, 0.0, 0.27220897561452306, 0.0, 0.2719716530551381, 0.0, 0.0, -0.8166269268435692, 1.0888359024580923, 0.0, 0.0, -0.27220897561452306, 0.0, 0.0, 0.544655273788431, 0.0, -0.27220897561452306, 0.0, 0.0, -0.817101571962339, 0.817101571962339, 0.0, 0.272446298173908, 0.0, -0.272446298173908, 0.0, 0.0, -0.27220897561452306, -0.272446298173908, 0.0, 0.0, -0.5444179512290461, -0.27220897561452306, 0.0, 0.0, -1.6353897567216027, 1.9075987323361259, 0.0, 0.0, -0.5453672414665859, 0.272446298173908, 0.0, 0.5456045640259708, 0.0, -0.8180508621998788, 0.0, 0.8180508621998788, 0.0, 0.0, 0.0, 0.272446298173908, 0.0, -0.272446298173908, 0.0, 0.272446298173908, -0.272446298173908, 0.0, 0.0, 0.0, -0.272446298173908, 0.0, 0.0, 0.544892596347816, 0.0, -0.8173388945217239, 0.0, 0.272446298173908, -0.272446298173908, 0.544892596347816, 0.0, 0.544892596347816, 0.0, 0.0, 0.0, 0.0, -0.27268362073329294, 0.817576217081109, 0.0, 0.0, -0.272446298173908, 0.5453672414665859, 0.0, 2.7258869170953894, 0.0, -2.180045030510034, 0.0, 0.0, -1.089310547576862, 0.817101571962339, 0.0, 0.272446298173908, -0.272446298173908, 0.272446298173908, 0.0, 0.0, -0.544892596347816, 0.0, 0.0, 0.8173388945217239, 0.0, -0.8173388945217239, 0.0, 0.27220897561452306, 0.0, -0.27220897561452306, 0.0, 0.27220897561452306, -0.27220897561452306, 0.0, 0.0, 0.272446298173908, 0.0, 0.544655273788431, 0.0, 0.5444179512290461, 0.0, -0.8168642494029541, 0.0, 0.0, -0.27220897561452306, 0.0, 0.0, 0.5444179512290461, 0.0, -0.5444179512290461, 0.0, 0.2719716530551381, -0.2719716530551381, -0.2719716530551381, 0.0, 0.2719716530551381, 0.0, 0.0, 0.0, 0.5439433061102762, 0.0, -0.2719716530551381, 0.0, 0.8156776366060294, 0.0, -0.5437059835508913, 0.0, 0.2717343304957532, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.2717343304957532, 0.2717343304957532, 0.0, 0.0, -0.2719716530551381, 0.2719716530551381, 0.0, 0.0, -0.2719716530551381, 0.0, 0.0, 0.0, -0.8156776366060294, 0.2719716530551381, 0.0, 0.5437059835508913, 0.0, -0.8156776366060294, 0.0, 0.0, -0.5437059835508913, 0.5437059835508913, 0.0, 0.0, -0.8161522817247993, 0.8161522817247993, 0.0, 0.5444179512290461, 0.0, -0.27220897561452306, 0.0, 0.0, -0.27220897561452306, 0.27220897561452306, 0.0, 0.5439433061102762, -1.0869373219830127, -1.0881239347799374, 0.0, 1.3584343299193808, 0.0, -1.6301686604151342, 0.0, 0.0, -0.8144910238091048, 0.2717343304957532, 0.0, 0.0, -1.3584343299193808, 1.3584343299193808, 0.0, 1.0871746445423975, 0.0, -0.8152029914872595, 0.0, 1.0866999994236277, 0.0, -0.5432313384321215, 0.0, 1.0859880317454729, 0.0, -0.8144910238091048, 0.0, 1.0866999994236277, -0.8144910238091048, 0.8144910238091048, 0.0, 1.3560611043255315, 0.0, -2.1705521281346365, 0.0, 0.27102236281759834, -0.5420447256351967, 0.27102236281759834, 0.0, -0.3, 2.9862297647406657, -1.0, 0.5, -0.25, 2.9862297647406657, -1.0, 0.5, -0.18333333333333332, 4.618297005630879, 1.0, 1.0, -0.11666666666666667, 1.0850387415079332, -1.0, 0.5, 1.0, 0.0, 0.0, 8.158437623975988, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
+
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id 25257b16-60d9-49cd-a709-a10cd5ab32fe --note "..."</code></p>
+</body></html>

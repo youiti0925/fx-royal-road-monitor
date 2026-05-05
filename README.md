@@ -1,419 +1,136 @@
-# fx-royal-road-monitor
+# fx-royal-road-monitor v2
 
-5分単位で FX チャートを監視し、**王道手順 (royal road)** ルールで判定したうえで、
-OpenAI と Claude の **二重 AI レビュー**を取り、結果を比較して通知するシステム。
+5分FX チャートに対する **王道判定** の観測専用システム。
 
-## 役割分担
+- **AI** が王道14手順に沿って分析・画面設計を行う
+- **コード** は数値事実の提供と事後検証のみ
+- **過去データ** が教師 (RAG コーパス、自動 outcome ラベル)
+- **コスト $0** 想定 (Claude Code subscription 内で完結、API キー不要)
 
-| repo | 役割 |
-| ---- | ---- |
-| `youiti0925/test` | 研究 / 検証 (バックテスト・リサーチ) |
-| `youiti0925/fx-royal-road-monitor` (このリポジトリ) | 5分監視 + ルール判定 + 二重 AI レビュー + 比較 + 通知 |
+## 安全方針(永久不変)
 
-このリポジトリでは **OANDA / paper / live / 自動売買は扱わない**。
-通知 (Discord / LINE / コンソール) のみが出力チャネル。
+- 観測専用。**READY 通知 / 自動売買 / 手動売買連動はすべて永久禁止**
+- AI 出力の `observation_only=true` / `used_for_*=false` は Pydantic と Layer 3 検証で多重強制
+- ブローカー / 取引執行 / 通知ディスパッチコードは CI grep で検知 → 混入時は失敗
+- 詳細: `.github/workflows/safety_lint.yml`
 
-## 最重要方針
+## アーキテクチャ
 
-AI に一般知識を期待しない。毎ターン必ず以下を payload としてプロンプトに渡す:
-
-1. 王道手順の知識パック (`docs/ROYAL_ROAD_KNOWLEDGE_PACK_v1.md`)
-2. 判定基準 `PASS / WAIT / WARN / BLOCK / UNKNOWN`
-3. `READY` にしてよい / いけない条件
-4. 出力 JSON schema (`src/fx_monitor/ai/schema.py`)
-5. 現在チャートの payload (構造化数値)
-6. 現在チャート画像 (vision 可のモデルにのみ)
-
-詳細は `docs/AI_REVIEW_POLICY.md` を参照。
+```
+過去 OHLC アーカイブ (yfinance, 無料)
+       ↓
+candidate_filter で局面候補抽出 (offline)
+       ↓
+Claude Code 内で AI バッチ判定 (subscription, $0)
+       ↓
+60本後の price action から outcome 自動ラベル
+       ↓
+特徴ベクトル化 → JsonlVectorStore に保存
+       ↓
+ライブ (5分毎手動 or 自由なタイミング):
+  数値事実 pack 構築 → 類似事例検索 → AI 判定 → Layer 3 検証 → 保存
+```
 
 ## ディレクトリ構成
 
 ```
 src/fx_monitor/
-  core/        models, rule_engine, compare
-  knowledge/   knowledge pack loader
-  ai/          schema, prompt_builder, openai_reviewer, claude_reviewer, mock_reviewer
-  render/      chart_card_renderer
-  notify/      notifier (base), console / discord / line backends
-  app/         run_once, run_watch
-docs/          knowledge pack & policies
-tests/         pytest
-.github/workflows/monitor.yml   5分 cron (現状は dry-run + テスト)
+├── live/        数値事実層 (汚染禁止). pivots, market_pack, embedding, post_validate
+├── corpus/      コーパス層. schema / store / outcome
+├── offline/     オフラインバッチ. ohlc_archive, candidate_filter, batch_runner
+├── ai/          AI 層. decision_screen_spec_schema, prompt_builder_v2, knowledge_pack_v2.json
+├── render/      レンダラー. AI が出した spec を描画 (画面の scribe)
+└── tools/       Claude Code 用 CLI. slash command が叩く
+
+.claude/commands/
+├── royal-road-check.md
+├── royal-road-update-outcomes.md
+├── royal-road-flag-dissent.md
+├── royal-road-monthly-report.md
+├── royal-road-dashboard.md
+└── build-corpus-from-history.md
 ```
 
-## クイックスタート
+## セットアップ
 
 ```bash
+git clone https://github.com/youiti0925/fx-royal-road-monitor
+cd fx-royal-road-monitor
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-cp .env.example .env   # 値はローカルのみ。コミット禁止。
-pytest
-python -m fx_monitor.app.run_once   # 1 回だけ実行 (dry-run)
+pip install -e .[dev,market]      # market は yfinance を含む
+pytest                             # テストが緑であることを確認
 ```
 
-## やらないこと (明示)
+## 使い方 (Claude Code 内)
 
-- OANDA / paper / live / 自動売買
-- 既存 `youiti0925/test` の `main` / PR #22 / PR #23 を触る
-- AI を **final action** に使う (AI は助言層、最終判断はルール + 通知判定)
-- API キーをコミットする
-
-## Notification cards
-
-`run_once` は (fixture mode の場合) 王道通知カード PNG を生成できます。
-
-```env
-FX_MONITOR_RENDER_CARD=true
-FX_MONITOR_ATTACH_CARD=true
-FX_MONITOR_CARD_PATH=out/notification_card.png
-```
-
-`FX_MONITOR_ATTACH_CARD=true` のとき、Discord は multipart `file=`、
-LINE Notify は `imageFile=` で PNG を添付して送信します。
-`DRY_RUN=true` のときは送信せず、生成画像のパスのみ stdout に出力します。
-
-### Japanese fonts
-
-通知カードは matplotlib で描画しますが、フォントファイルはこの repo に
-**同梱しません**。CJK フォントはホスト側でインストールしてください。
-
-Ubuntu:
-
-```bash
-sudo apt-get install fonts-noto-cjk
-```
-
-または、明示的に指定:
-
-```env
-FX_MONITOR_FONT_FAMILY=Noto Sans CJK JP
-# あるいは絶対パス指定 (.ttf / .otf):
-FX_MONITOR_CJK_FONT_PATH=/path/to/NotoSansCJKjp-Regular.otf
-```
-
-フォントが見つからなくても renderer は落ちません — 日本語ラベルだけ
-豆腐 (□) になります。フォントファイルは絶対に commit しないでください。
-
-## Market data feed
-
-Initial feed support is **read-only**. There is no broker connection,
-no OANDA, no live order, no paper trading.
-
-Supported sources:
-
-- `csv` — local OHLC file
-- `yahoo` — optional `yfinance` (`pip install -e .[market]`)
-
-CSV example:
-
-```env
-FX_MONITOR_FEED=csv
-FX_MONITOR_CSV_PATH=tests/fixtures/ohlc_sample.csv
-FX_MONITOR_SYMBOL=EURUSD=X
-FX_MONITOR_TIMEFRAME=M5
-```
-
-## Draft payload from OHLC
-
-CSV/Yahoo feed mode now builds an observation-only **draft payload**:
+### 1. 過去データから辞書(コーパス)構築
 
 ```
-OHLC -> pivots -> rough support/resistance -> rough wave context
-                                            -> RoyalRoadDraftPayload
-                                            -> MonitorCase (draft)
+/build-corpus-from-history --symbol EURUSD=X --start 2026-02-01 --end 2026-05-01
 ```
 
-Safety contract (enforced by tests + the rule engine):
+batch_size 件処理して止まる。subscription 枠が回復したら再実行で継続。
+進捗は `data/progress/<symbol>_<timeframe>.json` に保存。
 
-- `observation_only = true`
-- `used_in_final_action = false`
-- `entry_plan.entry_status = HOLD`
-- `royal_road_procedure_checklist.p0_pass = false`
-- `evaluate_monitor_case()` returns `UNKNOWN` for any draft (and `WARN`
-  if the draft is hand-edited to claim `READY`).
-- Feed-mode `run_once` does **not** call OpenAI / Claude reviewers.
-- Feed-mode `run_once` always ends in `Decision: SUPPRESSED`.
-
-Use rich royal-road payload fixtures (`FX_MONITOR_FIXTURE_PATH=...`) for
-READY notification tests.
-
-Phase P1 rich draft keys are still observation-only:
-
-- `pattern_levels_draft`
-- `wave_derived_lines_draft`
-- `structural_lines_draft`
-- `support_resistance_v2_draft`
-- `trendline_context_draft`
-- `royal_road_procedure_checklist_draft`
-
-They are not READY eligible. The dashboard's safety banner flips to
-"CHECK SAFETY FLAGS" if `rich_draft.ready_eligible` or
-`rich_draft.p0_pass` is ever true.
-
-### Draft chart visual validation
-
-Phase P2 renders an observation-only chart from `rich_draft`:
-
-```env
-FX_MONITOR_RENDER_DRAFT_CHART=true
-FX_MONITOR_DRAFT_CHART_PATH=out/draft_chart.png
-```
-
-The image carries an "OBSERVATION ONLY / NOT READY ELIGIBLE /
-source=draft / ready_eligible=False" banner. The dashboard surfaces an
-"Open draft chart" link in the Rich draft card when the chart is
-present in the same `out/` directory.
-
-This chart is never used for READY decisions, notifications, trading,
-or order execution. It exists solely so a human can inspect whether
-the draft P1/NL/P2/BR (or B1/NL/B2/BR), WNL_D1 / WSL_D1 / WTP_D1, and
-SNL_D1 / SIL_D1 / STP_D1 / STL_D1 lines look reasonable on the chart.
-
-### Rich draft compare scaffold (Phase P3)
-
-A small offline comparator scores how close a draft rich payload is to
-a captured reference royal-road payload:
-
-```bash
-python -m fx_monitor.app.rich_draft_compare \
-    --draft tests/fixtures/sample_rich_draft.json \
-    --reference tests/fixtures/sample_reference_payload.json \
-    --out out/rich_draft_compare.json
-```
-
-The report includes presence-style scores
-(`pattern_match` / `wave_line_presence` / `structural_line_presence` /
-`sr_presence` / `trendline_presence`), structural anchor-match counts,
-wave-role price gaps, plus `missing` / `mismatches` / `warnings`
-arrays. Every record carries `offline_analysis_only=true`,
-`used_for_ready=false`, `used_for_notification=false`.
-
-This is **scaffold only** — there is no live backtest sweep yet. The
-output is for offline study and is never consumed by the rule engine,
-notifier, or trading paths.
-
-## Draft AI review mode
-
-Feed mode can optionally send the observation-only draft payload to
-OpenAI / Claude and append a JSONL summary for offline study:
-
-```env
-FX_MONITOR_REVIEW_DRAFT_WITH_AI=true
-FX_MONITOR_REVIEW_LOG_PATH=out/review_log.jsonl
-```
-
-Hard contract:
-
-- Draft AI review never dispatches notifications.
-- Draft AI review never produces READY.
-- `Decision: SUPPRESSED` is always printed.
-- The JSONL record contains only summary fields (verdict / bias /
-  confidence / a few reason lines) — no prompts, no raw payloads, no
-  API keys.
-- Even if the mock reviewer happens to return PASS in this mode, the
-  draft path stays SUPPRESSED.
-
-## Draft review report
-
-Aggregate the JSONL draft AI review log into a Markdown + JSON report:
-
-```bash
-python -m fx_monitor.app.review_report \
-    --log out/review_log.jsonl \
-    --md out/review_report.md \
-    --json out/review_report.json
-```
-
-The report counts top `missing` / `disagreements` / `reasons` from
-OpenAI and Claude, plus rough pattern / pivot / zone stats. It is
-**offline analysis only** — it is not used for READY decisions,
-notifications, trading, or order execution.
-
-## Scheduled draft review artifacts
-
-`.github/workflows/monitor.yml` runs the observation-only draft review
-on a 5-minute schedule (and on `workflow_dispatch`). On every scheduled
-run it:
-
-1. loads market data (`FX_MONITOR_FEED=yahoo`)
-2. builds an observation-only draft payload from the OHLC
-3. optionally asks OpenAI / Claude to review it (only when the
-   corresponding repository secret is configured)
-4. writes `out/review_log.jsonl`
-5. generates `out/review_report.md` and `out/review_report.json`
-6. uploads them as a workflow artifact (`draft-review-<run_id>`,
-   14-day retention)
-
-Push / pull-request runs only execute `pytest`. The draft-review job
-is gated by `if: github.event_name == 'schedule' || github.event_name
-== 'workflow_dispatch'`.
-
-Safety contract (pinned by `tests/test_workflow_static.py`):
-
-- `DRY_RUN=true`
-- No READY notification from draft mode
-- No Discord / LINE dispatch
-- No OANDA
-- No live / paper trading
-- No order execution
-- No font / API-key files committed
-
-### Diagnostics artifact
-
-Each scheduled draft-review run also writes:
+### 2. ライブ判定
 
 ```
-out/diagnostics.json
+/royal-road-check
 ```
 
-It records:
+最新OHLC を読み込み → 類似過去事例検索 → AI 判定 → 検証 → コーパス保存。
 
-- feed source / symbol / timeframe / candle count / warnings
-- draft pivot / zone / rough-pattern counts + observation-only flag
-- rule verdict / bias / reasons
-- AI reviewer verdicts (or `"not_run"` when the review is skipped)
-- compare result
-- decision level (`SUPPRESSED`)
-- safety flags (`ready_allowed=false`, `dispatch_called=false`,
-  `dry_run`)
-
-Secrets, tokens, API keys, webhooks, prompts, and raw payloads are
-**not** stored — `write_diagnostics()` redacts any key matching
-`api_key` / `token` / `secret` / `webhook` (case-insensitive)
-recursively before write.
-
-### Draft review dashboard
-
-The scheduled workflow also writes:
+### 3. outcome 自動充填
 
 ```
-out/dashboard.html
+/royal-road-update-outcomes
 ```
 
-It combines `out/diagnostics.json` and `out/review_report.json` into a
-single static HTML page (no JS, no external resources). The top of the
-page shows a coloured safety banner — green ("SAFE: offline analysis
-only") when every safety flag is correct, red ("CHECK SAFETY FLAGS")
-otherwise. Below it: feed / draft / rule / OpenAI / Claude / compare /
-decision cards plus top OpenAI / Claude `missing` and `disagreements`
-tables.
+PENDING な判定で 60 本以上経過したものを yfinance で取得して outcome 計算。
 
-The dashboard is **offline-only** and is not used for:
+### 4. その他
 
-- READY decisions
-- notifications
-- trading
-- order execution
-
-Generate manually:
-
-```bash
-python -m fx_monitor.app.dashboard \
-    --diagnostics out/diagnostics.json \
-    --summary out/review_report.json \
-    --html out/dashboard.html
+```
+/royal-road-flag-dissent --id <entry_id> --note "..."   # 違和感フラグ
+/royal-road-monthly-report                              # 月次自己診断
+/royal-road-dashboard                                   # 静的HTML 再生成
 ```
 
-Planning documents:
+## データの場所
 
-- [Scheduled Draft Review Runbook](docs/RUNBOOK_SCHEDULED_DRAFT_REVIEW.md)
-- [Draft to Rich Payload Promotion Plan](docs/DRAFT_TO_RICH_PROMOTION_PLAN.md)
-- [MVP-1 Observation Pipeline Freeze Report](docs/MVP1_OBSERVATION_PIPELINE_FREEZE_REPORT.md)
+| パス | 中身 |
+|---|---|
+| `data/corpus/<name>/entries.jsonl` | コーパスエントリ本体 |
+| `data/corpus/<name>/vectors.npy` | 特徴ベクトル (linear cosine 検索) |
+| `data/progress/*.json` | バッチ進捗ファイル |
+| `data/pending_judgements/*` | `/royal-road-check` の途中状態 |
+| `data/ohlc/*.parquet` | yfinance キャッシュ |
+| `docs/live_dashboard/` | 静的ダッシュボード (file:// で開く) |
 
-## MVP-1 AI生成 王道判定プレビュー
+`data/` は `.gitignore` 管理(コミットしない)。
 
-URL を 1 つ開くだけで、OpenAI と Claude が独立に作成した王道判定画面案
-と二者比較を確認できます。Actions タブも zip ダウンロードも不要です。
+## 設計の要点
 
-  https://htmlpreview.github.io/?https://raw.githubusercontent.com/youiti0925/fx-royal-road-monitor/main/docs/mvp1_current_preview/index.html
+### コードでは無理な領域
 
-設計:
+王道 procedure の判定は決定論コードで完結しません。理由:
 
-- **AI が画面の設計者** です。OpenAI / Claude がそれぞれ独立に
-  `AiDecisionScreenSpec` (王道判定画面の設計JSON) を作成します。
-- **renderer は清書係** です。AI spec に書かれた線・点・ゾーン・
-  王道手順チェックだけを描画し、specに無い線を勝手に追加しません。
-- **二者比較は隠さず表示** します。一致した線は consensus、
-  どちらか片方だけの線、価格不一致 (conflict) は色を分けて
-  画面に並べます。
+- **B.1 因果性**: 確認足判定に未来情報が要る
+- **B.2 組み合わせ爆発**: 14手順×状態でルール量が破綻
+- **B.3 過学習必然性**: パラメータ数 > 独立検証ケース数
+- **B.4 非定常**: 市場レジーム変化に追従不能
+- **B.5 形式仕様の不在**: 「ダウ崩れ」に唯一の定義がない
+- **B.6 開いた状態空間**: 想定外イベントで未定義動作
+- **B.7 タシット知識**: 熟練判断は言語化できない部分が大半
 
-プレビューに含まれる主なファイル:
+→ 手続き判断は AI、数値事実と事後検証はコード、という役割分担が現実解。
 
-- `index.html` … 入口 (日本語)
-- `decision_screen.png` … AI生成 王道判定画面
-- `decision_screen.html` … 王道判定画面の HTML 版 (`rr-*` クラス付き SVG)
-- `openai_decision_screen_spec.json` … OpenAI の画面設計
-- `claude_decision_screen_spec.json` … Claude の画面設計
-- `decision_screen_spec_compare.json` … 二者比較結果
-- `dashboard.html` … 詳細ダッシュボード (日本語)
-- `diagnostics.json` / `review_report.md` / `review_report.json`
-  / `review_log.jsonl` / `draft_chart.png`
+### コーパス = 学習ではなく辞書
 
-この画面は **観測専用** です。
+LLM は推論時に学習しません(fine-tuning しない限り)。コーパスは **AI が毎回参照する外部辞書**。
+`/royal-road-check` するたびに 1 ページ追加され、5 時間後に outcome が自動充填される。
+使うほど分厚くなる構造。
 
-- READY通知には使いません (`used_for_ready=false`)
-- 通知 (Discord / LINE) には使いません (`used_for_notification=false`)
-- 売買・取引執行には使いません (`used_for_trading=false`)
-- OANDA / live / paper には接続していません
+## ライセンス
 
-各 spec / 比較 JSON も `observation_only=true` /
-`used_for_ready=false` / `used_for_notification=false` /
-`used_for_trading=false` を必ず含みます。schema が違反を検知した
-場合は `final_status="UNKNOWN"` に強制ダウングレードします。
-
-プレビューには 2 つのモードがあります。
-
-#### `safe-local` (デフォルト)
-
-```bash
-python -m fx_monitor.app.build_preview \
-    --out-dir docs/mvp1_current_preview \
-    --mode safe-local
-```
-
-- API キーを env から剥がして実行 (再現性のため)
-- OpenAI / Claude は SAFE-UNKNOWN を返す
-- index.html には **「AI生成状態: 未実行」** と明示
-- これは安全 smoke 用であり、ユーザー確認用の完成プレビューではありません
-
-#### `ai-authored` (publish ワークフロー専用)
-
-```bash
-OPENAI_API_KEY=... ANTHROPIC_API_KEY=... \
-OPENAI_ENABLED=true ANTHROPIC_ENABLED=true \
-python -m fx_monitor.app.build_preview \
-    --out-dir docs/mvp1_current_preview \
-    --mode ai-authored
-```
-
-- 両 AI が実際に `AiDecisionScreenSpec` を作成
-- `points / lines / procedure_steps` のいずれかが空の場合は **非ゼロ終了**
-- safety フラグ (`used_for_ready` / `used_for_notification` /
-  `used_for_trading`) のいずれかが false でない場合も非ゼロ終了
-- 成功時のみ「AI生成状態: 実行済み」と表示
-
-#### GitHub Actions: `publish-mvp1-preview` (手動)
-
-`.github/workflows/publish_mvp1_preview.yml` を **手動実行** すると、
-リポジトリ secrets (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) を使って
-`--mode ai-authored` で preview を再生成し、`docs/mvp1_current_preview/`
-に commit + push します。schedule では動かしません。
-
-ハードニング:
-
-- **preflight**: API キーが無ければ workflow は即失敗し
-  `preflight.json` を成果物として残します。「placeholder preview を
-  AI生成済みと偽装する」状態には絶対なりません。
-- **repair pass**: 1回目の AI spec が空 / UNKNOWN / 安全違反だった
-  場合、validation error を伝えて 1 回だけ修復リクエストを送ります。
-  結果は `decision_screen_repair_log.json` に記録されます。
-- **artifact**: 全ての preview ファイルが
-  `mvp1-ai-authored-preview-<run_id>` artifact として 14 日間保管され、
-  workflow summary に preview URL が表示されます。
-
-## ステータス
-
-初期 scaffold。実 API 呼び出し / 実チャート取得 / 実通知は未実装 (mock のみ稼働)。
-通知カード PNG の生成と Discord/LINE への画像添付パスは実装済 (DRY_RUN
-で安全側)。マーケットデータ feed は CSV / Yahoo (optional) の入口のみ
-実装済 — feed だけでは READY を出さない。
+MIT
