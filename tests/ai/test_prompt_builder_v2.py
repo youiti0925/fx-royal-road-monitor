@@ -244,6 +244,24 @@ def test_v4_glossary_includes_new_terms():
         assert term in glossary, f"missing v4 glossary term: {term!r}"
 
 
+def test_user_prompt_includes_structure_annotation():
+    """Phase A (Option 2): code-detected structure must appear in user prompt.
+
+    Prevents the AI from re-doing combinatorial search the code already did.
+    Validator F15/F16 catches outputs that don't reference the annotation.
+    """
+    pack = _pack()
+    built = build_decision_prompt(pack)
+    user = built.user
+    # Header must be present
+    assert "コード検出済み構造" in user
+    assert "[code-detected structure]" in user
+    # Must explicitly state F15 / F16 obligations
+    assert "F15" in user
+    assert "F16" in user
+    assert "WAIT_BREAKOUT" in user
+
+
 def test_doctrine_version_marker():
     """The pack carries an explicit doctrine_version marker (v4 or later).
 

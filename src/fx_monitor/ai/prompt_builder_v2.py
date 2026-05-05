@@ -59,6 +59,66 @@ def _format_calendar(pack: MarketAnalysisPackV2) -> str:
     return "\n".join(lines)
 
 
+def _format_structure_annotation(pack: MarketAnalysisPackV2) -> str:
+    """Embed deterministic code-detected structure into the prompt.
+
+    Why this exists
+    ---------------
+    The AI judge has two structural weaknesses that bite this domain:
+      §2.A.1 no visual cortex — cannot "see" multi-touch trendlines or
+        parallel channels in the pivot polyline.
+      §2.B.9 no combinatorial search — does not enumerate (n choose 2)
+        pivot pairs to find best-fit lines.
+
+    See ``docs/SPEC.md`` for both. The countermeasure (validator F15/F16)
+    catches AI outputs that don't reference what code found, but a
+    cleaner approach is to put what code found in front of the AI as
+    part of the prompt — the AI then *selects* from candidates rather
+    than *searching* for them.
+
+    This function calls :func:`structure_detector.summarize_structure`
+    on the pack's pivot list and renders a structured annotation block
+    plus explicit must-include / must-not-do rules tied to F15/F16.
+    """
+    # Late import to avoid a hard dep if structure_detector is missing.
+    from fx_monitor.live.structure_detector import summarize_structure
+
+    summary = summarize_structure(pack.pivots)
+
+    out: list[str] = []
+    out.append("## コード検出済み構造 (探索責任は code 側で完了)")
+    out.append("")
+    out.append(summary.to_text_annotation())
+    out.append("")
+    out.append("### この情報の使い方 (重要)")
+    out.append(
+        "- 上の HIGH TL / LOW TL / Channel / Pattern / Dow は code が "
+        "全 pivot 組合せを enumerate して算出した確定値です。"
+        "AI が改めて pivot list から探索する必要はありません。"
+    )
+    out.append("")
+    out.append("### 必須要件 (validator F15 / F16 と連動)")
+    out.append(
+        "- **F15**: 上の `HIGH TL` または `LOW TL` の最も touches が多い候補に対応する "
+        "斜めトレンドラインを `spec.lines` に必ず含めること "
+        "(start_index / end_index / start_price / end_price をすべて埋める). "
+        "対応とは: 検出された slope と spec の slope の差が 0.3 pip/bar 以内、"
+        "endpoint の index 差が 5 bar 以内."
+    )
+    out.append(
+        "- **F16**: 上の `Channel` で `upper.touch_count + lower.touch_count >= 7` の "
+        "channel が検出されている場合、`spec.side` は `NEUTRAL` でなければならない. "
+        "`final_status` は `WAIT_BREAKOUT` 推奨. channel 内のタッチを directional な "
+        "BUY/SELL setup と扱うのは doctrine 違反 (saved time 狙いの反復敗因)."
+    )
+    out.append(
+        "- 検出された Pattern (double_top / head_and_shoulders / triangle 等) は "
+        "spec.pattern_label_ja に反映する事. AI が独自に pattern を上書きする場合は "
+        "spec.lines / spec.points で具体的に裏付ける根拠を示すこと."
+    )
+    return "\n".join(out)
+
+
 def _format_pivots(pack: MarketAnalysisPackV2) -> str:
     if not pack.pivots:
         return "  ピボット未検出 (シリーズ短い or ノイズフィルタで除外)"
@@ -418,6 +478,8 @@ def build_decision_prompt(
 
     sections.append("\n## 多スケールピボット (直近 20 件)")
     sections.append(_format_pivots(pack))
+
+    sections.append("\n" + _format_structure_annotation(pack))
 
     glossary = _format_glossary(knowledge_pack)
     if glossary:

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja"><head>
-<meta charset="utf-8"><title>判定 f5a775e4</title>
+<meta charset="utf-8"><title>判定 23cc68d3</title>
 <style>
 :root { color-scheme: light dark; }
 body {
@@ -77,27 +77,27 @@ details[open] summary { color: #60a5fa; }
 <div class="safety">観測専用ダッシュボード — このシステムは READY 通知 / 自動売買 / 手動売買連動を行いません。表示はあくまで参考材料です。</div>
 
 <div class="grid">
-<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">f5a775e4-9edb-4ebb-a16a-1655435ceecc</div></div>
+<div class="card"><div class="label">entry_id</div><div class="value" style="font-size:1rem;">23cc68d3-341c-46cf-999f-9ed3e64a83fe</div></div>
 <div class="card"><div class="label">asof_utc</div><div class="value" style="font-size:1rem;">2026-04-30T11:50:00+00:00</div></div>
 <div class="card"><div class="label">symbol / timeframe</div><div class="value" style="font-size:1rem;">EURUSD=X / M5</div></div>
-<div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">BUY · WAIT_RETEST</div></div>
-<div class="card"><div class="label">outcome</div><div class="value"><span class="badge badge-LOSE">LOSE</span></div></div>
-<div class="card"><div class="label">favourable / adverse</div><div class="value" style="font-size:1rem;">+28.9 / +21.9 pip</div></div>
+<div class="card"><div class="label">judgement</div><div class="value" style="font-size:1rem;">NEUTRAL · WAIT_BREAKOUT</div></div>
+<div class="card"><div class="label">outcome</div><div class="value"><span class="badge badge-NEUTRAL_MISSED">NEUTRAL_MISSED</span></div></div>
+<div class="card"><div class="label">favourable / adverse</div><div class="value" style="font-size:1rem;">+28.9 / -28.9 pip</div></div>
 <div class="card"><div class="label">user dissent</div><div class="value" style="font-size:1rem;">No</div></div>
 <div class="card"><div class="label">judgement model</div><div class="value" style="font-size:1rem;">v7-real-judgement-by-claude-29step</div></div>
 </div>
 
-<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="f5a775e4-9edb-4ebb-a16a-1655435ceecc.png" alt="entry chart for f5a775e4-9edb-4ebb-a16a-1655435ceecc">
+<h2>判定時点のチャート + AI ライン</h2><img class="chart-img" src="23cc68d3-341c-46cf-999f-9ed3e64a83fe.png" alt="entry chart for 23cc68d3-341c-46cf-999f-9ed3e64a83fe">
 
 <section class="postmortem severity-medium">
-<h3>後付け分析 (severity: medium / failure_mode: stop_hit)</h3>
-<p><strong>BUY 想定が逆方向に動いた (stop 想定価格を超えて反対側に到達)</strong></p>
+<h3>後付け分析 (severity: medium / failure_mode: moved_against_wait)</h3>
+<p><strong>NEUTRAL 待機中に想定方向へ走り抜けた (待ちが慎重すぎて初動を逃した)</strong></p>
 <h4 class="meta">事実(60本後の price action)</h4>
 <ul><li>判定時点の価格: 1.17096</li><li>観察期間: 60本中 60本 (経過時間≈300分)</li><li>最高値到達: 1.17385 (+28.9 pip) at +40本目</li><li>最安値到達: 1.16877 (-21.9 pip) at +18本目</li><li>観察期末close: 1.17302 (+20.6 pip)</li></ul>
 <h4 class="meta">疑わしい procedure step</h4>
-<table><thead><tr><th>step</th><th>当時のstatus</th><th>所見</th></tr></thead><tbody><tr><td>environment</td><td><span class="badge badge-UNKNOWN">UNKNOWN</span></td><td>上位足の方向確認が不十分だった可能性 (UNKNOWN だった?)</td></tr><tr><td>htf_dow</td><td><span class="badge badge-PASS">PASS</span></td><td>上位足ダウとの整合チェックが甘かった可能性</td></tr><tr><td>wave_pattern</td><td><span class="badge badge-PASS">PASS</span></td><td>波形認定がフェイク(早すぎ)だった可能性</td></tr><tr><td>breakout</td><td><span class="badge badge-PASS">PASS</span></td><td>ブレイク確定の閾値が緩く、ヒゲ抜けを真と扱った可能性</td></tr></tbody></table>
+<table><thead><tr><th>step</th><th>当時のstatus</th><th>所見</th></tr></thead><tbody><tr><td>breakout</td><td><span class="badge badge-PASS">PASS</span></td><td>ブレイク確定基準が厳しすぎて待ちすぎた</td></tr><tr><td>confirmation_candle</td><td><span class="badge badge-WAIT">WAIT</span></td><td>確認足の閾値(ATR×?)が大きすぎた</td></tr><tr><td>entry_price</td><td><span class="badge badge-WAIT">WAIT</span></td><td>ENTRYトリガーが具体化されておらず即応できなかった</td></tr></tbody></table>
 <h4 class="meta">具体的な対策案</h4>
-<ul><li>上位足 (H1/H4) のピボットも数値事実 pack に追加し、上位足ダウとの整合を必須チェック化する</li><li>波形認定に「最低 N 本の連続 LH/HL」を要求するよう知識 pack を厳格化</li><li>ブレイク確定を「実体クローズ + 次足の方向継続」に変えてフェイクを除外</li><li>RR 2.0 未達のシナリオは AI 出力時点で final_status を HOLD に強制降格</li></ul>
+<ul><li>「波形が未確定だが上位足ダウと方向一致する場合は WAIT_TRIGGER を許可」を知識 pack に追記</li><li>確認足の判定をリアルタイム化(現在の足が ATR×0.7 でも暫定的にカウントを許可)</li><li>リテストを必須にせず、トレンド継続パターンも別 final_status で表現可能にする</li><li>ENTRY価格を WAIT 段階でも具体的に提示するようプロンプトで強制</li></ul>
 </section>
 
 
@@ -129,8 +129,8 @@ details[open] summary { color: #60a5fa; }
   &quot;symbol&quot;: &quot;EURUSD=X&quot;,
   &quot;timeframe&quot;: &quot;M5&quot;,
   &quot;title_ja&quot;: &quot;EURUSD M5 — V字底 + 1.17000レジサポ転換 + リテスト押し目買い候補&quot;,
-  &quot;side&quot;: &quot;BUY&quot;,
-  &quot;final_status&quot;: &quot;WAIT_RETEST&quot;,
+  &quot;side&quot;: &quot;NEUTRAL&quot;,
+  &quot;final_status&quot;: &quot;WAIT_BREAKOUT&quot;,
   &quot;pattern_label_ja&quot;: &quot;V字底→上昇 + 1.17000レジ突破 + リテスト押し目買い候補&quot;,
   &quot;market_story_ja&quot;: &quot;1.16713 から +50pip 上昇、現在 1.17096. 重要: 1.17000 に左方 (idx 845-848 + 865-866 の HIGH cluster) で 計4本major HIGH = 強水平レジスタンス. 今回ブレイク後 1.16980 押し目 → 1.17096 上昇継続 = HH-HL 確立. doctrine 適用: reversal_triple_motive 適合 (V字反転 + レジサポ転換 + 押し目買い候補). fibonacci_zone_doctrine: 1.16713→1.17220 のフィボでリテスト 1.17000 = 43.4% (プライムゾーン直前)、深押し 1.16967 (50%) なら本命 lot. RR 3.14 で王道基準2.0クリア = 高勝率設定. ただし outcome=LOSE 実績は htf_full_scan 不可で H4 が下降中だった疑い (mtf_alignment 違反リスク).&quot;,
   &quot;points&quot;: [
@@ -1253,5 +1253,5 @@ details[open] summary { color: #60a5fa; }
   &quot;session&quot;: &quot;LONDON&quot;
 }</pre></details><details><summary>raw: 特徴ベクトル (272次元)</summary><pre>[0.2556439939011245, -0.2554205288714907, 0.0, 0.0, 0.0, -0.5108410577429814, 0.766485051644106, 0.0, 0.0, -0.7669319817033736, 0.5115114528318829, 0.0, 0.0, -0.2558674589307584, 0.5115114528318829, 0.0, 0.2558674589307584, 0.0, 0.0, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, -0.2558674589307584, 0.0, 0.0, 0.2556439939011245, 0.0, -0.5115114528318829, 0.0, 0.0, 0.0, 0.2556439939011245, 0.0, 0.5117349178615168, -0.2558674589307584, 0.2558674589307584, 0.0, 0.0, -1.2800076897426935, 1.5358751486734519, 0.0, 0.25653785401965995, -0.7693900970293459, 1.5383332639994243, 0.0, 1.282242340039032, 0.0, -1.025704486019372, 0.0, 0.7689431669700783, 0.0, -0.5126287779800521, 0.0, 0.25609092396039224, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.7682727718811767, 0.25609092396039224, 0.0, 0.5124053129504184, 0.0, -0.25609092396039224, 0.0, 0.0, -0.25609092396039224, 0.0, 0.0, 0.0, -0.5117349178615168, -0.5121818479207845, 0.0, 0.0, -0.5115114528318829, -0.7676023767922752, 0.0, 0.2558674589307584, -0.2558674589307584, 0.2558674589307584, 0.0, 0.5117349178615168, 0.0, -0.5117349178615168, 0.0, 0.0, -1.0232463706933996, 0.5117349178615168, 0.0, 0.0, -0.5117349178615168, 0.0, 0.0, 0.0, -0.5117349178615168, 0.5117349178615168, 0.0, 0.0, -0.767825841821909, 0.25609092396039224, 0.0, 1.5378863339401565, 0.0, 0.25609092396039224, 0.0, 0.0, -0.5126287779800521, 0.7687197019404444, 0.0, 0.25631438899002607, -0.25631438899002607, 0.25631438899002607, 0.0, 0.0, -0.25653785401965995, 0.512852243009686, 0.0, 0.0, -0.5130757080393199, 0.5130757080393199, 0.0, 0.25653785401965995, 0.0, -0.25653785401965995, 0.0, 0.25653785401965995, -0.25653785401965995, -0.25653785401965995, 0.0, 0.0, -0.5130757080393199, 0.25653785401965995, 0.0, 1.025704486019372, 0.0, -1.025704486019372, 0.0, 0.0, -0.7691666319997121, 0.7691666319997121, 0.0, 0.0, -0.25653785401965995, 0.5130757080393199, 0.0, 0.25653785401965995, -1.0268218111675413, 0.7702839571478813, 0.0, 0.0, -0.7714012822960506, 1.7988934885524934, 0.0, 0.5139695681578553, -0.25698478407892766, -1.0283860663749782, 0.0, 0.0, -0.5139695681578553, 0.5139695681578553, 0.0, 0.0, -1.0279391363157107, 0.0, 0.0, 0.0, -1.0286095314046122, 0.7716247473256844, 0.0, 0.0, -0.7716247473256844, 0.2572082491085615, 0.0, 0.0, -0.2574317141381953, 0.772295142414586, 0.0, 1.8002342787302965, 0.0, -2.315097707006687, 0.0, 0.0, -1.2853708504539059, 1.0283860663749782, 0.0, 0.2572082491085615, -0.514416498217123, 0.0, 0.0, 0.0, -0.772295142414586, 1.286711640631709, 0.0, 0.0, -0.5150868933060245, 0.2576551791678292, 0.0, 0.2574317141381953, -0.514416498217123, -1.0299503215824153, 0.0, 0.0, -0.5150868933060245, 1.0299503215824153, 0.0, 0.0, -0.2574317141381953, -0.5150868933060245, 0.0, 0.2574317141381953, 0.0, 0.0, 0.0, 2.0581129229277595, 0.0, -1.8006812087895643, 0.0, -0.38333333333333336, -1.7977761634043241, 1.0, 0.5, -0.3333333333333333, -3.0800185034433563, -1.0, 0.5, -0.31666666666666665, -3.0800185034433563, -1.0, 0.5, -0.08333333333333333, 2.3157681020955887, 1.0, 0.5, 1.0, 0.0, 0.0, 9.489219018371811, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 60.0, 0.0, 0.0, 0.0]</pre></details>
 
-<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id f5a775e4-9edb-4ebb-a16a-1655435ceecc --note "..."</code></p>
+<p class="meta" style="margin-top: 2rem;">違和感を立てる場合: <code>python -m fx_monitor.tools.flag_dissent --id 23cc68d3-341c-46cf-999f-9ed3e64a83fe --note "..."</code></p>
 </body></html>
