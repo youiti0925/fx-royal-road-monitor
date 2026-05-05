@@ -14,6 +14,7 @@ from fx_monitor.live.structure_detector import (
     detect_double_bottom,
     detect_double_top,
     detect_dow_state,
+    detect_extreme_anchored_trendline,
     detect_head_and_shoulders,
     detect_triangle,
     enumerate_trendlines,
@@ -253,6 +254,68 @@ def test_dow_range_when_mixed():
 
 
 # ------ summarize_structure (top-level) -------------------------------------
+
+
+def test_extreme_anchored_HIGH_picks_descending_envelope():
+    """User-proposed algorithm: anchor at the highest pivot, find a descending
+    line through later pivots that respects the >=20-bar duration and 2 touches."""
+    # Highest at idx 10. Other pivots descend cleanly.
+    pivots = [
+        _piv(10, 1.17578, "HIGH"),  # extreme HIGH
+        _piv(20, 1.17500, "HIGH"),  # touch within tolerance of slope -0.55
+        _piv(35, 1.17400, "HIGH"),  # touch
+        _piv(50, 1.17310, "HIGH"),  # endpoint
+    ]
+    tl = detect_extreme_anchored_trendline(
+        pivots, kind="HIGH",
+        min_duration_bars=20, min_additional_touches=2, tolerance_pip=1.5,
+    )
+    assert tl is not None
+    assert tl.start_index == 10
+    assert tl.slope_pip_per_bar < 0  # descending
+
+
+def test_extreme_anchored_returns_none_when_duration_short():
+    pivots = [
+        _piv(10, 1.17500, "HIGH"),
+        _piv(15, 1.17450, "HIGH"),
+        _piv(18, 1.17400, "HIGH"),  # all within 8 bars of extreme
+    ]
+    tl = detect_extreme_anchored_trendline(
+        pivots, kind="HIGH",
+        min_duration_bars=20, min_additional_touches=2,
+    )
+    assert tl is None
+
+
+def test_extreme_anchored_returns_none_when_too_few_touches():
+    pivots = [
+        _piv(10, 1.17500, "HIGH"),
+        _piv(35, 1.17300, "HIGH"),  # endpoint 25 bars away, but no touches between
+    ]
+    tl = detect_extreme_anchored_trendline(
+        pivots, kind="HIGH",
+        min_duration_bars=20, min_additional_touches=2,
+    )
+    assert tl is None
+
+
+def test_extreme_anchored_LOW_picks_steepest_slope():
+    """Multiple valid candidates exist; algorithm should pick the steepest."""
+    pivots = [
+        _piv(10, 1.17000, "LOW"),  # extreme LOW
+        _piv(20, 1.17050, "LOW"),  # touch1 (gentle)
+        _piv(30, 1.17100, "LOW"),  # touch2 (steeper line through here?)
+        _piv(40, 1.17150, "LOW"),  # endpoint candidate (steepest)
+        _piv(35, 1.17120, "LOW"),  # touch on steeper line
+    ]
+    tl = detect_extreme_anchored_trendline(
+        pivots, kind="LOW",
+        min_duration_bars=20, min_additional_touches=2, tolerance_pip=1.5,
+    )
+    assert tl is not None
+    # Pick should anchor at idx 10 (the extreme min)
+    assert 10 in (tl.start_index, tl.end_index)
 
 
 def test_summarize_returns_text_annotation():

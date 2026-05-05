@@ -585,6 +585,7 @@ __all__ = [
     "DowState",
     "StructureSummary",
     "enumerate_trendlines",
+    "detect_extreme_anchored_trendline",
     "detect_channels",
     "detect_double_top",
     "detect_double_bottom",
@@ -593,3 +594,112 @@ __all__ = [
     "detect_dow_state",
     "summarize_structure",
 ]
+
+
+# ---------------------------------------------------------------------------
+# User-proposed algorithm: extreme-anchored trendline (cleaner than full enum)
+# ---------------------------------------------------------------------------
+
+
+def detect_extreme_anchored_trendline(
+    pivots: Sequence,
+    *,
+    kind: Literal["HIGH", "LOW"],
+    min_duration_bars: int = 20,
+    min_additional_touches: int = 2,
+    tolerance_pip: float = 1.5,
+    pip_size: float = 0.0001,
+) -> TrendlineCandidate | None:
+    """Detect a single 'envelope' trendline anchored at the period's extreme.
+
+    The user-proposed algorithm (replaces the noisy full pair-enumeration).
+
+    Algorithm
+    ---------
+    1. Pick the extreme pivot of the requested ``kind`` over all pivots
+       (max-price for HIGH = the period's resistance anchor;
+        min-price for LOW = the period's support anchor).
+    2. For every other same-kind pivot ``other`` whose index is at least
+       ``min_duration_bars`` away from the extreme, treat (extreme, other)
+       as candidate endpoints and draw the line.
+    3. Count "additional touches" — pivots strictly between the two
+       endpoints that fall within ``tolerance_pip`` of the line.
+       Endpoints themselves are excluded from this count (they always
+       lie on the line by construction).
+    4. Keep candidates with ``additional_touches >= min_additional_touches``.
+    5. Among the surviving candidates, return the one with the steepest
+       slope (largest absolute slope_pip_per_bar).
+
+    Returning a single candidate per kind keeps the chart uncluttered.
+
+    Notes
+    -----
+    Unlike :func:`enumerate_trendlines`, this function:
+      - Anchors on the actual extreme of the window, so the returned line
+        is the period's outer envelope — matching how a human would draw
+        a "trendline".
+      - Considers every pivot scale (no min_scale filter) — the extreme
+        pivot is what matters, not how the pivot detector classified it.
+      - Returns at most one candidate per kind, eliminating the
+        "five lines that look the same" cluttering problem.
+    """
+    pool = [p for p in _coerce_pivots(pivots) if p.kind == kind]
+    if len(pool) < 3:
+        return None
+
+    extreme = (
+        max(pool, key=lambda p: p.price) if kind == "HIGH"
+        else min(pool, key=lambda p: p.price)
+    )
+
+    tol = tolerance_pip * pip_size
+    candidates: list[TrendlineCandidate] = []
+
+    for other in pool:
+        if other.index == extreme.index:
+            continue
+        if abs(other.index - extreme.index) < min_duration_bars:
+            continue
+        # Order endpoints by index so start < end.
+        if extreme.index < other.index:
+            A, B = extreme, other
+        else:
+            A, B = other, extreme
+
+        slope = (B.price - A.price) / (B.index - A.index)
+        intercept = A.price - slope * A.index
+
+        # Endpoints + pivots strictly between them within tolerance.
+        on_line: list[tuple[int, float]] = [(A.index, A.price), (B.index, B.price)]
+        additional = 0
+        for p in pool:
+            if p.index <= A.index or p.index >= B.index:
+                continue
+            expected = intercept + slope * p.index
+            if abs(p.price - expected) <= tol:
+                on_line.append((p.index, p.price))
+                additional += 1
+
+        if additional < min_additional_touches:
+            continue
+
+        on_line_sorted = tuple(sorted(on_line, key=lambda t: t[0]))
+        candidates.append(TrendlineCandidate(
+            kind=kind,
+            slope_pip_per_bar=slope / pip_size,
+            intercept_price=intercept,
+            touches=on_line_sorted,
+            start_index=A.index,
+            end_index=B.index,
+            start_price=A.price,
+            end_price=B.price,
+        ))
+
+    if not candidates:
+        return None
+
+    # Steepest slope wins; tie-break by more touches.
+    return max(
+        candidates,
+        key=lambda c: (abs(c.slope_pip_per_bar), c.touch_count),
+    )

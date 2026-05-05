@@ -32,6 +32,7 @@ from typing import Any
 from fx_monitor.corpus.schema import CorpusEntry
 from fx_monitor.live.structure_detector import (
     detect_channels,
+    detect_extreme_anchored_trendline,
     enumerate_trendlines,
 )
 
@@ -187,19 +188,21 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
                 "impractical to execute."
             )
 
-    # ----- F15: spec must reference the strongest code-detected trendline -----
-    # Aim: prevent the anchor 2 case where AI drew 2-touch TLs while a 5+
-    # touch HIGH cluster TL was sitting in the pivot data.
+    # ----- F15: spec must reference the extreme-anchored trendline ---------
+    # Aim: prevent the anchor 2 case (5+ touch HIGH descending TL missed)
+    # and similar.  Uses the user-proposed extreme-anchored detector for
+    # cleaner / less noisy results than the previous full enumeration.
     pivots = pack.pivots
     if pivots:
         for tl_kind in ("HIGH", "LOW"):
-            code_tls = enumerate_trendlines(
-                pivots, kind=tl_kind, min_touches=3, tolerance_pip=0.8,
-                min_scale="swing",  # ignore micro-pivot coincidences
+            top = detect_extreme_anchored_trendline(
+                pivots, kind=tl_kind,
+                min_duration_bars=20,
+                min_additional_touches=2,
+                tolerance_pip=1.5,
             )
-            if not code_tls:
+            if top is None:
                 continue
-            top = code_tls[0]
             spec_slants = [
                 l for l in spec.lines
                 if l.kind == "trendline"
@@ -224,7 +227,7 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
                     break
             if not matched:
                 errors.append(
-                    f"F15 missed strongest {tl_kind} trendline: "
+                    f"F15 missed extreme-anchored {tl_kind} trendline: "
                     f"{top.touch_count} touches, slope {top.slope_pip_per_bar:+.2f}pip/bar, "
                     f"idx {top.start_index}->{top.end_index} "
                     f"({top.start_price:.5f}->{top.end_price:.5f}). "
