@@ -201,12 +201,12 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
             top = detect_extreme_anchored_trendline(
                 pivots, kind=tl_kind,
                 min_duration_bars=20,
-                min_additional_touches=2.0,
+                min_additional_touches=1.5,
                 tolerance_pip=atr_tolerance,
                 top_k=1,
                 direction_aware=True,
                 swing_weight=1.0,
-                micro_weight=0.5,
+                micro_weight=0.7,
             )
             if top is None:
                 continue
