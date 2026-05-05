@@ -606,46 +606,54 @@ def detect_extreme_anchored_trendline(
     *,
     kind: Literal["HIGH", "LOW"],
     min_duration_bars: int = 20,
-    min_additional_touches: int = 2,
+    min_additional_touches: float = 2.0,
     tolerance_pip: float = 1.5,
     pip_size: float = 0.0001,
-) -> TrendlineCandidate | None:
-    """Detect a single 'envelope' trendline anchored at the period's extreme.
+    top_k: int = 1,
+    direction_aware: bool = True,
+    swing_weight: float = 1.0,
+    micro_weight: float = 0.5,
+) -> TrendlineCandidate | list[TrendlineCandidate] | None:
+    """Detect 'envelope' trendline(s) anchored at the period's extreme.
 
-    The user-proposed algorithm (replaces the noisy full pair-enumeration).
+    User-proposed core algorithm + four filter restorations on top:
 
-    Algorithm
-    ---------
-    1. Pick the extreme pivot of the requested ``kind`` over all pivots
-       (max-price for HIGH = the period's resistance anchor;
-        min-price for LOW = the period's support anchor).
+    Core (user's request)
+    ---------------------
+    1. Pick the extreme pivot of the requested ``kind`` (max-price for
+       HIGH = resistance anchor; min-price for LOW = support anchor).
     2. For every other same-kind pivot ``other`` whose index is at least
-       ``min_duration_bars`` away from the extreme, treat (extreme, other)
-       as candidate endpoints and draw the line.
+       ``min_duration_bars`` away, treat (extreme, other) as candidate
+       endpoints.
     3. Count "additional touches" — pivots strictly between the two
-       endpoints that fall within ``tolerance_pip`` of the line.
-       Endpoints themselves are excluded from this count (they always
-       lie on the line by construction).
-    4. Keep candidates with ``additional_touches >= min_additional_touches``.
-    5. Among the surviving candidates, return the one with the steepest
-       slope (largest absolute slope_pip_per_bar).
+       endpoints whose price is within ``tolerance_pip`` of the line.
+       Endpoints themselves are excluded from this count.
+    4. Keep candidates with weighted touches >= ``min_additional_touches``.
 
-    Returning a single candidate per kind keeps the chart uncluttered.
+    Filter restorations (added on top, controlled by params)
+    --------------------------------------------------------
+    1. **swing/major weighting** (``swing_weight`` / ``micro_weight``):
+       a touch by a swing or major pivot counts ``swing_weight`` (1.0
+       default), a micro pivot counts ``micro_weight`` (0.5 default).
+       Lets micro pivots contribute partial evidence without dominating.
+    2. **direction-aware tolerance** (``direction_aware``): for HIGH
+       (resistance) lines, pivots that sit *above* the line beyond
+       ``tolerance_pip`` don't count as touches at all (= they were
+       breakouts, not contacts). Symmetric for LOW (support).
+    3. **ATR-proportional tolerance**: caller passes ``tolerance_pip``
+       which is expected to be ATR×0.4-ish (build script computes this).
+    4. **Top-K** (``top_k``): when >1, returns the K steepest valid
+       candidates as a list (different second-endpoints, all anchored at
+       the same extreme). When ==1 returns a single candidate (or None).
 
-    Notes
-    -----
-    Unlike :func:`enumerate_trendlines`, this function:
-      - Anchors on the actual extreme of the window, so the returned line
-        is the period's outer envelope — matching how a human would draw
-        a "trendline".
-      - Considers every pivot scale (no min_scale filter) — the extreme
-        pivot is what matters, not how the pivot detector classified it.
-      - Returns at most one candidate per kind, eliminating the
-        "five lines that look the same" cluttering problem.
+    Returns
+    -------
+    None / TrendlineCandidate / list[TrendlineCandidate] depending on
+    ``top_k`` value.
     """
     pool = [p for p in _coerce_pivots(pivots) if p.kind == kind]
     if len(pool) < 3:
-        return None
+        return None if top_k == 1 else []
 
     extreme = (
         max(pool, key=lambda p: p.price) if kind == "HIGH"
@@ -660,7 +668,6 @@ def detect_extreme_anchored_trendline(
             continue
         if abs(other.index - extreme.index) < min_duration_bars:
             continue
-        # Order endpoints by index so start < end.
         if extreme.index < other.index:
             A, B = extreme, other
         else:
@@ -669,18 +676,26 @@ def detect_extreme_anchored_trendline(
         slope = (B.price - A.price) / (B.index - A.index)
         intercept = A.price - slope * A.index
 
-        # Endpoints + pivots strictly between them within tolerance.
         on_line: list[tuple[int, float]] = [(A.index, A.price), (B.index, B.price)]
-        additional = 0
+        weighted_touches = 0.0
         for p in pool:
             if p.index <= A.index or p.index >= B.index:
                 continue
             expected = intercept + slope * p.index
-            if abs(p.price - expected) <= tol:
+            diff = p.price - expected
+            if direction_aware:
+                if kind == "HIGH" and diff > tol:
+                    # pivot above the resistance line beyond tolerance →
+                    # broke through, not a contact.
+                    continue
+                if kind == "LOW" and diff < -tol:
+                    continue
+            if abs(diff) <= tol:
+                w = swing_weight if p.scale in ("swing", "major") else micro_weight
+                weighted_touches += w
                 on_line.append((p.index, p.price))
-                additional += 1
 
-        if additional < min_additional_touches:
+        if weighted_touches < min_additional_touches:
             continue
 
         on_line_sorted = tuple(sorted(on_line, key=lambda t: t[0]))
@@ -696,10 +711,14 @@ def detect_extreme_anchored_trendline(
         ))
 
     if not candidates:
-        return None
+        return None if top_k == 1 else []
 
-    # Steepest slope wins; tie-break by more touches.
-    return max(
-        candidates,
+    # Sort by steepness desc, then by touch count desc for stable tiebreak.
+    candidates.sort(
         key=lambda c: (abs(c.slope_pip_per_bar), c.touch_count),
+        reverse=True,
     )
+
+    if top_k == 1:
+        return candidates[0]
+    return candidates[:top_k]

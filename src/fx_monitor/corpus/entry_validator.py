@@ -194,12 +194,19 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
     # cleaner / less noisy results than the previous full enumeration.
     pivots = pack.pivots
     if pivots:
+        atr_m5 = float(getattr(pack.atr, "m5_14", 0.0002) or 0.0002)
+        atr_pip = atr_m5 * 10000.0
+        atr_tolerance = max(0.5, atr_pip * 0.4)
         for tl_kind in ("HIGH", "LOW"):
             top = detect_extreme_anchored_trendline(
                 pivots, kind=tl_kind,
                 min_duration_bars=20,
-                min_additional_touches=2,
-                tolerance_pip=1.5,
+                min_additional_touches=2.0,
+                tolerance_pip=atr_tolerance,
+                top_k=1,
+                direction_aware=True,
+                swing_weight=1.0,
+                micro_weight=0.5,
             )
             if top is None:
                 continue
