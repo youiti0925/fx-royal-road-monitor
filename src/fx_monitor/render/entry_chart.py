@@ -153,6 +153,75 @@ def render_entry_chart_png(
     x_max = n_past + max(len(future_list), 1)
     ax_main.set_xlim(-1, x_max)
 
+    # ---- Code-computed indicators: MA / BB / Fib ----
+    # Drawn under everything else as a faint backdrop.
+    ind = getattr(pack, "indicators", None)
+    if ind is not None:
+        # Bollinger Bands as a translucent band across the past window.
+        if ind.bb is not None:
+            bb = ind.bb
+            ax_main.add_patch(
+                plt.Rectangle(
+                    (0, bb.lower), n_past, bb.upper - bb.lower,
+                    facecolor="#94a3b8", edgecolor="#94a3b8",
+                    alpha=0.06, zorder=0,
+                )
+            )
+            ax_main.hlines(
+                bb.middle, 0, n_past - 1,
+                colors="#94a3b8", linewidth=0.6, linestyles=":", alpha=0.5,
+            )
+            ax_main.text(
+                n_past + 0.3, bb.upper,
+                f"BB+2σ {bb.upper:.5f}",
+                color="#94a3b8", fontsize=7, va="center", alpha=0.8,
+            )
+        # Moving averages as horizontal reference at asof.
+        if ind.ma.sma20 is not None:
+            ax_main.hlines(
+                ind.ma.sma20, 0, n_past - 1,
+                colors="#fbbf24", linewidth=0.9, linestyles="-", alpha=0.55,
+            )
+            ax_main.text(
+                n_past + 0.3, ind.ma.sma20,
+                f"SMA20 {ind.ma.sma20:.5f}",
+                color="#fbbf24", fontsize=7, va="center", alpha=0.85,
+            )
+        if ind.ma.ema200 is not None:
+            ax_main.hlines(
+                ind.ma.ema200, 0, n_past - 1,
+                colors="#a78bfa", linewidth=0.9, linestyles="-", alpha=0.55,
+            )
+            ax_main.text(
+                n_past + 0.3, ind.ma.ema200,
+                f"EMA200 {ind.ma.ema200:.5f}",
+                color="#a78bfa", fontsize=7, va="center", alpha=0.85,
+            )
+        # Fibonacci 50% and 61.8% reference lines.
+        if ind.fib is not None:
+            for level, label in (
+                (ind.fib.fib_500, "Fib50%"),
+                (ind.fib.fib_618, "Fib61.8%"),
+            ):
+                ax_main.hlines(
+                    level, 0, n_past - 1,
+                    colors="#f59e0b", linewidth=0.7, linestyles=":", alpha=0.55,
+                )
+                ax_main.text(
+                    n_past + 0.3, level, f"{label} {level:.5f}",
+                    color="#f59e0b", fontsize=7, va="center", alpha=0.8,
+                )
+        # Round numbers (キリ番)
+        for rn in ind.round_numbers_nearby:
+            ax_main.hlines(
+                rn, 0, n_past - 1,
+                colors="#64748b", linewidth=0.5, linestyles="--", alpha=0.4,
+            )
+            ax_main.text(
+                -0.5, rn, f"キリ {rn:.5f}",
+                color="#64748b", fontsize=6, va="center", ha="right", alpha=0.7,
+            )
+
     # ---- AI zones (fib prime / buildup / stop / confluence / generic) ----
     # Drawn FIRST so lines and points layer on top.
     for z in spec.zones:

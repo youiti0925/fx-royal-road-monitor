@@ -59,6 +59,72 @@ def _format_calendar(pack: MarketAnalysisPackV2) -> str:
     return "\n".join(lines)
 
 
+def _format_indicators(pack: MarketAnalysisPackV2) -> str:
+    """Embed doctrine indicators (SMA / BB / RSI / MACD / Fib / kiriban).
+
+    These were previously left as ``UNKNOWN`` in every spec because the
+    pack didn't carry them. Now that ``build_market_pack_v2`` computes
+    them, the AI judge has actual numbers to feed into ma_alignment,
+    indicator_environment, divergence_check and the round-number
+    portion of horizontal_levels.
+    """
+    ind = pack.indicators
+    out: list[str] = ["## コード計算済み指標 (判断基準として必ず使用すること)"]
+    # Moving averages
+    ma = ind.ma
+    parts = []
+    if ma.sma20 is not None: parts.append(f"SMA20={ma.sma20:.5f}")
+    if ma.sma75 is not None: parts.append(f"SMA75={ma.sma75:.5f}")
+    if ma.ema200 is not None: parts.append(f"EMA200={ma.ema200:.5f}")
+    out.append(
+        f"- MA: {', '.join(parts) if parts else '計算不能 (lookback 不足)'}. "
+        f"current_price={pack.current_price:.5f}. "
+        "ma_alignment step ではこの値を doctrine グランビル①〜⑧ と照合する事."
+    )
+    # Bollinger Bands
+    if ind.bb is not None:
+        bb = ind.bb
+        squeeze = "squeeze" if bb.width_atr_ratio < 1.5 else "通常幅"
+        out.append(
+            f"- BB(20,2σ): lower={bb.lower:.5f} mid={bb.middle:.5f} upper={bb.upper:.5f} "
+            f"width={bb.width_pip:.1f}pip ratio={bb.width_atr_ratio:.2f} ({squeeze}). "
+            "indicator_environment / breakout step で使用."
+        )
+    else:
+        out.append("- BB: 計算不能 (60本未満)")
+    # RSI
+    if ind.rsi14 is not None:
+        zone = "売られすぎ(<30)" if ind.rsi14 < 30 else ("買われすぎ(>70)" if ind.rsi14 > 70 else "中立")
+        out.append(
+            f"- RSI14: {ind.rsi14:.1f} ({zone}). divergence_check で価格との逆行を確認."
+        )
+    # MACD
+    if ind.macd is not None:
+        m = ind.macd
+        cross = "ゴールデンクロス気味" if m.histogram > 0 else "デッドクロス気味"
+        out.append(
+            f"- MACD: macd={m.macd:.5f} signal={m.signal:.5f} hist={m.histogram:+.5f} "
+            f"({cross}). divergence_check で使用."
+        )
+    # Fib
+    if ind.fib is not None:
+        f = ind.fib
+        out.append(
+            f"- Fib (auto, direction={f.direction}): "
+            f"anchor_high={f.anchor_high:.5f} anchor_low={f.anchor_low:.5f}. "
+            f"50%={f.fib_500:.5f}  61.8%={f.fib_618:.5f}  78.6%={f.fib_786:.5f}. "
+            "fibonacci_zone step ではプライムゾーン (50-61.8%) 帯到達か必須確認."
+        )
+    # Kiriban
+    if ind.round_numbers_nearby:
+        rns = " / ".join(f"{r:.5f}" for r in ind.round_numbers_nearby)
+        out.append(
+            f"- キリ番 (50pip 粒度, 80pip 半径): {rns}. "
+            "horizontal_levels の重要度4フィルター ③ (キリ番接近) で使用."
+        )
+    return "\n".join(out)
+
+
 def _format_structure_annotation(pack: MarketAnalysisPackV2) -> str:
     """Embed deterministic code-detected structure into the prompt.
 
@@ -478,6 +544,8 @@ def build_decision_prompt(
 
     sections.append("\n## 多スケールピボット (直近 20 件)")
     sections.append(_format_pivots(pack))
+
+    sections.append("\n" + _format_indicators(pack))
 
     sections.append("\n" + _format_structure_annotation(pack))
 

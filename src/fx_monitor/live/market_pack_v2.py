@@ -42,6 +42,53 @@ class CalendarEvent(BaseModel):
     minutes_until: int  # negative if the event is already past
 
 
+class IndicatorMA(BaseModel):
+    """Moving average snapshot at asof. None when the lookback is too short."""
+    sma20: float | None = None
+    sma75: float | None = None
+    ema200: float | None = None
+
+
+class IndicatorBB(BaseModel):
+    middle: float
+    upper: float
+    lower: float
+    width_pip: float
+    width_atr_ratio: float  # squeeze metric — < ~1.5 typically squeeze
+
+
+class IndicatorMACD(BaseModel):
+    macd: float
+    signal: float
+    histogram: float
+
+
+class IndicatorFib(BaseModel):
+    """Auto-computed fibonacci retracement between window's extreme high/low."""
+    anchor_high: float
+    anchor_low: float
+    direction: Literal["up", "down"]
+    fib_236: float
+    fib_382: float
+    fib_500: float
+    fib_618: float
+    fib_786: float
+
+
+class IndicatorPack(BaseModel):
+    """Indicator values referenced by doctrine v7.
+
+    Computed by ``fx_monitor.live.indicators.compute_indicator_snapshot``.
+    Empty / None when the lookback isn't long enough.
+    """
+    ma: IndicatorMA = Field(default_factory=IndicatorMA)
+    bb: IndicatorBB | None = None
+    rsi14: float | None = None
+    macd: IndicatorMACD | None = None
+    fib: IndicatorFib | None = None
+    round_numbers_nearby: list[float] = Field(default_factory=list)
+
+
 class MarketAnalysisPackV2(BaseModel):
     """Numeric-fact pack handed to the AI judge.
 
@@ -64,6 +111,7 @@ class MarketAnalysisPackV2(BaseModel):
     current_price: float
     current_spread: float | None = None
     session: SessionLabel = "QUIET"
+    indicators: IndicatorPack = Field(default_factory=IndicatorPack)
 
 
 def _classify_session(asof_utc: datetime) -> SessionLabel:
@@ -108,7 +156,55 @@ def build_market_pack_v2(
 
     The function intentionally does **not** call any pattern detector or
     line builder. Higher layers compute pivots/ATR/etc. and pass them in.
+
+    Indicators (SMA / BB / RSI / MACD / Fib / round numbers) ARE computed
+    here from the candle window — they are objective facts (just like
+    ATR), not opinions.
     """
+    # Compute the doctrine indicators from candles. Late import to avoid
+    # circular dependencies.
+    from fx_monitor.live.indicators import compute_indicator_snapshot
+
+    pip_size = 0.01 if "JPY" in symbol.upper() else 0.0001
+    snap = compute_indicator_snapshot(
+        candles,
+        pip_size=pip_size,
+        atr_pip=(atr_m5_14 / pip_size) if atr_m5_14 else None,
+        current_price=current_price,
+    )
+    indicators = IndicatorPack(
+        ma=IndicatorMA(
+            sma20=snap.ma.sma20,
+            sma75=snap.ma.sma75,
+            ema200=snap.ma.ema200,
+        ),
+        bb=(
+            IndicatorBB(
+                middle=snap.bb.middle, upper=snap.bb.upper, lower=snap.bb.lower,
+                width_pip=snap.bb.width_pip, width_atr_ratio=snap.bb.width_atr_ratio,
+            ) if snap.bb else None
+        ),
+        rsi14=snap.rsi14,
+        macd=(
+            IndicatorMACD(
+                macd=snap.macd.macd, signal=snap.macd.signal,
+                histogram=snap.macd.histogram,
+            ) if snap.macd else None
+        ),
+        fib=(
+            IndicatorFib(
+                anchor_high=snap.fib.anchor_high,
+                anchor_low=snap.fib.anchor_low,
+                direction=snap.fib.direction,
+                fib_236=snap.fib.fib_236,
+                fib_382=snap.fib.fib_382,
+                fib_500=snap.fib.fib_500,
+                fib_618=snap.fib.fib_618,
+                fib_786=snap.fib.fib_786,
+            ) if snap.fib else None
+        ),
+        round_numbers_nearby=list(snap.round_numbers_nearby),
+    )
     return MarketAnalysisPackV2(
         symbol=symbol,
         asof_utc=asof_utc,
@@ -125,6 +221,7 @@ def build_market_pack_v2(
         current_price=current_price,
         current_spread=current_spread,
         session=_classify_session(asof_utc),
+        indicators=indicators,
     )
 
 
@@ -132,6 +229,11 @@ __all__ = [
     "AtrPack",
     "RangePack",
     "CalendarEvent",
+    "IndicatorMA",
+    "IndicatorBB",
+    "IndicatorMACD",
+    "IndicatorFib",
+    "IndicatorPack",
     "MarketAnalysisPackV2",
     "build_market_pack_v2",
     "SessionLabel",
