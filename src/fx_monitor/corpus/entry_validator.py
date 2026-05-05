@@ -194,7 +194,8 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
     if pivots:
         for tl_kind in ("HIGH", "LOW"):
             code_tls = enumerate_trendlines(
-                pivots, kind=tl_kind, min_touches=4, tolerance_pip=1.5,
+                pivots, kind=tl_kind, min_touches=3, tolerance_pip=0.8,
+                min_scale="swing",  # ignore micro-pivot coincidences
             )
             if not code_tls:
                 continue
@@ -237,6 +238,8 @@ def validate_entry(entry: CorpusEntry) -> list[str]:
         channels = detect_channels(
             pivots, min_touches_per_line=3,
             parallel_tolerance_pip_per_bar=0.4,
+            tolerance_pip=0.8,
+            min_scale="swing",  # ignore micro-pivot coincidences
         )
         if channels:
             top_ch = channels[0]

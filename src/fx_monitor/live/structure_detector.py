@@ -220,6 +220,7 @@ def detect_channels(
     parallel_tolerance_pip_per_bar: float = 0.5,
     pip_size: float = 0.0001,
     tolerance_pip: float = 1.0,
+    min_scale: Literal["micro", "swing", "major"] = "micro",
 ) -> list[ChannelCandidate]:
     """Detect channels = pair of parallel-ish trendlines (one HIGH, one LOW).
 
@@ -231,11 +232,13 @@ def detect_channels(
         pivots, kind="HIGH",
         min_touches=min_touches_per_line,
         tolerance_pip=tolerance_pip, pip_size=pip_size,
+        min_scale=min_scale,
     )
     low_tls = enumerate_trendlines(
         pivots, kind="LOW",
         min_touches=min_touches_per_line,
         tolerance_pip=tolerance_pip, pip_size=pip_size,
+        min_scale=min_scale,
     )
     channels: list[ChannelCandidate] = []
     for h in high_tls:
